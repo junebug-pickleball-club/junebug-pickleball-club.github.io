@@ -1,0 +1,38 @@
+teams:
+  - name: Servers of the Court
+    home_court: Pickleball Hideout
+    roster:
+      - name: Amy Tucker
+        role: captain
+      - name: Nathan Cross
+        role: member
+      - name: Stephen Houston
+        role: member
+      - name: Sonia Key
+        role: member
+  - name: Pickle Posse
+    home_court: Pickleball Hideout
+    roster:
+      - name: Clay Mage
+        role: captain
+      - name: Erik Hernandez
+        role: member
+      - name: Darrah Mage
+        role: member
+      - name: Stephanie Babin
+        role: member
+schedule:
+  - home_team:
+    away_team:
+    week: 
+    location: 
+    match_score:
+      games:
+      dreammaker: 
+    games: 
+      - name:
+        players:
+         - home:
+           away: 
+        score: 
+
