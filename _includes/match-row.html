@@ -4,8 +4,8 @@
 {% assign home_name = match.home_team %}
 {% assign away_name = match.away_team %}
 {% for t in teams %}
-  {% if t.id == match.home_team %}{% assign home_name = t.name %}{% endif %}
-  {% if t.id == match.away_team %}{% assign away_name = t.name %}{% endif %}
+  {% if t.slug == match.home_team %}{% assign home_name = t.name %}{% endif %}
+  {% if t.slug == match.away_team %}{% assign away_name = t.name %}{% endif %}
 {% endfor %}
 
 <tr>

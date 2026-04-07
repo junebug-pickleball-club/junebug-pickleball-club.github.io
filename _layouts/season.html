@@ -9,15 +9,15 @@ layout: default
 
   <section class="season-teams">
     <h2>Teams</h2>
-    <ul>
-      {% for team_id in season.teams %}
-        {% assign team_name = team_id %}
-        {% for t in site.data.teams %}
-          {% if t.id == team_id %}{% assign team_name = t.name %}{% endif %}
+    {% if season.teams and season.teams.size > 0 %}
+      <div class="teams-grid">
+        {% for team in season.teams %}
+          {% include team-card.html team=team %}
         {% endfor %}
-        <li>{{ team_name }}</li>
-      {% endfor %}
-    </ul>
+      </div>
+    {% else %}
+      <p>No teams have been announced yet.</p>
+    {% endif %}
   </section>
 
   <section class="season-standings">
@@ -45,7 +45,7 @@ layout: default
       </thead>
       <tbody>
         {% for match in season.schedule %}
-          {% include match-row.html match=match teams=site.data.teams %}
+          {% include match-row.html match=match teams=season.teams %}
         {% endfor %}
       </tbody>
     </table>

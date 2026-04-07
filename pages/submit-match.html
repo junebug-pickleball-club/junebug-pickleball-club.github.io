@@ -225,21 +225,15 @@ permalink: /submit-match/
     <div class="form-row">
       <div class="form-group" id="group-home_team">
         <label for="home-team">Home Team</label>
-        <select id="home-team" name="home_team" required>
+        <select id="home-team" name="home_team" required disabled>
           <option value="">— select —</option>
-          {% for team in site.data.teams %}
-          <option value="{{ team.id }}">{{ team.name }}</option>
-          {% endfor %}
         </select>
         <div class="field-error" id="err-home_team">Please select a home team.</div>
       </div>
       <div class="form-group" id="group-away_team">
         <label for="away-team">Away Team</label>
-        <select id="away-team" name="away_team" required>
+        <select id="away-team" name="away_team" required disabled>
           <option value="">— select —</option>
-          {% for team in site.data.teams %}
-          <option value="{{ team.id }}">{{ team.name }}</option>
-          {% endfor %}
         </select>
         <div class="field-error" id="err-away_team">Please select an away team.</div>
       </div>
@@ -335,6 +329,19 @@ permalink: /submit-match/
 </div>
 
 <script>
+const SEASON_TEAMS = {
+  {% for s in site.seasons %}
+  {% assign season_data = site.data.seasons[s.data_file] %}
+  "{{ s.data_file }}": [
+    {% for team in season_data.teams %}
+    { "slug": "{{ team.slug }}", "name": "{{ team.name }}" }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ]{% unless forloop.last %},{% endunless %}
+  {% endfor %}
+};
+</script>
+
+<script>
 {% assign repo_owner = site.github_username %}
 {% raw %}
 (function () {
@@ -365,6 +372,52 @@ permalink: /submit-match/
   document.addEventListener('DOMContentLoaded', function () {
     const stored = loadPat();
     if (stored) document.getElementById('pat-input').value = stored;
+
+    // Ensure team dropdowns start disabled with only the placeholder
+    var homeSelect = document.getElementById('home-team');
+    var awaySelect = document.getElementById('away-team');
+    homeSelect.disabled = true;
+    awaySelect.disabled = true;
+  });
+
+  // ── Season-aware team dropdowns ──────────────────────────────────────────────
+  function populateTeamDropdowns(seasonKey) {
+    var homeSelect = document.getElementById('home-team');
+    var awaySelect = document.getElementById('away-team');
+    var teams = (typeof SEASON_TEAMS !== 'undefined' && SEASON_TEAMS[seasonKey]) ? SEASON_TEAMS[seasonKey] : [];
+
+    // Reset both selects to placeholder only
+    homeSelect.innerHTML = '<option value="">— select —</option>';
+    awaySelect.innerHTML = '<option value="">— select —</option>';
+
+    if (teams.length > 0) {
+      teams.forEach(function (team) {
+        var optHome = document.createElement('option');
+        optHome.value = team.slug;
+        optHome.textContent = team.name;
+        homeSelect.appendChild(optHome);
+
+        var optAway = document.createElement('option');
+        optAway.value = team.slug;
+        optAway.textContent = team.name;
+        awaySelect.appendChild(optAway);
+      });
+      homeSelect.disabled = false;
+      awaySelect.disabled = false;
+    } else {
+      homeSelect.disabled = true;
+      awaySelect.disabled = true;
+    }
+  }
+  window.populateTeamDropdowns = populateTeamDropdowns;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('season-select').addEventListener('change', function () {
+      // Clear previously selected team values
+      document.getElementById('home-team').value = '';
+      document.getElementById('away-team').value = '';
+      populateTeamDropdowns(this.value);
+    });
   });
 
   // ── validateForm ─────────────────────────────────────────────────────────────

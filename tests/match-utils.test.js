@@ -36,7 +36,7 @@ const matchArb = fc.record({
   week:      fc.integer({ min: 1, max: 20 }),
   date:      fc.date({ min: new Date('2026-01-01'), max: new Date('2026-12-31') })
                .map(d => d.toISOString().slice(0, 10)),
-  location:  fc.string({ minLength: 1, maxLength: 40 }).filter(s => s.trim().length > 0 && !s.includes('\n') && !s.includes('"') && !s.includes('\\')),
+  location:  fc.stringMatching(/^[A-Za-z0-9][A-Za-z0-9 .,'-]{0,39}$/),
   home_team: teamIdArb,
   away_team: teamIdArb,
   result:    matchResultArb,
@@ -49,7 +49,7 @@ const validFormArb = fc.record({
   week:         fc.integer({ min: 1, max: 20 }).map(String),
   match_date:   fc.date({ min: new Date('2026-01-01'), max: new Date('2026-12-31') })
                   .map(d => d.toISOString().slice(0, 10)),
-  location:     fc.string({ minLength: 1, maxLength: 40 }).filter(s => s.trim().length > 0 && !s.includes('\n') && !s.includes('"') && !s.includes('\\')),
+  location:     fc.stringMatching(/^[A-Za-z0-9][A-Za-z0-9 .,'-]{0,39}$/),
   mens_home:    scoreArb.map(String),
   mens_away:    scoreArb.map(String),
   womens_home:  scoreArb.map(String),

@@ -1,10 +1,32 @@
 name: Spring 2026
 slug: spring-2026
-start_date: 2026-03-01
-end_date: 2026-05-31
+start_date: 2026-01-01
+end_date: 2026-04-31
 teams:
-  - servers-of-the-court
-  - pickle-posse
+  - slug: servers-of-the-court
+    name: Servers of the Court
+    home_court: Pickleball Hideout
+    roster:
+      - name: Amy Tucker
+        role: captain
+      - name: Nathan Cross
+        role: member
+      - name: Stephen Houston
+        role: member
+      - name: Sonia Key
+        role: member
+  - slug: pickle-posse
+    name: Pickle Posse
+    home_court: Pickleball Hideout
+    roster:
+      - name: Clay Mage
+        role: captain
+      - name: Erik Hernandez
+        role: member
+      - name: Darrah Mage
+        role: member
+      - name: Stephanie Babin
+        role: member
 schedule:
   - week: 1
     date: 2026-03-08

@@ -11,7 +11,8 @@
 {% comment %}--- Build sort keys: "IIII-JJJJJ-teamid" (inverted/zero-padded for descending sort) ---{% endcomment %}
 {% assign sort_keys = "" | split: "" %}
 
-{% for team_id in season.teams %}
+{% for team in season.teams %}
+  {% assign team_id = team.slug %}
   {% assign match_wins = 0 %}
   {% assign match_losses = 0 %}
   {% assign total_game_wins = 0 %}
@@ -139,7 +140,7 @@
           {% endif %}
         {% endfor %}
         {% assign team_name = team_id %}
-        {% for t in site.data.teams %}{% if t.id == team_id %}{% assign team_name = t.name %}{% endif %}{% endfor %}
+        {% for t in season.teams %}{% if t.slug == team_id %}{% assign team_name = t.name %}{% endif %}{% endfor %}
         <tr>
           <td>{{ rank }}</td>
           <td>{{ team_name }}</td>
@@ -185,7 +186,7 @@
           {% endif %}
         {% endfor %}
         {% assign team_name = team_id %}
-        {% for t in site.data.teams %}{% if t.id == team_id %}{% assign team_name = t.name %}{% endif %}{% endfor %}
+        {% for t in season.teams %}{% if t.slug == team_id %}{% assign team_name = t.name %}{% endif %}{% endfor %}
         <tr>
           <td>{{ rank }}</td>
           <td>{{ team_name }}</td>

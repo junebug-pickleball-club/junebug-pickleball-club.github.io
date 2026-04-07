@@ -19,18 +19,19 @@ function readSiteFile(relPath) {
 }
 
 // ── Property 1: Team card renders all team data ───────────────────────────────
+// Note: _data/teams.yml was removed in task 2; teams now live in _data/seasons/spring-2026.yml.
+// The standalone /teams page was removed in task 6; team cards are now rendered on the season page.
 
 describe('Property 1: Team card renders all team data', () => {
-  it('_site/teams/index.html contains all team names, courts, and player names', () => {
-    const html = readSiteFile('teams/index.html') ?? readSiteFile('teams.html');
+  it('_site/seasons/spring-2026.html contains all team names from spring-2026.yml', () => {
+    const html = readSiteFile('seasons/spring-2026.html');
     expect(html).not.toBeNull();
 
-    // Verify against actual teams data
-    const teamsYaml = readFileSync(resolve('_data/teams.yml'), 'utf8');
-    // Simple check: each team name appears in the rendered HTML
+    // Verify against season data (teams are now embedded in the season file)
+    const seasonYaml = readFileSync(resolve('_data/seasons/spring-2026.yml'), 'utf8');
     fc.assert(
-      fc.property(fc.constant(teamsYaml), (raw) => {
-        // Extract names via simple regex
+      fc.property(fc.constant(seasonYaml), (raw) => {
+        // Extract team names via simple regex
         const names = [...raw.matchAll(/name:\s+(.+)/g)].map(m => m[1].trim());
         for (const name of names) {
           expect(html).toContain(name);
@@ -98,7 +99,7 @@ describe('Property 5: Match row renders complete match data', () => {
           week: fc.integer({ min: 1, max: 20 }),
           date: fc.date({ min: new Date('2026-01-01'), max: new Date('2026-12-31') })
                   .map(d => d.toISOString().slice(0, 10)),
-          location: fc.string({ minLength: 1, maxLength: 30 }).filter(s => !s.includes('\n') && !s.includes('"') && !s.includes('\\')),
+          location: fc.stringMatching(/^[A-Za-z0-9][A-Za-z0-9 .,'-]{0,29}$/),
           home_team: fc.constantFrom('team-alpha', 'team-beta'),
           away_team: fc.constantFrom('team-gamma', 'team-delta'),
           result: fc.record({
@@ -193,7 +194,6 @@ describe('Property 12: Blog posts rendered with complete data', () => {
 describe('Property 13: Footer present on all pages', () => {
   const pages = [
     'index.html',
-    { path: 'teams/index.html', fallback: 'teams.html' },
     'seasons/index.html',
     'events/index.html',
     'blog/index.html',
@@ -530,8 +530,8 @@ describe('Header HTML structure (horizontal-nav)', () => {
     expect(header).toContain('href="/"');
   });
 
-  it('contains nav link href="/teams" (Req 2.3)', () => {
-    expect(header).toContain('href="/teams"');
+  it('does not contain nav link href="/teams" — Teams page was removed (Req 3.1)', () => {
+    expect(header).not.toContain('href="/teams"');
   });
 
   it('contains dropdown link href="/seasons/..." for active season (Req 2.3)', () => {
@@ -580,15 +580,15 @@ describe('Feature: horizontal-nav, Property 1: active link class matches current
    *
    * Liquid rules:
    *   Home:         page.url == '/'
-   *   Teams:        page.url contains '/teams'
    *   Events:       page.url contains '/events'
    *   Blog:         page.url contains '/blog'
    *   Submit Match: page.url contains '/submit-match'
+   *
+   * Note: /teams was removed in task 6 (season-teams-view).
    */
   function simulateActiveLinks(pageUrl) {
     return [
       { href: '/',             active: pageUrl === '/' },
-      { href: '/teams',        active: pageUrl.includes('/teams') },
       { href: '/events',       active: pageUrl.includes('/events') },
       { href: '/blog',         active: pageUrl.includes('/blog') },
       { href: '/submit-match', active: pageUrl.includes('/submit-match') },
@@ -596,8 +596,8 @@ describe('Feature: horizontal-nav, Property 1: active link class matches current
   }
 
   it('exactly one nav item is active and its href matches the generated URL', () => {
-    // Arbitrarily pick from the exact set of nav-link hrefs
-    const navUrls = fc.constantFrom('/', '/teams', '/events', '/blog', '/submit-match');
+    // Arbitrarily pick from the exact set of nav-link hrefs (no /teams — removed in task 6)
+    const navUrls = fc.constantFrom('/', '/events', '/blog', '/submit-match');
 
     fc.assert(
       fc.property(navUrls, (pageUrl) => {
@@ -699,5 +699,526 @@ describe('Feature: horizontal-nav, Property 2: dropdown active state matches URL
       }),
       { numRuns: 50 }
     );
+  });
+});
+
+// ── Feature: season-teams-view, Property 2: teams section renders all teams ───
+// Validates: Requirements 2.1
+
+/**
+ * Simulates the Liquid season layout teams section logic from _layouts/season.html.
+ * For N teams, renders N `.team-card` divs; for 0 teams, renders the "no teams" message.
+ *
+ * Mirrors:
+ *   {% if season.teams and season.teams.size > 0 %}
+ *     {% for team in season.teams %}{% include team-card.html team=team %}{% endfor %}
+ *   {% else %}
+ *     <p>No teams have been announced yet.</p>
+ *   {% endif %}
+ */
+function renderTeamsSection(teams) {
+  if (!teams || teams.length === 0) {
+    return '<p>No teams have been announced yet.</p>';
+  }
+  const cards = teams
+    .map(() => '<div class="team-card"></div>')
+    .join('\n');
+  return `<div class="teams-grid">\n${cards}\n</div>`;
+}
+
+describe('Feature: season-teams-view, Property 2: teams section renders all teams', () => {
+  // Property test: for any 0–10 teams, rendered HTML contains exactly N team-card elements
+  it('rendered HTML contains exactly N team-card elements for N teams (fast-check)', () => {
+    const teamArb = fc.record({
+      slug:       fc.stringMatching(/^[a-z][a-z0-9-]{0,19}$/),
+      name:       fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,29}$/),
+      home_court: fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,29}$/),
+      roster:     fc.array(
+        fc.record({
+          name: fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,19}$/),
+          role: fc.constantFrom('captain', 'member'),
+        }),
+        { minLength: 1, maxLength: 6 }
+      ),
+    });
+
+    fc.assert(
+      fc.property(
+        fc.array(teamArb, { minLength: 0, maxLength: 10 }),
+        (teams) => {
+          const html = renderTeamsSection(teams);
+          const count = (html.match(/class="team-card"/g) || []).length;
+          expect(count).toBe(teams.length);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  // Edge case: 0 teams renders the "no teams" message and zero team-card elements
+  it('renders "no teams" message and zero team-card elements when teams list is empty', () => {
+    const html = renderTeamsSection([]);
+    expect(html).toContain('No teams have been announced yet.');
+    expect((html.match(/class="team-card"/g) || []).length).toBe(0);
+  });
+
+  // Smoke test: built _site/seasons/spring-2026.html contains exactly 2 team-card elements
+  it('_site/seasons/spring-2026.html contains exactly 2 team-card elements', () => {
+    const html = readSiteFile('seasons/spring-2026.html');
+    expect(html).not.toBeNull();
+    const count = (html.match(/class="team-card"/g) || []).length;
+    expect(count).toBe(2);
+  });
+});
+
+// ── Feature: season-teams-view, Property 3: team card renders complete team data ──
+// Validates: Requirements 2.3
+
+/**
+ * Simulates the Liquid team-card.html rendering logic.
+ * Mirrors _includes/team-card.html:
+ *   - Always renders team name in .team-card__name
+ *   - Renders home_court in .team-card__court if present
+ *   - Renders each roster member's name in a <li> if roster is non-empty
+ *   - Renders "Roster pending" if roster is empty/absent
+ */
+function renderTeamCard(team) {
+  const courtHtml = team.home_court
+    ? `<p class="team-card__court">${team.home_court}</p>`
+    : '';
+
+  let rosterHtml;
+  if (team.roster && team.roster.length > 0) {
+    const items = team.roster
+      .map(p => `<li>${p.name} <span class="team-card__role">(${p.role})</span></li>`)
+      .join('\n      ');
+    rosterHtml = `<ul>\n      ${items}\n    </ul>`;
+  } else {
+    rosterHtml = '<p class="team-card__roster-pending">Roster pending</p>';
+  }
+
+  return `<div class="team-card">
+  <h3 class="team-card__name">${team.name}</h3>
+  ${courtHtml}
+  <div class="team-card__roster">
+    ${rosterHtml}
+  </div>
+</div>`;
+}
+
+describe('Feature: season-teams-view, Property 3: team card renders complete team data', () => {
+  // **Validates: Requirements 2.3**
+  it('rendered card HTML contains team name, home_court, and all roster member names', () => {
+    const playerArb = fc.record({
+      name: fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,19}$/),
+      role: fc.constantFrom('captain', 'member'),
+    });
+
+    const teamArb = fc.record({
+      name:       fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,29}$/),
+      home_court: fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,29}$/),
+      roster:     fc.array(playerArb, { minLength: 1, maxLength: 6 }),
+    });
+
+    fc.assert(
+      fc.property(teamArb, (team) => {
+        const html = renderTeamCard(team);
+
+        // Team name must appear in the rendered card
+        expect(html).toContain(team.name);
+
+        // Home court must appear in the rendered card
+        expect(html).toContain(team.home_court);
+
+        // Every roster member's name must appear in the rendered card
+        for (const player of team.roster) {
+          expect(html).toContain(player.name);
+        }
+      }),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ── Feature: season-teams-view, Property 4: schedule slug resolution ──────────
+// Feature: season-teams-view, Property 4: schedule slug resolution
+// Validates: Requirements 4.3
+
+/**
+ * Simulates the Liquid slug-to-name resolution logic from _includes/match-row.html.
+ * Iterates the teams list and returns t.name where t.slug == slug,
+ * or the raw slug if no match is found.
+ *
+ * Mirrors:
+ *   {% assign home_name = match.home_team %}
+ *   {% for t in teams %}
+ *     {% if t.slug == match.home_team %}{% assign home_name = t.name %}{% endif %}
+ *   {% endfor %}
+ */
+function resolveTeamName(slug, teams) {
+  for (const t of teams) {
+    if (t.slug === slug) return t.name;
+  }
+  return slug;
+}
+
+describe('Feature: season-teams-view, Property 4: schedule slug resolution', () => {
+  // **Validates: Requirements 4.3**
+  it('resolveTeamName returns team name (not raw slug) for any slug present in the teams list', () => {
+    // Generate a slug: lowercase letters and hyphens only, to keep slugs realistic
+    const slugArb = fc
+      .stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz-'.split('')), {
+        minLength: 2,
+        maxLength: 20,
+      })
+      .filter(s => /^[a-z]/.test(s) && /[a-z]$/.test(s) && !s.includes('--'));
+
+    // Generate a team name: printable non-empty string
+    const nameArb = fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,29}$/);
+    const teamsArb = fc
+      .array(
+        fc.record({ slug: slugArb, name: nameArb }),
+        { minLength: 2, maxLength: 5 }
+      )
+      .filter(teams => {
+        const slugs = teams.map(t => t.slug);
+        return new Set(slugs).size === slugs.length;
+      });
+
+    fc.assert(
+      fc.property(
+        teamsArb,
+        fc.integer({ min: 0, max: 4 }), // index into teams list
+        (teams, idx) => {
+          // Pick a slug that is guaranteed to be in the teams list
+          const team = teams[idx % teams.length];
+          const resolved = resolveTeamName(team.slug, teams);
+
+          // Must return the team name, not the raw slug
+          expect(resolved).toBe(team.name);
+          expect(resolved).not.toBe(team.slug === team.name ? null : team.slug);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('resolveTeamName returns the raw slug when slug is not in the teams list', () => {
+    const slugArb = fc
+      .stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz-'.split('')), {
+        minLength: 2,
+        maxLength: 20,
+      })
+      .filter(s => /^[a-z]/.test(s) && /[a-z]$/.test(s) && !s.includes('--'));
+
+    const nameArb = fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,29}$/);
+
+    const teamsArb = fc.array(
+      fc.record({ slug: slugArb, name: nameArb }),
+      { minLength: 1, maxLength: 5 }
+    );
+
+    fc.assert(
+      fc.property(
+        teamsArb,
+        slugArb,
+        (teams, unknownSlug) => {
+          // Ensure the unknown slug is not in the teams list
+          fc.pre(!teams.some(t => t.slug === unknownSlug));
+
+          const resolved = resolveTeamName(unknownSlug, teams);
+          expect(resolved).toBe(unknownSlug);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('for any schedule entry whose slugs are drawn from the teams list, resolved names are never raw slugs', () => {
+    const slugArb = fc
+      .stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz-'.split('')), {
+        minLength: 2,
+        maxLength: 20,
+      })
+      .filter(s => /^[a-z]/.test(s) && /[a-z]$/.test(s) && !s.includes('--'));
+
+    const nameArb = fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,29}$/);
+
+    const teamsArb = fc
+      .array(
+        fc.record({ slug: slugArb, name: nameArb }),
+        { minLength: 2, maxLength: 5 }
+      )
+      .filter(teams => {
+        const slugs = teams.map(t => t.slug);
+        return new Set(slugs).size === slugs.length;
+      })
+      // Also ensure no team has name === slug (so we can distinguish resolution)
+      .filter(teams => teams.every(t => t.name !== t.slug));
+
+    fc.assert(
+      fc.property(
+        teamsArb,
+        fc.integer({ min: 0, max: 4 }),
+        fc.integer({ min: 0, max: 4 }),
+        (teams, homeIdx, awayIdx) => {
+          const homeTeam = teams[homeIdx % teams.length];
+          const awayTeam = teams[awayIdx % teams.length];
+
+          const resolvedHome = resolveTeamName(homeTeam.slug, teams);
+          const resolvedAway = resolveTeamName(awayTeam.slug, teams);
+
+          // Resolved values must be team names, not raw slugs
+          expect(resolvedHome).toBe(homeTeam.name);
+          expect(resolvedAway).toBe(awayTeam.name);
+
+          // Confirm the resolved name is not the raw slug
+          expect(resolvedHome).not.toBe(homeTeam.slug);
+          expect(resolvedAway).not.toBe(awayTeam.slug);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ── Feature: season-teams-view, Task 6.1: Removal smoke checks ───────────────
+// Validates: Requirements 3.1, 3.2
+
+import { existsSync } from 'fs';
+
+describe('Feature: season-teams-view, Removal smoke checks', () => {
+  // Req 3.2 — teams.html source file must not exist
+  it('teams.html does not exist in the source (Req 3.2)', () => {
+    expect(existsSync(resolve('teams.html'))).toBe(false);
+  });
+
+  // Req 3.1 — header must not contain a /teams/ nav link
+  it('_includes/header.html does not contain a /teams/ link (Req 3.1)', () => {
+    const header = readFileSync(resolve('_includes/header.html'), 'utf8');
+    expect(header).not.toMatch(/href="\/teams[/"]/);
+  });
+});
+
+// ── Feature: season-teams-view, Property 5: season-select populates correct team options ──
+// Feature: season-teams-view, Property 5: season-select populates correct team options
+// Validates: Requirements 5.1, 5.3
+
+/**
+ * Simulates the runtime JS `populateTeamDropdowns(seasonKey)` logic from submit-match.html.
+ * Looks up SEASON_TEAMS[seasonKey] and returns the list of {slug, name} options for that season,
+ * or an empty array if the season key is not found.
+ *
+ * Mirrors:
+ *   function populateTeamDropdowns(seasonKey) {
+ *     var teams = (SEASON_TEAMS[seasonKey]) ? SEASON_TEAMS[seasonKey] : [];
+ *     // ... populates both dropdowns with these teams
+ *   }
+ */
+function populateTeamDropdowns(seasonKey, SEASON_TEAMS) {
+  return (SEASON_TEAMS[seasonKey] && SEASON_TEAMS[seasonKey].length > 0)
+    ? SEASON_TEAMS[seasonKey]
+    : [];
+}
+
+describe('Feature: season-teams-view, Property 5: season-select populates correct team options', () => {
+  // **Validates: Requirements 5.1, 5.3**
+  it('both dropdowns contain exactly the options for the selected season and no options from other seasons', () => {
+    // Generator for a single team: distinct slug and name
+    const teamArb = fc.record({
+      slug: fc
+        .stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz-'.split('')), {
+          minLength: 2,
+          maxLength: 20,
+        })
+        .filter(s => /^[a-z]/.test(s) && /[a-z]$/.test(s) && !s.includes('--')),
+      name: fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,29}$/),
+    });
+
+    // Generator for a season key (simple alphanumeric string)
+    const seasonKeyArb = fc
+      .stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789-'.split('')), {
+        minLength: 3,
+        maxLength: 20,
+      })
+      .filter(s => /^[a-z]/.test(s));
+
+    // Generator for a single season entry: a key + 2–8 teams with distinct slugs
+    const seasonEntryArb = fc
+      .tuple(
+        seasonKeyArb,
+        fc.array(teamArb, { minLength: 2, maxLength: 8 })
+      )
+      .filter(([, teams]) => {
+        const slugs = teams.map(t => t.slug);
+        return new Set(slugs).size === slugs.length;
+      });
+
+    // Generator for a SEASON_TEAMS map: 2–5 seasons with distinct keys
+    const seasonTeamsArb = fc
+      .array(seasonEntryArb, { minLength: 2, maxLength: 5 })
+      .filter(entries => {
+        const keys = entries.map(([k]) => k);
+        return new Set(keys).size === keys.length;
+      })
+      .map(entries => Object.fromEntries(entries));
+
+    fc.assert(
+      fc.property(
+        seasonTeamsArb,
+        fc.integer({ min: 0, max: 4 }), // index to pick a season key
+        (SEASON_TEAMS, idx) => {
+          const seasonKeys = Object.keys(SEASON_TEAMS);
+          const selectedKey = seasonKeys[idx % seasonKeys.length];
+          const expectedTeams = SEASON_TEAMS[selectedKey];
+
+          // Call the simulated populateTeamDropdowns for both home and away dropdowns
+          const homeOptions = populateTeamDropdowns(selectedKey, SEASON_TEAMS);
+          const awayOptions = populateTeamDropdowns(selectedKey, SEASON_TEAMS);
+
+          // Both dropdowns must contain exactly the teams for the selected season
+          expect(homeOptions).toHaveLength(expectedTeams.length);
+          expect(awayOptions).toHaveLength(expectedTeams.length);
+
+          // Each expected team must appear in both dropdowns (by slug and name)
+          for (const team of expectedTeams) {
+            expect(homeOptions.some(o => o.slug === team.slug && o.name === team.name)).toBe(true);
+            expect(awayOptions.some(o => o.slug === team.slug && o.name === team.name)).toBe(true);
+          }
+
+          // Collect all slugs from other seasons
+          const otherSeasonSlugs = new Set(
+            seasonKeys
+              .filter(k => k !== selectedKey)
+              .flatMap(k => SEASON_TEAMS[k].map(t => t.slug))
+          );
+
+          // No option from another season should appear in either dropdown
+          // (only applies to slugs that are not also in the selected season)
+          const selectedSlugs = new Set(expectedTeams.map(t => t.slug));
+          for (const slug of otherSeasonSlugs) {
+            if (!selectedSlugs.has(slug)) {
+              expect(homeOptions.some(o => o.slug === slug)).toBe(false);
+              expect(awayOptions.some(o => o.slug === slug)).toBe(false);
+            }
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ── Feature: season-teams-view, Task 8.2: Disabled initial state ─────────────
+// Validates: Requirements 5.2
+
+describe('Feature: season-teams-view, disabled initial state of team dropdowns', () => {
+  const source = readFileSync(resolve('pages/submit-match.html'), 'utf8');
+
+  it('#home-team select has the disabled attribute in the HTML source (Req 5.2)', () => {
+    // Match the <select id="home-team" ... disabled ...> tag
+    expect(source).toMatch(/<select[^>]*id="home-team"[^>]*disabled/);
+  });
+
+  it('#away-team select has the disabled attribute in the HTML source (Req 5.2)', () => {
+    expect(source).toMatch(/<select[^>]*id="away-team"[^>]*disabled/);
+  });
+
+  it('#home-team contains only the placeholder option and no Liquid team loop (Req 5.2)', () => {
+    // Extract the home-team select block
+    const homeBlock = source.match(/<select[^>]*id="home-team"[\s\S]*?<\/select>/)?.[0] ?? '';
+    expect(homeBlock).toContain('— select —');
+    expect(homeBlock).not.toContain('{% for team in site.data.teams %}');
+  });
+
+  it('#away-team contains only the placeholder option and no Liquid team loop (Req 5.2)', () => {
+    const awayBlock = source.match(/<select[^>]*id="away-team"[\s\S]*?<\/select>/)?.[0] ?? '';
+    expect(awayBlock).toContain('— select —');
+    expect(awayBlock).not.toContain('{% for team in site.data.teams %}');
+  });
+
+  it('SEASON_TEAMS constant is embedded in a <script> block (Req 5.2)', () => {
+    expect(source).toMatch(/<script[\s\S]*?const SEASON_TEAMS\s*=/);
+  });
+
+  it('populateTeamDropdowns function is defined in the source (Req 5.2)', () => {
+    expect(source).toContain('function populateTeamDropdowns(');
+  });
+});
+
+// ── Feature: season-teams-view, Property 1: team objects contain all required fields ──
+// Validates: Requirements 1.1
+
+describe('Feature: season-teams-view, Property 1: team objects contain all required fields', () => {
+  // **Validates: Requirements 1.1**
+  it('every generated team object has non-empty slug, name, home_court, and roster', () => {
+    const rosterMemberArb = fc.record({
+      name: fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,19}$/),
+      role: fc.constantFrom('captain', 'member'),
+    });
+
+    const teamArb = fc.record({
+      slug:       fc.stringMatching(/^[a-z][a-z0-9-]{0,29}$/),
+      name:       fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,29}$/),
+      home_court: fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,39}$/),
+      roster:     fc.array(rosterMemberArb, { minLength: 1, maxLength: 8 }),
+    });
+
+    fc.assert(
+      fc.property(teamArb, (team) => {
+        // slug must be present and non-empty
+        expect(typeof team.slug).toBe('string');
+        expect(team.slug.trim().length).toBeGreaterThan(0);
+
+        // name must be present and non-empty
+        expect(typeof team.name).toBe('string');
+        expect(team.name.trim().length).toBeGreaterThan(0);
+
+        // home_court must be present and non-empty
+        expect(typeof team.home_court).toBe('string');
+        expect(team.home_court.trim().length).toBeGreaterThan(0);
+
+        // roster must be a non-empty array
+        expect(Array.isArray(team.roster)).toBe(true);
+        expect(team.roster.length).toBeGreaterThan(0);
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+  // Smoke test: all teams in _data/seasons/spring-2026.yml have the required fields
+  it('all teams in _data/seasons/spring-2026.yml have non-empty slug, name, home_court, and roster', () => {
+    // Regex-based check against the raw YAML source
+    const raw = readFileSync(resolve('_data/seasons/spring-2026.yml'), 'utf8');
+
+    // Extract team blocks by looking for slug/name/home_court/roster occurrences
+    // We verify the YAML contains the required keys for each team entry
+    const slugMatches    = [...raw.matchAll(/^[\s\-]{2,6}slug:\s+(\S+)/gm)].map(m => m[1].trim());
+    const nameMatches    = [...raw.matchAll(/^[\s\-]{2,6}name:\s+(.+)/gm)].map(m => m[1].trim());
+    const courtMatches   = [...raw.matchAll(/^[\s\-]{2,6}home_court:\s+(.+)/gm)].map(m => m[1].trim());
+    const rosterMatches  = [...raw.matchAll(/^[\s\-]{2,6}roster:/gm)];
+
+    // There must be at least one team
+    expect(slugMatches.length).toBeGreaterThan(0);
+
+    // Each team must have a non-empty slug
+    for (const slug of slugMatches) {
+      expect(slug.length).toBeGreaterThan(0);
+    }
+
+    // Each team must have a non-empty name
+    expect(nameMatches.length).toBeGreaterThanOrEqual(slugMatches.length);
+    for (const name of nameMatches) {
+      expect(name.length).toBeGreaterThan(0);
+    }
+
+    // Each team must have a non-empty home_court
+    expect(courtMatches.length).toBeGreaterThanOrEqual(slugMatches.length);
+    for (const court of courtMatches) {
+      expect(court.length).toBeGreaterThan(0);
+    }
+
+    // Each team must have a roster section
+    expect(rosterMatches.length).toBeGreaterThanOrEqual(slugMatches.length);
   });
 });

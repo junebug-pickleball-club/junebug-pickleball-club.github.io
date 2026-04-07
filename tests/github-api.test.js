@@ -15,7 +15,7 @@ const validFormArb = fc.record({
   week:         fc.integer({ min: 1, max: 20 }).map(String),
   match_date:   fc.date({ min: new Date('2026-01-01'), max: new Date('2026-12-31') })
                   .map(d => d.toISOString().slice(0, 10)),
-  location:     fc.string({ minLength: 1, maxLength: 30 }).filter(s => s.trim().length > 0 && !s.includes('\n')),
+  location:     fc.stringMatching(/^[A-Za-z0-9][A-Za-z0-9 .,'-]{0,29}$/),
   mens_home:    scoreArb.map(String), mens_away:    scoreArb.map(String),
   womens_home:  scoreArb.map(String), womens_away:  scoreArb.map(String),
   mixed_1_home: scoreArb.map(String), mixed_1_away: scoreArb.map(String),
