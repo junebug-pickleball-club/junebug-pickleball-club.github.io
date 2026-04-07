@@ -58,6 +58,20 @@ plugins:
 #  *All described config keys below should be nested under the top-level
 #   `minima` key.*
 #
+active_season: spring-2026
+
+collections:
+  seasons:
+    output: true
+    permalink: /seasons/:name
+
+defaults:
+  - scope:
+      path: ""
+      type: seasons
+    values:
+      layout: season
+
 minima:
   skin: solarized-dark
 #

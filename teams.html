@@ -1,25 +1,11 @@
 ---
-permalink: /teams
+permalink: /teams/
 layout: page
+title: Teams
 ---
 
-<style type="text/css" media="screen">
-  .container {
-    margin: 10px auto;
-    max-width: 600px;
-    text-align: center;
-  }
-  h1 {
-    margin: 30px 0;
-    font-size: 4em;
-    line-height: 1;
-    letter-spacing: -1px;
-  }
-</style>
-
-<div class="container">
-  {% for team in site.data.data.teams %}
-    {% assign teamToRender = team %}
-    {% include team.html team= teamToRender %}
+<div class="teams-grid">
+  {% for t in site.data.teams %}
+    {% include team-card.html team=t %}
   {% endfor %}
 </div>
