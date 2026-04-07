@@ -27,6 +27,42 @@ teams:
         role: member
       - name: Stephanie Babin
         role: member
+  - slug: long-shots
+    name: Long Shots
+    home_court: Pickleball Hideout
+    roster:
+      - name: Brent Patane
+        role: captain
+      - name: Taylor Horton
+        role: member
+      - name: Vanessa 
+        role: member
+      - name: Kelly
+        role: member
+  - slug: salsa-and-saltines
+    name: Salsa And Saltines
+    home_court: Pickleball Hideout
+    roster:
+      - name: Cameron
+        role: captain
+      - name: Justin
+        role: member
+      - name: Callie
+        role: member
+      - name: Camry
+        role: member
+  - slug: day-dinkers
+    name: Day Dinkers
+    home_court: Pickleball Hideout
+    roster:
+      - name: James Schonian
+        role: captain
+      - name: Trent Justice
+        role: member
+      - name: Allana Montag
+        role: member
+      - name: Colleen Stockert
+        role: member
 schedule:
   - week: 1
     date: 2026-03-08
