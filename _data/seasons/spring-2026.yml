@@ -1,0 +1,32 @@
+name: Spring 2026
+slug: spring-2026
+start_date: 2026-03-01
+end_date: 2026-05-31
+teams:
+  - servers-of-the-court
+  - pickle-posse
+schedule:
+  - week: 1
+    date: 2026-03-08
+    location: Pickleball Hideout
+    home_team: servers-of-the-court
+    away_team: pickle-posse
+    result:
+      mens_doubles:
+        home: 11
+        away: 7
+      womens_doubles:
+        home: 9
+        away: 11
+      mixed_doubles:
+        home: 11
+        away: 6
+      dreambreaker:
+        home: 15
+        away: 12
+  - week: 2
+    date: 2026-03-15
+    location: Pickleball Hideout
+    home_team: pickle-posse
+    away_team: servers-of-the-court
+    # no result block — this match is scheduled but not yet played

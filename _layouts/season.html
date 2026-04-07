@@ -1,0 +1,50 @@
+---
+layout: default
+---
+{% assign season = site.data.seasons[page.data_file] %}
+
+<div class="season-detail">
+  <h1>{{ season.name }}</h1>
+  <p class="season-dates">{{ season.start_date | date: "%B %-d, %Y" }} &ndash; {{ season.end_date | date: "%B %-d, %Y" }}</p>
+
+  <section class="season-teams">
+    <h2>Teams</h2>
+    <ul>
+      {% for team_id in season.teams %}
+        {% assign team_name = team_id %}
+        {% for t in site.data.teams %}
+          {% if t.id == team_id %}{% assign team_name = t.name %}{% endif %}
+        {% endfor %}
+        <li>{{ team_name }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="season-standings">
+    <h2>Standings</h2>
+    {% include standings-table.html season=season %}
+  </section>
+
+  <section class="season-schedule">
+    <h2>Schedule</h2>
+    <table class="schedule-table">
+      <thead>
+        <tr>
+          <th>Week</th>
+          <th>Home</th>
+          <th>Away</th>
+          <th>Location</th>
+          <th>Men's Doubles</th>
+          <th>Women's Doubles</th>
+          <th>Mixed Doubles</th>
+          <th>Dreambreaker</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for match in season.schedule %}
+          {% include match-row.html match=match teams=site.data.teams %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>

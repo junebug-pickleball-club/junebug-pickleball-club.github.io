@@ -1,0 +1,163 @@
+{% comment %}
+  standings-table.html
+  Parameters:
+    season — a season data object from _data/seasons/{slug}.yml
+  Computes match wins (W), losses (L), and total game wins for each team,
+  then renders a ranked standings table.
+{% endcomment %}
+
+{% assign season = include.season %}
+
+{% comment %}--- Build sort keys: "IIII-JJJJJ-teamid" (inverted/zero-padded for descending sort) ---{% endcomment %}
+{% assign sort_keys = "" | split: "" %}
+
+{% for team_id in season.teams %}
+  {% assign match_wins = 0 %}
+  {% assign match_losses = 0 %}
+  {% assign total_game_wins = 0 %}
+
+  {% for match in season.schedule %}
+    {% if match.result %}
+      {% if match.home_team == team_id %}
+        {% assign my_games = 0 %}
+        {% assign opp_games = 0 %}
+        {% if match.result.mens_doubles %}
+          {% if match.result.mens_doubles.home > match.result.mens_doubles.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}
+          {% assign total_game_wins = total_game_wins | plus: match.result.mens_doubles.home %}
+        {% endif %}
+        {% if match.result.womens_doubles %}
+          {% if match.result.womens_doubles.home > match.result.womens_doubles.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}
+          {% assign total_game_wins = total_game_wins | plus: match.result.womens_doubles.home %}
+        {% endif %}
+        {% if match.result.mixed_doubles %}
+          {% if match.result.mixed_doubles.home > match.result.mixed_doubles.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}
+          {% assign total_game_wins = total_game_wins | plus: match.result.mixed_doubles.home %}
+        {% endif %}
+        {% if match.result.dreambreaker %}
+          {% if match.result.dreambreaker.home > match.result.dreambreaker.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}
+          {% assign total_game_wins = total_game_wins | plus: match.result.dreambreaker.home %}
+        {% endif %}
+        {% if my_games > opp_games %}{% assign match_wins = match_wins | plus: 1 %}{% else %}{% assign match_losses = match_losses | plus: 1 %}{% endif %}
+      {% elsif match.away_team == team_id %}
+        {% assign my_games = 0 %}
+        {% assign opp_games = 0 %}
+        {% if match.result.mens_doubles %}
+          {% if match.result.mens_doubles.away > match.result.mens_doubles.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}
+          {% assign total_game_wins = total_game_wins | plus: match.result.mens_doubles.away %}
+        {% endif %}
+        {% if match.result.womens_doubles %}
+          {% if match.result.womens_doubles.away > match.result.womens_doubles.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}
+          {% assign total_game_wins = total_game_wins | plus: match.result.womens_doubles.away %}
+        {% endif %}
+        {% if match.result.mixed_doubles %}
+          {% if match.result.mixed_doubles.away > match.result.mixed_doubles.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}
+          {% assign total_game_wins = total_game_wins | plus: match.result.mixed_doubles.away %}
+        {% endif %}
+        {% if match.result.dreambreaker %}
+          {% if match.result.dreambreaker.away > match.result.dreambreaker.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}
+          {% assign total_game_wins = total_game_wins | plus: match.result.dreambreaker.away %}
+        {% endif %}
+        {% if my_games > opp_games %}{% assign match_wins = match_wins | plus: 1 %}{% else %}{% assign match_losses = match_losses | plus: 1 %}{% endif %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {% assign inv_wins = 9999 | minus: match_wins %}
+  {% assign inv_game_wins = 99999 | minus: total_game_wins %}
+
+  {% if inv_wins < 10 %}{% assign w_pad = "000" %}{% elsif inv_wins < 100 %}{% assign w_pad = "00" %}{% elsif inv_wins < 1000 %}{% assign w_pad = "0" %}{% else %}{% assign w_pad = "" %}{% endif %}
+  {% if inv_game_wins < 10 %}{% assign g_pad = "0000" %}{% elsif inv_game_wins < 100 %}{% assign g_pad = "000" %}{% elsif inv_game_wins < 1000 %}{% assign g_pad = "00" %}{% elsif inv_game_wins < 10000 %}{% assign g_pad = "0" %}{% else %}{% assign g_pad = "" %}{% endif %}
+
+  {% assign sort_key = w_pad | append: inv_wins | append: "-" | append: g_pad | append: inv_game_wins | append: "-" | append: team_id %}
+  {% assign sort_keys = sort_keys | push: sort_key %}
+{% endfor %}
+
+{% assign sorted_keys = sort_keys | sort %}
+
+<table class="standings-table">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Team</th>
+      <th>W</th>
+      <th>L</th>
+      <th>Game Wins</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if season.standings_order %}
+      {% for team_id in season.standings_order %}
+        {% assign rank = forloop.index %}
+        {% assign match_wins = 0 %}{% assign match_losses = 0 %}{% assign total_game_wins = 0 %}
+        {% for match in season.schedule %}
+          {% if match.result %}
+            {% if match.home_team == team_id %}
+              {% assign my_games = 0 %}{% assign opp_games = 0 %}
+              {% if match.result.mens_doubles %}{% if match.result.mens_doubles.home > match.result.mens_doubles.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.mens_doubles.home %}{% endif %}
+              {% if match.result.womens_doubles %}{% if match.result.womens_doubles.home > match.result.womens_doubles.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.womens_doubles.home %}{% endif %}
+              {% if match.result.mixed_doubles %}{% if match.result.mixed_doubles.home > match.result.mixed_doubles.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.mixed_doubles.home %}{% endif %}
+              {% if match.result.dreambreaker %}{% if match.result.dreambreaker.home > match.result.dreambreaker.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.dreambreaker.home %}{% endif %}
+              {% if my_games > opp_games %}{% assign match_wins = match_wins | plus: 1 %}{% else %}{% assign match_losses = match_losses | plus: 1 %}{% endif %}
+            {% elsif match.away_team == team_id %}
+              {% assign my_games = 0 %}{% assign opp_games = 0 %}
+              {% if match.result.mens_doubles %}{% if match.result.mens_doubles.away > match.result.mens_doubles.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.mens_doubles.away %}{% endif %}
+              {% if match.result.womens_doubles %}{% if match.result.womens_doubles.away > match.result.womens_doubles.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.womens_doubles.away %}{% endif %}
+              {% if match.result.mixed_doubles %}{% if match.result.mixed_doubles.away > match.result.mixed_doubles.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.mixed_doubles.away %}{% endif %}
+              {% if match.result.dreambreaker %}{% if match.result.dreambreaker.away > match.result.dreambreaker.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.dreambreaker.away %}{% endif %}
+              {% if my_games > opp_games %}{% assign match_wins = match_wins | plus: 1 %}{% else %}{% assign match_losses = match_losses | plus: 1 %}{% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% assign team_name = team_id %}
+        {% for t in site.data.teams %}{% if t.id == team_id %}{% assign team_name = t.name %}{% endif %}{% endfor %}
+        <tr>
+          <td>{{ rank }}</td>
+          <td>{{ team_name }}</td>
+          <td>{{ match_wins }}</td>
+          <td>{{ match_losses }}</td>
+          <td>{{ total_game_wins }}</td>
+        </tr>
+      {% endfor %}
+    {% else %}
+      {% for key in sorted_keys %}
+        {% assign rank = forloop.index %}
+        {% assign key_parts = key | split: "-" %}
+        {% assign team_id = "" %}
+        {% for part in key_parts %}
+          {% if forloop.index > 2 %}
+            {% if team_id == "" %}{% assign team_id = part %}{% else %}{% assign team_id = team_id | append: "-" | append: part %}{% endif %}
+          {% endif %}
+        {% endfor %}
+        {% assign match_wins = 0 %}{% assign match_losses = 0 %}{% assign total_game_wins = 0 %}
+        {% for match in season.schedule %}
+          {% if match.result %}
+            {% if match.home_team == team_id %}
+              {% assign my_games = 0 %}{% assign opp_games = 0 %}
+              {% if match.result.mens_doubles %}{% if match.result.mens_doubles.home > match.result.mens_doubles.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.mens_doubles.home %}{% endif %}
+              {% if match.result.womens_doubles %}{% if match.result.womens_doubles.home > match.result.womens_doubles.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.womens_doubles.home %}{% endif %}
+              {% if match.result.mixed_doubles %}{% if match.result.mixed_doubles.home > match.result.mixed_doubles.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.mixed_doubles.home %}{% endif %}
+              {% if match.result.dreambreaker %}{% if match.result.dreambreaker.home > match.result.dreambreaker.away %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.dreambreaker.home %}{% endif %}
+              {% if my_games > opp_games %}{% assign match_wins = match_wins | plus: 1 %}{% else %}{% assign match_losses = match_losses | plus: 1 %}{% endif %}
+            {% elsif match.away_team == team_id %}
+              {% assign my_games = 0 %}{% assign opp_games = 0 %}
+              {% if match.result.mens_doubles %}{% if match.result.mens_doubles.away > match.result.mens_doubles.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.mens_doubles.away %}{% endif %}
+              {% if match.result.womens_doubles %}{% if match.result.womens_doubles.away > match.result.womens_doubles.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.womens_doubles.away %}{% endif %}
+              {% if match.result.mixed_doubles %}{% if match.result.mixed_doubles.away > match.result.mixed_doubles.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.mixed_doubles.away %}{% endif %}
+              {% if match.result.dreambreaker %}{% if match.result.dreambreaker.away > match.result.dreambreaker.home %}{% assign my_games = my_games | plus: 1 %}{% else %}{% assign opp_games = opp_games | plus: 1 %}{% endif %}{% assign total_game_wins = total_game_wins | plus: match.result.dreambreaker.away %}{% endif %}
+              {% if my_games > opp_games %}{% assign match_wins = match_wins | plus: 1 %}{% else %}{% assign match_losses = match_losses | plus: 1 %}{% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% assign team_name = team_id %}
+        {% for t in site.data.teams %}{% if t.id == team_id %}{% assign team_name = t.name %}{% endif %}{% endfor %}
+        <tr>
+          <td>{{ rank }}</td>
+          <td>{{ team_name }}</td>
+          <td>{{ match_wins }}</td>
+          <td>{{ match_losses }}</td>
+          <td>{{ total_game_wins }}</td>
+        </tr>
+      {% endfor %}
+    {% endif %}
+  </tbody>
+</table>

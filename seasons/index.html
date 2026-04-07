@@ -1,0 +1,23 @@
+---
+layout: page
+title: Seasons
+permalink: /seasons/
+---
+
+{% assign all_seasons = site.seasons | sort: "start_date" | reverse %}
+
+{% if all_seasons.size > 0 %}
+  <div class="seasons-list">
+    {% for season_page in all_seasons %}
+      {% assign season_data = site.data.seasons[season_page.data_file] %}
+      <div class="event-card">
+        <h3><a href="{{ season_page.url }}">{{ season_page.title }}</a></h3>
+        {% if season_data %}
+          <p>{{ season_data.start_date | date: "%B %-d, %Y" }} &ndash; {{ season_data.end_date | date: "%B %-d, %Y" }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>No seasons yet.</p>
+{% endif %}

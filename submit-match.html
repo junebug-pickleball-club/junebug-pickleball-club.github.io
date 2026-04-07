@@ -1,0 +1,668 @@
+---
+layout: page
+title: Submit Match
+permalink: /submit-match/
+---
+
+<style>
+  .submit-form {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #a0a0b8;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    background: #16213e;
+    border: 1px solid #2a2a4a;
+    border-radius: 4px;
+    color: #e8e8f0;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #e94560;
+    box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.2);
+  }
+  .form-group select option {
+    background: #16213e;
+    color: #e8e8f0;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .scores-section {
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .scores-section h3 {
+    margin: 0 0 16px;
+    color: #e8e8f0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .score-row {
+    display: grid;
+    grid-template-columns: 1fr 80px 80px;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .score-row label {
+    color: #a0a0b8;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  .score-row input {
+    width: 100%;
+    padding: 8px 10px;
+    background: #16213e;
+    border: 1px solid #2a2a4a;
+    border-radius: 4px;
+    color: #e8e8f0;
+    font-size: 1rem;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  .score-row input:focus {
+    outline: none;
+    border-color: #e94560;
+    box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.2);
+  }
+  .score-header {
+    display: grid;
+    grid-template-columns: 1fr 80px 80px;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .score-header span {
+    color: #a0a0b8;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+  .score-header span:first-child {
+    text-align: left;
+  }
+  .pat-section {
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .pat-section h3 {
+    margin: 0 0 8px;
+    color: #e8e8f0;
+    font-size: 1rem;
+  }
+  .pat-section p {
+    color: #a0a0b8;
+    font-size: 0.85rem;
+    margin: 0 0 14px;
+  }
+  .pat-section a {
+    color: #e94560;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .pat-section a:hover {
+    color: #c73652;
+  }
+  .pat-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .pat-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+  }
+  .btn-primary {
+    background: #e94560;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 12px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    margin-top: 8px;
+  }
+  .btn-primary:hover {
+    background: #c73652;
+  }
+  .btn-primary:disabled {
+    background: #2a2a4a;
+    color: #a0a0b8;
+    cursor: not-allowed;
+  }
+  .banner {
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    display: none;
+  }
+  .banner.success {
+    background: rgba(76, 175, 80, 0.15);
+    border: 1px solid #4caf50;
+    color: #4caf50;
+  }
+  .banner.error {
+    background: rgba(244, 67, 54, 0.15);
+    border: 1px solid #f44336;
+    color: #f44336;
+  }
+  .banner a {
+    color: inherit;
+    font-weight: 600;
+  }
+  .field-error {
+    color: #f44336;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    display: none;
+  }
+  .form-group.has-error input,
+  .form-group.has-error select {
+    border-color: #f44336;
+  }
+  .form-group.has-error .field-error {
+    display: block;
+  }
+</style>
+
+<div class="submit-form">
+
+  <div id="success-banner" class="banner success" role="alert"></div>
+  <div id="error-banner" class="banner error" role="alert"></div>
+
+  <!-- PAT Section -->
+  <div class="pat-section">
+    <h3>GitHub Token</h3>
+    <p>A Personal Access Token with <code>repo</code> scope is required to submit match results. Your token is stored locally in your browser and never sent to our servers.</p>
+    <div class="pat-row">
+      <div class="form-group">
+        <label for="pat-input">Personal Access Token</label>
+        <input type="password" id="pat-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+      </div>
+    </div>
+    <div style="margin-top: 10px;">
+      <a id="clear-token-link" onclick="clearToken()">Clear token</a>
+    </div>
+  </div>
+
+  <form id="match-form" novalidate>
+
+    <!-- Teams -->
+    <div class="form-row">
+      <div class="form-group" id="group-home_team">
+        <label for="home-team">Home Team</label>
+        <select id="home-team" name="home_team" required>
+          <option value="">— select —</option>
+          {% for team in site.data.teams %}
+          <option value="{{ team.id }}">{{ team.name }}</option>
+          {% endfor %}
+        </select>
+        <div class="field-error" id="err-home_team">Please select a home team.</div>
+      </div>
+      <div class="form-group" id="group-away_team">
+        <label for="away-team">Away Team</label>
+        <select id="away-team" name="away_team" required>
+          <option value="">— select —</option>
+          {% for team in site.data.teams %}
+          <option value="{{ team.id }}">{{ team.name }}</option>
+          {% endfor %}
+        </select>
+        <div class="field-error" id="err-away_team">Please select an away team.</div>
+      </div>
+    </div>
+
+    <!-- Season -->
+    <div class="form-group" id="group-season">
+      <label for="season-select">Season</label>
+      <select id="season-select" name="season" required>
+        <option value="">— select —</option>
+        {% if site.seasons %}
+        {% assign sorted_seasons = site.seasons | sort: "start_date" | reverse %}
+        {% for s in sorted_seasons %}
+        <option value="{{ s.data_file }}">{{ s.title }}</option>
+        {% endfor %}
+        {% endif %}
+      </select>
+      <div class="field-error" id="err-season">Please select a season.</div>
+    </div>
+
+    <!-- Week + Date + Location -->
+    <div class="form-row">
+      <div class="form-group" id="group-week">
+        <label for="week-number">Week Number</label>
+        <input type="number" id="week-number" name="week" min="1" max="52" placeholder="1" required>
+        <div class="field-error" id="err-week">Please enter a week number.</div>
+      </div>
+      <div class="form-group" id="group-match_date">
+        <label for="match-date">Match Date</label>
+        <input type="date" id="match-date" name="match_date" required>
+        <div class="field-error" id="err-match_date">Please select a match date.</div>
+      </div>
+    </div>
+
+    <div class="form-group" id="group-location">
+      <label for="location">Location</label>
+      <input type="text" id="location" name="location" placeholder="e.g. Pickleball Hideout" required>
+      <div class="field-error" id="err-location">Please enter a location.</div>
+    </div>
+
+    <!-- Scores -->
+    <div class="scores-section">
+      <h3>Scores</h3>
+      <div class="score-header">
+        <span>Game</span>
+        <span>Home</span>
+        <span>Away</span>
+      </div>
+
+      <div class="score-row">
+        <label>Men's Doubles</label>
+        <input type="number" id="mens-home" name="mens_home" min="0" placeholder="0" required>
+        <input type="number" id="mens-away" name="mens_away" min="0" placeholder="0" required>
+      </div>
+      <div class="score-row">
+        <label>Women's Doubles</label>
+        <input type="number" id="womens-home" name="womens_home" min="0" placeholder="0" required>
+        <input type="number" id="womens-away" name="womens_away" min="0" placeholder="0" required>
+      </div>
+      <div class="score-row">
+        <label>Mixed Doubles</label>
+        <input type="number" id="mixed-home" name="mixed_home" min="0" placeholder="0" required>
+        <input type="number" id="mixed-away" name="mixed_away" min="0" placeholder="0" required>
+      </div>
+      <div class="score-row">
+        <label>Dreambreaker</label>
+        <input type="number" id="dream-home" name="dream_home" min="0" placeholder="0" required>
+        <input type="number" id="dream-away" name="dream_away" min="0" placeholder="0" required>
+      </div>
+
+      <div id="score-errors" style="color:#f44336;font-size:0.8rem;margin-top:8px;display:none;">
+        Please fill in all score fields.
+      </div>
+    </div>
+
+    <button type="submit" class="btn-primary" id="submit-btn">Submit Match Result</button>
+  </form>
+</div>
+
+<script>
+{% assign repo_owner = site.github_username %}
+{% raw %}
+(function () {
+  'use strict';
+
+  // ── Config ──────────────────────────────────────────────────────────────────
+  const REPO_OWNER = '{% endraw %}{{ site.github_username }}{% raw %}';
+  const REPO_NAME  = 'pickleball-club-site'; // update if repo name differs
+  const PAT_KEY    = 'jpl_github_pat';
+
+  // ── PAT helpers ─────────────────────────────────────────────────────────────
+  function loadPat() {
+    return localStorage.getItem(PAT_KEY) || '';
+  }
+
+  function savePat(token) {
+    localStorage.setItem(PAT_KEY, token);
+  }
+
+  function clearToken() {
+    localStorage.removeItem(PAT_KEY);
+    document.getElementById('pat-input').value = '';
+    showError('Token cleared.');
+  }
+  window.clearToken = clearToken;
+
+  // Pre-fill PAT field from storage on load
+  document.addEventListener('DOMContentLoaded', function () {
+    const stored = loadPat();
+    if (stored) document.getElementById('pat-input').value = stored;
+  });
+
+  // ── validateForm ─────────────────────────────────────────────────────────────
+  /**
+   * Validates required form fields.
+   * @param {Object} fields - map of fieldName → value
+   * @returns {{ valid: boolean, missing: string[] }}
+   */
+  function validateForm(fields) {
+    const required = [
+      'home_team', 'away_team', 'season', 'week', 'match_date', 'location',
+      'mens_home', 'mens_away', 'womens_home', 'womens_away',
+      'mixed_home', 'mixed_away', 'dream_home', 'dream_away'
+    ];
+    const missing = required.filter(function (key) {
+      const val = fields[key];
+      return val === undefined || val === null || String(val).trim() === '';
+    });
+    return { valid: missing.length === 0, missing: missing };
+  }
+
+  // ── serializeMatchYaml ───────────────────────────────────────────────────────
+  /**
+   * Serializes a match object to a YAML schedule entry string.
+   * @param {Object} match
+   * @returns {string}
+   */
+  function serializeMatchYaml(match) {
+    return [
+      '  - week: ' + match.week,
+      '    date: ' + match.date,
+      '    location: ' + match.location,
+      '    home_team: ' + match.home_team,
+      '    away_team: ' + match.away_team,
+      '    result:',
+      '      mens_doubles:',
+      '        home: ' + match.result.mens_doubles.home,
+      '        away: ' + match.result.mens_doubles.away,
+      '      womens_doubles:',
+      '        home: ' + match.result.womens_doubles.home,
+      '        away: ' + match.result.womens_doubles.away,
+      '      mixed_doubles:',
+      '        home: ' + match.result.mixed_doubles.home,
+      '        away: ' + match.result.mixed_doubles.away,
+      '      dreambreaker:',
+      '        home: ' + match.result.dreambreaker.home,
+      '        away: ' + match.result.dreambreaker.away
+    ].join('\n');
+  }
+
+  // ── GitHub API helpers ───────────────────────────────────────────────────────
+  function apiHeaders(pat) {
+    return {
+      'Authorization': 'token ' + pat,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    };
+  }
+
+  function apiUrl(path) {
+    return 'https://api.github.com' + path;
+  }
+
+  async function getMainHeadSha(pat, owner, repo) {
+    const res = await fetch(apiUrl('/repos/' + owner + '/' + repo + '/git/ref/heads/main'), {
+      headers: apiHeaders(pat)
+    });
+    if (!res.ok) throw { status: res.status, step: 'getRef' };
+    const data = await res.json();
+    return data.object.sha;
+  }
+
+  async function getFileContents(pat, owner, repo, filePath) {
+    const res = await fetch(apiUrl('/repos/' + owner + '/' + repo + '/contents/' + filePath), {
+      headers: apiHeaders(pat)
+    });
+    if (!res.ok) throw { status: res.status, step: 'getFile' };
+    return res.json(); // { content (base64), sha, ... }
+  }
+
+  async function createBranch(pat, owner, repo, branchName, sha) {
+    const res = await fetch(apiUrl('/repos/' + owner + '/' + repo + '/git/refs'), {
+      method: 'POST',
+      headers: apiHeaders(pat),
+      body: JSON.stringify({ ref: 'refs/heads/' + branchName, sha: sha })
+    });
+    if (!res.ok) throw { status: res.status, step: 'createBranch' };
+    return res.json();
+  }
+
+  async function updateFile(pat, owner, repo, filePath, message, content, fileSha, branchName) {
+    const res = await fetch(apiUrl('/repos/' + owner + '/' + repo + '/contents/' + filePath), {
+      method: 'PUT',
+      headers: apiHeaders(pat),
+      body: JSON.stringify({
+        message: message,
+        content: btoa(unescape(encodeURIComponent(content))),
+        sha: fileSha,
+        branch: branchName
+      })
+    });
+    if (!res.ok) throw { status: res.status, step: 'updateFile' };
+    return res.json();
+  }
+
+  async function createPullRequest(pat, owner, repo, title, body, head, base) {
+    const res = await fetch(apiUrl('/repos/' + owner + '/' + repo + '/pulls'), {
+      method: 'POST',
+      headers: apiHeaders(pat),
+      body: JSON.stringify({ title: title, body: body, head: head, base: base })
+    });
+    if (!res.ok) throw { status: res.status, step: 'createPR' };
+    return res.json(); // { html_url, ... }
+  }
+
+  // ── submitMatchResult ────────────────────────────────────────────────────────
+  /**
+   * Orchestrates the full GitHub API call sequence to submit a match result.
+   * 1. GET season file → base64 content + sha
+   * 2a. POST create branch
+   * 2b. PUT updated file to branch
+   * 3. POST create PR
+   *
+   * @param {Object} formData  - parsed form values
+   * @param {string} pat       - GitHub Personal Access Token
+   * @param {string} repoOwner
+   * @param {string} repoName
+   * @returns {Promise<string>} PR URL on success
+   */
+  async function submitMatchResult(formData, pat, repoOwner, repoName) {
+    const seasonSlug = formData.season;
+    const filePath   = '_data/seasons/' + seasonSlug + '.yml';
+
+    // 1. Fetch current season file
+    const fileInfo = await getFileContents(pat, repoOwner, repoName, filePath);
+    const currentYaml = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g, ''))));
+    const fileSha = fileInfo.sha;
+
+    // Build match YAML snippet and append to schedule
+    const matchObj = {
+      week:      formData.week,
+      date:      formData.match_date,
+      location:  formData.location,
+      home_team: formData.home_team,
+      away_team: formData.away_team,
+      result: {
+        mens_doubles:    { home: Number(formData.mens_home),   away: Number(formData.mens_away) },
+        womens_doubles:  { home: Number(formData.womens_home), away: Number(formData.womens_away) },
+        mixed_doubles:   { home: Number(formData.mixed_home),  away: Number(formData.mixed_away) },
+        dreambreaker:    { home: Number(formData.dream_home),  away: Number(formData.dream_away) }
+      }
+    };
+    const matchYaml = serializeMatchYaml(matchObj);
+
+    // Append to schedule section (or end of file)
+    let updatedYaml;
+    if (currentYaml.includes('schedule:')) {
+      // Append before any trailing newlines at end of file
+      updatedYaml = currentYaml.trimEnd() + '\n' + matchYaml + '\n';
+    } else {
+      updatedYaml = currentYaml.trimEnd() + '\nschedule:\n' + matchYaml + '\n';
+    }
+
+    // Build branch name
+    const branchBase = 'match/' + formData.match_date + '-' + formData.home_team + '-vs-' + formData.away_team;
+    let branchName = branchBase;
+
+    // 2a. Get main HEAD sha and create branch
+    const mainSha = await getMainHeadSha(pat, repoOwner, repoName);
+
+    try {
+      await createBranch(pat, repoOwner, repoName, branchName, mainSha);
+    } catch (err) {
+      if (err.status === 422) {
+        // Branch already exists — retry with timestamp suffix
+        branchName = branchBase + '-' + Date.now();
+        await createBranch(pat, repoOwner, repoName, branchName, mainSha);
+      } else {
+        throw err;
+      }
+    }
+
+    // 2b. Commit updated YAML to new branch
+    const commitMsg = 'Add match result: ' + formData.home_team + ' vs ' + formData.away_team + ' (Week ' + formData.week + ')';
+    await updateFile(pat, repoOwner, repoName, filePath, commitMsg, updatedYaml, fileSha, branchName);
+
+    // 3. Open PR
+    const prTitle = 'Match result: ' + formData.home_team + ' vs ' + formData.away_team + ' - Week ' + formData.week;
+    const prBody  = 'Submitted via the Junebug Pickleball League match submission form.\n\nSeason: ' + seasonSlug + '\nDate: ' + formData.match_date;
+    const pr = await createPullRequest(pat, repoOwner, repoName, prTitle, prBody, branchName, 'main');
+
+    return pr.html_url;
+  }
+
+  // ── UI feedback helpers ──────────────────────────────────────────────────────
+  function showSuccess(prUrl) {
+    const banner = document.getElementById('success-banner');
+    banner.innerHTML = '✓ Match submitted! <a href="' + prUrl + '" target="_blank" rel="noopener">View Pull Request →</a>';
+    banner.style.display = 'block';
+    document.getElementById('error-banner').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showError(message) {
+    const banner = document.getElementById('error-banner');
+    banner.textContent = message;
+    banner.style.display = 'block';
+    document.getElementById('success-banner').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function errorMessageForStatus(err) {
+    if (!err.status) return 'Network error. Check connection and try again.';
+    switch (err.status) {
+      case 401: return 'Authentication failed. Check your token.';
+      case 403: return 'Permission denied. Ensure token has `repo` scope.';
+      case 404: return 'Season data file not found. Contact admin.';
+      case 422: return 'Could not create branch. Please try again.';
+      default:  return 'API error (' + err.status + '). Please try again.';
+    }
+  }
+
+  function clearFieldErrors() {
+    document.querySelectorAll('.form-group.has-error').forEach(function (el) {
+      el.classList.remove('has-error');
+    });
+    document.getElementById('score-errors').style.display = 'none';
+  }
+
+  function markFieldError(fieldName) {
+    const group = document.getElementById('group-' + fieldName);
+    if (group) group.classList.add('has-error');
+  }
+
+  // ── Form submission ──────────────────────────────────────────────────────────
+  document.getElementById('match-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    clearFieldErrors();
+    document.getElementById('success-banner').style.display = 'none';
+    document.getElementById('error-banner').style.display = 'none';
+
+    // Collect field values
+    const fields = {
+      home_team:   document.getElementById('home-team').value,
+      away_team:   document.getElementById('away-team').value,
+      season:      document.getElementById('season-select').value,
+      week:        document.getElementById('week-number').value,
+      match_date:  document.getElementById('match-date').value,
+      location:    document.getElementById('location').value,
+      mens_home:   document.getElementById('mens-home').value,
+      mens_away:   document.getElementById('mens-away').value,
+      womens_home: document.getElementById('womens-home').value,
+      womens_away: document.getElementById('womens-away').value,
+      mixed_home:  document.getElementById('mixed-home').value,
+      mixed_away:  document.getElementById('mixed-away').value,
+      dream_home:  document.getElementById('dream-home').value,
+      dream_away:  document.getElementById('dream-away').value
+    };
+
+    // Validate
+    const validation = validateForm(fields);
+    if (!validation.valid) {
+      const scoreFields = ['mens_home','mens_away','womens_home','womens_away','mixed_home','mixed_away','dream_home','dream_away'];
+      let hasScoreError = false;
+      validation.missing.forEach(function (f) {
+        if (scoreFields.includes(f)) {
+          hasScoreError = true;
+        } else {
+          markFieldError(f);
+        }
+      });
+      if (hasScoreError) {
+        document.getElementById('score-errors').style.display = 'block';
+      }
+      showError('Please fill in all required fields.');
+      return;
+    }
+
+    // Get / save PAT
+    const patInput = document.getElementById('pat-input').value.trim();
+    if (!patInput) {
+      showError('Please enter your GitHub Personal Access Token.');
+      return;
+    }
+    savePat(patInput);
+
+    // Disable submit button during request
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    try {
+      const prUrl = await submitMatchResult(fields, patInput, REPO_OWNER, REPO_NAME);
+      showSuccess(prUrl);
+      document.getElementById('match-form').reset();
+    } catch (err) {
+      if (err instanceof TypeError) {
+        // Network / fetch error
+        showError('Network error. Check connection and try again.');
+      } else {
+        showError(errorMessageForStatus(err));
+      }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit Match Result';
+    }
+  });
+
+  // Expose pure functions for testing (task 6.2)
+  window.validateForm      = validateForm;
+  window.serializeMatchYaml = serializeMatchYaml;
+  window.submitMatchResult  = submitMatchResult;
+
+}());
+{% endraw %}
+</script>

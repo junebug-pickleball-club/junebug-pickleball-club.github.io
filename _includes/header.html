@@ -1,0 +1,69 @@
+<header class="site-header">
+  <div class="wrapper">
+    <a class="site-title" href="/">{{ site.title }}</a>
+
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+    </button>
+
+    <nav class="site-nav" id="site-nav">
+      <a class="nav-link{% if page.url == '/' %} active{% endif %}" href="/">Home</a>
+      <a class="nav-link{% if page.url contains '/teams' %} active{% endif %}" href="/teams">Teams</a>
+
+      <div class="nav-dropdown{% if page.url contains '/seasons' %} active{% endif %}">
+        <button class="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+          Seasons <span class="dropdown-arrow">&#9660;</span>
+        </button>
+        <ul class="nav-dropdown-menu">
+          <li>
+            <a href="/seasons/{{ site.active_season }}"{% if page.url == '/seasons/' | append: site.active_season | append: '/' %} class="active"{% endif %}>
+              Active Season
+            </a>
+          </li>
+          <li>
+            <a href="/seasons"{% if page.url == '/seasons/' %} class="active"{% endif %}>
+              All Seasons
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="nav-link{% if page.url contains '/events' %} active{% endif %}" href="/events">Events</a>
+      <a class="nav-link{% if page.url contains '/blog' %} active{% endif %}" href="/blog">Blog</a>
+      <a class="nav-link{% if page.url contains '/submit-match' %} active{% endif %}" href="/submit-match">Submit Match</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  (function () {
+    var toggle = document.querySelector('.nav-toggle');
+    var nav = document.getElementById('site-nav');
+    if (!toggle || !nav) return;
+
+    toggle.addEventListener('click', function () {
+      var isOpen = nav.classList.toggle('nav-open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Seasons dropdown toggle
+    var dropdownToggle = document.querySelector('.nav-dropdown-toggle');
+    var dropdownMenu = document.querySelector('.nav-dropdown-menu');
+    if (dropdownToggle && dropdownMenu) {
+      dropdownToggle.addEventListener('click', function () {
+        var isExpanded = dropdownMenu.classList.toggle('open');
+        dropdownToggle.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function (e) {
+        if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+          dropdownMenu.classList.remove('open');
+          dropdownToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+  })();
+</script>
