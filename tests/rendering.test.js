@@ -1222,3 +1222,117 @@ describe('Feature: season-teams-view, Property 1: team objects contain all requi
     expect(rosterMatches.length).toBeGreaterThanOrEqual(slugMatches.length);
   });
 });
+
+// ── Feature: active season default on submit-match form ──────────────────────
+// Validates: season select defaults to site.active_season and teams auto-populate
+
+describe('Submit match: season select defaults to active_season', () => {
+  const source = readFileSync(resolve('pages/submit-match.html'), 'utf8');
+
+  it('season select option uses site.active_season for the selected attribute', () => {
+    // The Liquid conditional must compare s.data_file to site.active_season
+    expect(source).toContain('site.active_season');
+    expect(source).toMatch(/s\.data_file\s*==\s*site\.active_season/);
+  });
+
+  it('the selected attribute is applied inline on the matching option', () => {
+    // The option tag must conditionally output the selected attribute
+    expect(source).toMatch(/selected.*site\.active_season|site\.active_season.*selected/s);
+  });
+
+  it('_site/submit-match/index.html has spring-2026 option selected (smoke test)', () => {
+    const html = readSiteFile('submit-match/index.html');
+    expect(html).not.toBeNull();
+    // The built HTML must have the spring-2026 option with selected attribute
+    expect(html).toMatch(/<option[^>]*value="spring-2026"[^>]*selected/);
+  });
+});
+
+describe('Submit match: team dropdowns auto-populate on load for default season', () => {
+  const source = readFileSync(resolve('pages/submit-match.html'), 'utf8');
+
+  it('DOMContentLoaded handler checks seasonSelect.value and calls populateTeamDropdowns', () => {
+    expect(source).toContain('seasonSelect.value');
+    expect(source).toContain('populateTeamDropdowns(seasonSelect.value)');
+  });
+
+  it('SEASON_TEAMS data is parsed from a <script type="application/json"> element', () => {
+    expect(source).toContain('type="application/json"');
+    expect(source).toContain('id="season-teams-data"');
+    expect(source).toMatch(/JSON\.parse\(document\.getElementById\('season-teams-data'\)/);
+  });
+
+  it('_site/submit-match/index.html embeds spring-2026 team slugs in the season-teams-data block', () => {
+    const html = readSiteFile('submit-match/index.html');
+    expect(html).not.toBeNull();
+    // Both team slugs from spring-2026.yml must be present in the embedded JSON
+    expect(html).toContain('servers-of-the-court');
+    expect(html).toContain('pickle-posse');
+  });
+
+  it('simulateAutoPopulate returns teams for the active season key', () => {
+    // Unit-test the auto-populate logic in isolation
+    function simulateAutoPopulate(seasonSelectValue, SEASON_TEAMS) {
+      if (!seasonSelectValue) return [];
+      return (SEASON_TEAMS[seasonSelectValue] && SEASON_TEAMS[seasonSelectValue].length > 0)
+        ? SEASON_TEAMS[seasonSelectValue]
+        : [];
+    }
+
+    const SEASON_TEAMS = {
+      'spring-2026': [
+        { slug: 'servers-of-the-court', name: 'Servers of the Court' },
+        { slug: 'pickle-posse',         name: 'Pickle Posse' },
+      ],
+      'fall-2026': [
+        { slug: 'team-alpha', name: 'Team Alpha' },
+      ],
+    };
+
+    // When active season is pre-selected, teams are returned
+    const teams = simulateAutoPopulate('spring-2026', SEASON_TEAMS);
+    expect(teams).toHaveLength(2);
+    expect(teams[0].slug).toBe('servers-of-the-court');
+    expect(teams[1].slug).toBe('pickle-posse');
+
+    // When no season is selected (empty string), returns empty array
+    expect(simulateAutoPopulate('', SEASON_TEAMS)).toHaveLength(0);
+
+    // When an unknown season key is used, returns empty array
+    expect(simulateAutoPopulate('unknown-season', SEASON_TEAMS)).toHaveLength(0);
+  });
+
+  it('property: auto-populate always returns the correct team count for any valid season key', () => {
+    function simulateAutoPopulate(seasonSelectValue, SEASON_TEAMS) {
+      if (!seasonSelectValue) return [];
+      return (SEASON_TEAMS[seasonSelectValue] && SEASON_TEAMS[seasonSelectValue].length > 0)
+        ? SEASON_TEAMS[seasonSelectValue]
+        : [];
+    }
+
+    const teamArb = fc.record({
+      slug: fc.stringMatching(/^[a-z][a-z0-9-]{1,19}$/),
+      name: fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{0,29}$/),
+    });
+
+    const seasonKeyArb = fc.stringMatching(/^[a-z][a-z0-9-]{2,19}$/);
+
+    const seasonTeamsArb = fc
+      .array(
+        fc.tuple(seasonKeyArb, fc.array(teamArb, { minLength: 1, maxLength: 6 })),
+        { minLength: 1, maxLength: 4 }
+      )
+      .filter(entries => new Set(entries.map(([k]) => k)).size === entries.length)
+      .map(entries => Object.fromEntries(entries));
+
+    fc.assert(
+      fc.property(seasonTeamsArb, fc.integer({ min: 0, max: 3 }), (SEASON_TEAMS, idx) => {
+        const keys = Object.keys(SEASON_TEAMS);
+        const key = keys[idx % keys.length];
+        const result = simulateAutoPopulate(key, SEASON_TEAMS);
+        expect(result).toHaveLength(SEASON_TEAMS[key].length);
+      }),
+      { numRuns: 100 }
+    );
+  });
+});

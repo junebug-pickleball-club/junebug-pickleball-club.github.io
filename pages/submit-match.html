@@ -219,7 +219,22 @@ permalink: /submit-match/
     </div>
   </div>
 
-  <form id="match-form" novalidate>
+  <form id="match-form" novalidate data-repo-owner="{{ site.github_username }}">
+
+    <!-- Season -->
+    <div class="form-group" id="group-season">
+      <label for="season-select">Season</label>
+      <select id="season-select" name="season" required>
+        <option value="">— select —</option>
+        {% if site.seasons %}
+        {% assign sorted_seasons = site.seasons | sort: "start_date" | reverse %}
+        {% for s in sorted_seasons %}
+        <option value="{{ s.data_file }}"{% if s.data_file == site.active_season %} selected{% endif %}>{{ s.title }}</option>
+        {% endfor %}
+        {% endif %}
+      </select>
+      <div class="field-error" id="err-season">Please select a season.</div>
+    </div>
 
     <!-- Teams -->
     <div class="form-row">
@@ -237,21 +252,6 @@ permalink: /submit-match/
         </select>
         <div class="field-error" id="err-away_team">Please select an away team.</div>
       </div>
-    </div>
-
-    <!-- Season -->
-    <div class="form-group" id="group-season">
-      <label for="season-select">Season</label>
-      <select id="season-select" name="season" required>
-        <option value="">— select —</option>
-        {% if site.seasons %}
-        {% assign sorted_seasons = site.seasons | sort: "start_date" | reverse %}
-        {% for s in sorted_seasons %}
-        <option value="{{ s.data_file }}">{{ s.title }}</option>
-        {% endfor %}
-        {% endif %}
-      </select>
-      <div class="field-error" id="err-season">Please select a season.</div>
     </div>
 
     <!-- Week + Date + Location -->
@@ -328,8 +328,8 @@ permalink: /submit-match/
   </form>
 </div>
 
-<script>
-const SEASON_TEAMS = {
+<script type="application/json" id="season-teams-data">
+{
   {% for s in site.seasons %}
   {% assign season_data = site.data.seasons[s.data_file] %}
   "{{ s.data_file }}": [
@@ -338,17 +338,19 @@ const SEASON_TEAMS = {
     {% endfor %}
   ]{% unless forloop.last %},{% endunless %}
   {% endfor %}
-};
+}
 </script>
 
 <script>
-{% assign repo_owner = site.github_username %}
-{% raw %}
+const SEASON_TEAMS = JSON.parse(document.getElementById('season-teams-data').textContent);
+</script>
+
+<script>
 (function () {
   'use strict';
 
   // ── Config ──────────────────────────────────────────────────────────────────
-  const REPO_OWNER = '{% endraw %}{{ site.github_username }}{% raw %}';
+  const REPO_OWNER = document.getElementById('match-form').dataset.repoOwner;
   const REPO_NAME  = 'pickleball-club-site'; // update if repo name differs
   const PAT_KEY    = 'jpl_github_pat';
 
@@ -372,12 +374,6 @@ const SEASON_TEAMS = {
   document.addEventListener('DOMContentLoaded', function () {
     const stored = loadPat();
     if (stored) document.getElementById('pat-input').value = stored;
-
-    // Ensure team dropdowns start disabled with only the placeholder
-    var homeSelect = document.getElementById('home-team');
-    var awaySelect = document.getElementById('away-team');
-    homeSelect.disabled = true;
-    awaySelect.disabled = true;
   });
 
   // ── Season-aware team dropdowns ──────────────────────────────────────────────
@@ -412,7 +408,14 @@ const SEASON_TEAMS = {
   window.populateTeamDropdowns = populateTeamDropdowns;
 
   document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('season-select').addEventListener('change', function () {
+    var seasonSelect = document.getElementById('season-select');
+
+    // Pre-populate teams if a season is already selected (e.g. active season default)
+    if (seasonSelect.value) {
+      populateTeamDropdowns(seasonSelect.value);
+    }
+
+    seasonSelect.addEventListener('change', function () {
       // Clear previously selected team values
       document.getElementById('home-team').value = '';
       document.getElementById('away-team').value = '';
@@ -424,7 +427,7 @@ const SEASON_TEAMS = {
   /**
    * Validates required form fields.
    * @param {Object} fields - map of fieldName → value
-   * @returns {{ valid: boolean, missing: string[] }}
+   * @returns {Object} Object with `valid` boolean and `missing` string array
    */
   function validateForm(fields) {
     const required = [
@@ -763,5 +766,4 @@ const SEASON_TEAMS = {
   window.submitMatchResult  = submitMatchResult;
 
 }());
-{% endraw %}
 </script>
