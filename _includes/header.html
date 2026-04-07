@@ -1,6 +1,13 @@
 <header class="site-header">
   <div class="wrapper">
-    <a class="site-title" href="/">{{ site.title }}</a>
+    <a class="site-title" href="/">
+      <img
+        src="{{ '/assets/images/JuneBug_Logo_main_horizontal.png' | relative_url }}"
+        alt="{{ site.title }}"
+        class="site-logo"
+        onerror="this.style.display='none'; this.parentElement.appendChild(document.createTextNode('{{ site.title }}'))"
+      >
+    </a>
 
     <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
       <span class="hamburger-bar"></span>

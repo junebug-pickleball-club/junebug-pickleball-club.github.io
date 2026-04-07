@@ -1,32 +1,32 @@
 ---
 ---
-// Override Minima SCSS variables before importing
-$background-color: #0f0f1a;
-$brand-color:      #e94560;
-$text-color:       #e8e8f0;
-$grey-color:       #a0a0b8;
-$grey-color-dark:  #2a2a4a;
-$grey-color-light: #1a1a2e;
+// ─── Minima overrides (must precede @import "minima") ────────────────────────
+$background-color: #1E2A3A;
+$brand-color:      #C8E64B;
+$text-color:       #FFFFFF;
+$grey-color:       #A0AAB4;
+$grey-color-dark:  #4D5F72;
+$grey-color-light: #2C3E50;
 
 @import "minima";
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
-$bg-primary:    #0f0f1a;
-$bg-secondary:  #1a1a2e;
-$bg-tertiary:   #16213e;
-$accent:        #e94560;
-$accent-hover:  #c73652;
-$text-primary:  #e8e8f0;
-$text-secondary:#a0a0b8;
-$border:        #2a2a4a;
-$success:       #4caf50;
-$danger:        #f44336;
+$bg-primary:    #1E2A3A;
+$bg-secondary:  #2C3E50;
+$bg-tertiary:   #34495E;
+$accent:        #C8E64B;
+$accent-hover:  #A7C93F;
+$text-primary:  #FFFFFF;
+$text-secondary:#A0AAB4;
+$border-color:  #4D5F72;
+$success:       #2ECC71;
+$danger:        #E74C3C;
 
 // ─── Cards ───────────────────────────────────────────────────────────────────
 .team-card,
 .event-card {
   background:    $bg-secondary;
-  border:        1px solid $border;
+  border:        1px solid $border-color;
   border-radius: 8px;
   padding:       24px;
   margin-bottom: 24px;
@@ -67,7 +67,7 @@ table {
   td {
     padding: 8px 12px;
     color:   $text-primary;
-    border-bottom: 1px solid $border;
+    border-bottom: 1px solid $border-color;
   }
 }
 
@@ -80,7 +80,7 @@ input[type="password"],
 select,
 textarea {
   background:    $bg-tertiary;
-  border:        1px solid $border;
+  border:        1px solid $border-color;
   border-radius: 4px;
   color:         $text-primary;
   padding:       8px 12px;
@@ -109,20 +109,20 @@ textarea {
 
 // ─── Header / Nav ────────────────────────────────────────────────────────────
 .site-header {
-  position:      sticky;
-  top:           0;
-  z-index:       1000;
-  min-height:    56px;
+  position:   sticky;
+  top:        0;
+  z-index:    1000;
+  min-height: 56px;
   background:    $bg-secondary;
-  border-bottom: 1px solid $border;
+  border-bottom: 1px solid $border-color;
 
   .wrapper {
     display:         flex;
     align-items:     center;
     justify-content: space-between;
     flex-wrap:       nowrap;
-    padding-top:     16px;
-    padding-bottom:  16px;
+    padding-top:     4px;
+    padding-bottom:  4px;
   }
 }
 
@@ -134,6 +134,12 @@ textarea {
   flex-shrink:     0;
 
   &:hover { color: $accent; }
+}
+
+.site-logo {
+  max-height: 96px;
+  width: auto;
+  display: block;
 }
 
 .site-nav {
@@ -154,7 +160,7 @@ textarea {
 
     &.active {
       color:                 $accent;
-      text-decoration:       underline;
+      text-decoration:      underline;
       text-decoration-color: $accent;
     }
   }
@@ -166,7 +172,7 @@ textarea {
 
   &.active .nav-dropdown-toggle {
     color:                 $accent;
-    text-decoration:       underline;
+    text-decoration:      underline;
     text-decoration-color: $accent;
   }
 }
@@ -195,7 +201,7 @@ textarea {
   top:           calc(100% + 4px);
   left:          0;
   background:    $bg-secondary;
-  border:        1px solid $border;
+  border:        1px solid $border-color;
   border-radius: 4px;
   list-style:    none;
   margin:        0;
@@ -238,6 +244,221 @@ textarea {
   }
 
   &:hover .hamburger-bar { background: $accent; }
+}
+
+// ─── Submit Match ────────────────────────────────────────────────────────────
+.submit-form {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: $text-secondary;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  color: $text-primary;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: $accent;
+  box-shadow: 0 0 0 2px rgba($accent, 0.2);
+}
+.form-group select option {
+  background: $bg-tertiary;
+  color: $text-primary;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.scores-section {
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.scores-section h3 {
+  margin: 0 0 16px;
+  color: $text-primary;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.score-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.score-row label {
+  color: $text-secondary;
+  font-size: 0.9rem;
+  margin: 0;
+}
+.score-row input {
+  width: 100%;
+  padding: 8px 10px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  color: $text-primary;
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  box-sizing: border-box;
+}
+.score-row input:focus {
+  outline: none;
+  border-color: $accent;
+  box-shadow: 0 0 0 2px rgba($accent, 0.2);
+}
+.score-header {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.score-header span {
+  color: $text-secondary;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+.score-header span:first-child {
+  text-align: left;
+}
+.pat-section {
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.pat-section h3 {
+  margin: 0 0 8px;
+  color: $text-primary;
+  font-size: 1rem;
+}
+.pat-section p {
+  color: $text-secondary;
+  font-size: 0.85rem;
+  margin: 0 0 14px;
+}
+.pat-section a {
+  color: $accent;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.pat-section a:hover {
+  color: $accent-hover;
+}
+.pat-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+.pat-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+.btn-primary {
+  background: $accent;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  margin-top: 8px;
+}
+.btn-primary:hover {
+  background: $accent-hover;
+}
+.btn-primary:disabled {
+  background: $border-color;
+  color: $text-secondary;
+  cursor: not-allowed;
+}
+.banner {
+  padding: 14px 18px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  display: none;
+}
+.banner.success {
+  background: rgba($success, 0.15);
+  border: 1px solid $success;
+  color: $success;
+}
+.banner.error {
+  background: rgba($danger, 0.15);
+  border: 1px solid $danger;
+  color: $danger;
+}
+.banner a {
+  color: inherit;
+  font-weight: 600;
+}
+.field-error {
+  color: $danger;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: none;
+}
+.form-group.has-error input,
+.form-group.has-error select {
+  border-color: $danger;
+}
+.form-group.has-error .field-error {
+  display: block;
+}
+.label-optional {
+  color: $text-secondary;
+  font-size: 0.8em;
+}
+.score-errors-msg {
+  color: $danger;
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+.text-secondary {
+  color: $text-secondary;
+}
+.text-sm {
+  font-size: 0.8em;
+}
+.score-errors {
+  color: $danger;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  display: none;
 }
 
 // ─── Mobile nav (≤ 768px) ────────────────────────────────────────────────────

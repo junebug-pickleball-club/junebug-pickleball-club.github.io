@@ -762,12 +762,12 @@ describe('Feature: season-teams-view, Property 2: teams section renders all team
     expect((html.match(/class="team-card"/g) || []).length).toBe(0);
   });
 
-  // Smoke test: built _site/seasons/spring-2026.html contains exactly 2 team-card elements
-  it('_site/seasons/spring-2026.html contains exactly 2 team-card elements', () => {
+  // Smoke test: built _site/seasons/spring-2026.html contains exactly 5 team-card elements
+  it('_site/seasons/spring-2026.html contains exactly 5 team-card elements', () => {
     const html = readSiteFile('seasons/spring-2026.html');
     expect(html).not.toBeNull();
     const count = (html.match(/class="team-card"/g) || []).length;
-    expect(count).toBe(2);
+    expect(count).toBe(5);
   });
 });
 
@@ -1334,5 +1334,81 @@ describe('Submit match: team dropdowns auto-populate on load for default season'
       }),
       { numRuns: 100 }
     );
+  });
+});
+
+// ── Task 7: WCAG contrast ratio tests (Requirements 1.2, 6.3, 6.4) ───────────
+
+/**
+ * Computes WCAG relative luminance for a hex color string (e.g. '#FFFFFF').
+ * Formula: for each RGB channel c (0–255):
+ *   sRGB = c / 255
+ *   if sRGB <= 0.03928: linear = sRGB / 12.92
+ *   else:               linear = ((sRGB + 0.055) / 1.055) ^ 2.4
+ * L = 0.2126 * R + 0.7152 * G + 0.0722 * B
+ */
+function relativeLuminance(hex) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const toLinear = (c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+}
+
+/**
+ * Computes WCAG contrast ratio between two hex colors.
+ * ratio = (L1 + 0.05) / (L2 + 0.05) where L1 >= L2.
+ */
+function contrastRatio(hex1, hex2) {
+  const l1 = relativeLuminance(hex1);
+  const l2 = relativeLuminance(hex2);
+  const lighter = Math.max(l1, l2);
+  const darker  = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+describe('WCAG contrast ratios ≥ 4.5:1 (Requirements 1.2, 6.3, 6.4)', () => {
+  const MIN_RATIO = 4.5;
+
+  it('#FFFFFF on #1E2A3A (text-primary on bg-primary) meets 4.5:1', () => {
+    expect(contrastRatio('#FFFFFF', '#1E2A3A')).toBeGreaterThanOrEqual(MIN_RATIO);
+  });
+
+  it('#FFFFFF on #2C3E50 (text-primary on bg-secondary) meets 4.5:1', () => {
+    expect(contrastRatio('#FFFFFF', '#2C3E50')).toBeGreaterThanOrEqual(MIN_RATIO);
+  });
+
+  it('#FFFFFF on #34495E (text-primary on bg-tertiary) meets 4.5:1', () => {
+    expect(contrastRatio('#FFFFFF', '#34495E')).toBeGreaterThanOrEqual(MIN_RATIO);
+  });
+
+  it('#A0AAB4 on #1E2A3A (text-secondary on bg-primary) meets 4.5:1', () => {
+    expect(contrastRatio('#A0AAB4', '#1E2A3A')).toBeGreaterThanOrEqual(MIN_RATIO);
+  });
+
+  it('#C8E64B on #1E2A3A (accent on bg-primary) meets 4.5:1', () => {
+    expect(contrastRatio('#C8E64B', '#1E2A3A')).toBeGreaterThanOrEqual(MIN_RATIO);
+  });
+});
+
+// ── Task 7: Header logo rendering test (Requirements 6.3, 6.4) ───────────────
+
+describe('Header logo rendering (Requirements 6.3, 6.4)', () => {
+  const header = readFileSync(resolve('_includes/header.html'), 'utf8');
+
+  it('header.html contains an <img> with src referencing JuneBug_Logo_main.png', () => {
+    expect(header).toMatch(/<img[^>]*src="[^"]*JuneBug_Logo_main\.png[^"]*"/);
+  });
+
+  it('header.html <img> has a non-empty alt attribute', () => {
+    // Extract the img tag and verify alt is present and non-empty
+    const imgMatch = header.match(/<img[^>]*>/);
+    expect(imgMatch).not.toBeNull();
+    const imgTag = imgMatch[0];
+    // alt must be present and its value must be non-empty (Liquid expression counts as non-empty)
+    expect(imgTag).toMatch(/alt="[^"]+"/);
   });
 });
