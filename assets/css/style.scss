@@ -102,8 +102,17 @@ textarea {
   color: $accent;
 }
 
+// ─── Page body offset for sticky header ─────────────────────────────────────
+.page-content {
+  padding-top: 56px;
+}
+
 // ─── Header / Nav ────────────────────────────────────────────────────────────
 .site-header {
+  position:   sticky;
+  top:        0;
+  z-index:    1000;
+  min-height: 56px;
   background: $bg-secondary;
   border-bottom: 1px solid $border;
 
@@ -130,7 +139,7 @@ textarea {
   display:     flex;
   align-items: center;
   gap:         8px;
-  flex-wrap:   wrap;
+  flex-wrap:   nowrap;
 
   .nav-link {
     color:           $text-secondary;
@@ -155,6 +164,8 @@ textarea {
 
   &.active .nav-dropdown-toggle {
     color: $accent;
+    text-decoration: underline;
+    text-decoration-color: $accent;
   }
 }
 
