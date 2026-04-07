@@ -10,7 +10,11 @@ export function validateForm(fields) {
   const required = [
     'home_team', 'away_team', 'season', 'week', 'match_date', 'location',
     'mens_home', 'mens_away', 'womens_home', 'womens_away',
-    'mixed_home', 'mixed_away', 'dream_home', 'dream_away'
+    'mixed_1_home', 'mixed_1_away',
+    'mixed_2_home', 'mixed_2_away',
+    'mixed_3_home', 'mixed_3_away',
+    'mixed_4_home', 'mixed_4_away',
+    // dream_home and dream_away are intentionally absent
   ];
   const missing = required.filter(function (key) {
     const val = fields[key];
@@ -25,7 +29,7 @@ export function validateForm(fields) {
  * @returns {string}
  */
 export function serializeMatchYaml(match) {
-  return [
+  const lines = [
     '  - week: ' + match.week,
     '    date: ' + match.date,
     '    location: "' + match.location + '"',
@@ -38,13 +42,27 @@ export function serializeMatchYaml(match) {
     '      womens_doubles:',
     '        home: ' + match.result.womens_doubles.home,
     '        away: ' + match.result.womens_doubles.away,
-    '      mixed_doubles:',
-    '        home: ' + match.result.mixed_doubles.home,
-    '        away: ' + match.result.mixed_doubles.away,
-    '      dreambreaker:',
-    '        home: ' + match.result.dreambreaker.home,
-    '        away: ' + match.result.dreambreaker.away
-  ].join('\n');
+    '      mixed_doubles_1:',
+    '        home: ' + match.result.mixed_doubles_1.home,
+    '        away: ' + match.result.mixed_doubles_1.away,
+    '      mixed_doubles_2:',
+    '        home: ' + match.result.mixed_doubles_2.home,
+    '        away: ' + match.result.mixed_doubles_2.away,
+    '      mixed_doubles_3:',
+    '        home: ' + match.result.mixed_doubles_3.home,
+    '        away: ' + match.result.mixed_doubles_3.away,
+    '      mixed_doubles_4:',
+    '        home: ' + match.result.mixed_doubles_4.home,
+    '        away: ' + match.result.mixed_doubles_4.away,
+  ];
+  if (match.result.dreambreaker != null) {
+    lines.push(
+      '      dreambreaker:',
+      '        home: ' + match.result.dreambreaker.home,
+      '        away: ' + match.result.dreambreaker.away
+    );
+  }
+  return lines.join('\n');
 }
 
 /**
@@ -83,7 +101,7 @@ export function computeStandings(teamIds, schedule) {
 
   for (const match of schedule) {
     if (!match.result) continue;
-    const games = ['mens_doubles', 'womens_doubles', 'mixed_doubles', 'dreambreaker'];
+    const games = ['mens_doubles', 'womens_doubles', 'mixed_doubles_1', 'mixed_doubles_2', 'mixed_doubles_3', 'mixed_doubles_4', 'dreambreaker'];
     let homeGames = 0, awayGames = 0;
 
     for (const game of games) {

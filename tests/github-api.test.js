@@ -9,17 +9,20 @@ const teamIdArb = fc.constantFrom('team-alpha', 'team-beta', 'team-gamma');
 const scoreArb  = fc.integer({ min: 0, max: 21 });
 
 const validFormArb = fc.record({
-  home_team:   teamIdArb,
-  away_team:   teamIdArb,
-  season:      fc.constantFrom('spring-2026', 'fall-2026'),
-  week:        fc.integer({ min: 1, max: 20 }).map(String),
-  match_date:  fc.date({ min: new Date('2026-01-01'), max: new Date('2026-12-31') })
-                 .map(d => d.toISOString().slice(0, 10)),
-  location:    fc.string({ minLength: 1, maxLength: 30 }).filter(s => s.trim().length > 0 && !s.includes('\n')),
-  mens_home:   scoreArb.map(String), mens_away:   scoreArb.map(String),
-  womens_home: scoreArb.map(String), womens_away: scoreArb.map(String),
-  mixed_home:  scoreArb.map(String), mixed_away:  scoreArb.map(String),
-  dream_home:  scoreArb.map(String), dream_away:  scoreArb.map(String),
+  home_team:    teamIdArb,
+  away_team:    teamIdArb,
+  season:       fc.constantFrom('spring-2026', 'fall-2026'),
+  week:         fc.integer({ min: 1, max: 20 }).map(String),
+  match_date:   fc.date({ min: new Date('2026-01-01'), max: new Date('2026-12-31') })
+                  .map(d => d.toISOString().slice(0, 10)),
+  location:     fc.string({ minLength: 1, maxLength: 30 }).filter(s => s.trim().length > 0 && !s.includes('\n')),
+  mens_home:    scoreArb.map(String), mens_away:    scoreArb.map(String),
+  womens_home:  scoreArb.map(String), womens_away:  scoreArb.map(String),
+  mixed_1_home: scoreArb.map(String), mixed_1_away: scoreArb.map(String),
+  mixed_2_home: scoreArb.map(String), mixed_2_away: scoreArb.map(String),
+  mixed_3_home: scoreArb.map(String), mixed_3_away: scoreArb.map(String),
+  mixed_4_home: scoreArb.map(String), mixed_4_away: scoreArb.map(String),
+  dream_home:   scoreArb.map(String), dream_away:   scoreArb.map(String),
 });
 
 // ── Inline submitMatchResult (mirrors submit-match.html logic) ────────────────
@@ -55,10 +58,15 @@ function makeSubmitMatchResult(fetchMock) {
       week: formData.week, date: formData.match_date, location: formData.location,
       home_team: formData.home_team, away_team: formData.away_team,
       result: {
-        mens_doubles:   { home: Number(formData.mens_home),   away: Number(formData.mens_away) },
-        womens_doubles: { home: Number(formData.womens_home), away: Number(formData.womens_away) },
-        mixed_doubles:  { home: Number(formData.mixed_home),  away: Number(formData.mixed_away) },
-        dreambreaker:   { home: Number(formData.dream_home),  away: Number(formData.dream_away) },
+        mens_doubles:    { home: Number(formData.mens_home),    away: Number(formData.mens_away) },
+        womens_doubles:  { home: Number(formData.womens_home),  away: Number(formData.womens_away) },
+        mixed_doubles_1: { home: Number(formData.mixed_1_home), away: Number(formData.mixed_1_away) },
+        mixed_doubles_2: { home: Number(formData.mixed_2_home), away: Number(formData.mixed_2_away) },
+        mixed_doubles_3: { home: Number(formData.mixed_3_home), away: Number(formData.mixed_3_away) },
+        mixed_doubles_4: { home: Number(formData.mixed_4_home), away: Number(formData.mixed_4_away) },
+        dreambreaker: (formData.dream_home !== '' && formData.dream_away !== '')
+          ? { home: Number(formData.dream_home), away: Number(formData.dream_away) }
+          : null,
       },
     };
     const matchYaml  = serializeMatchYaml(matchObj);

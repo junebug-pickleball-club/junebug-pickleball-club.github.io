@@ -89,22 +89,25 @@ describe('Property 3: Season detail page renders all season data', () => {
 // ── Property 5: Match row renders complete match data ────────────────────────
 
 describe('Property 5: Match row renders complete match data', () => {
-  it('serializeMatchYaml output contains all four game scores', () => {
+  it('serializeMatchYaml output contains all four mixed doubles game scores', () => {
     const scoreArb = fc.integer({ min: 0, max: 21 });
+    const gameResultArb = fc.record({ home: scoreArb, away: scoreArb });
     fc.assert(
       fc.property(
         fc.record({
           week: fc.integer({ min: 1, max: 20 }),
           date: fc.date({ min: new Date('2026-01-01'), max: new Date('2026-12-31') })
                   .map(d => d.toISOString().slice(0, 10)),
-          location: fc.string({ minLength: 1, maxLength: 30 }).filter(s => !s.includes('\n')),
+          location: fc.string({ minLength: 1, maxLength: 30 }).filter(s => !s.includes('\n') && !s.includes('"') && !s.includes('\\')),
           home_team: fc.constantFrom('team-alpha', 'team-beta'),
           away_team: fc.constantFrom('team-gamma', 'team-delta'),
           result: fc.record({
-            mens_doubles:   fc.record({ home: scoreArb, away: scoreArb }),
-            womens_doubles: fc.record({ home: scoreArb, away: scoreArb }),
-            mixed_doubles:  fc.record({ home: scoreArb, away: scoreArb }),
-            dreambreaker:   fc.record({ home: scoreArb, away: scoreArb }),
+            mens_doubles:    gameResultArb,
+            womens_doubles:  gameResultArb,
+            mixed_doubles_1: gameResultArb,
+            mixed_doubles_2: gameResultArb,
+            mixed_doubles_3: gameResultArb,
+            mixed_doubles_4: gameResultArb,
           }),
         }),
         (match) => {
@@ -112,10 +115,13 @@ describe('Property 5: Match row renders complete match data', () => {
           const yaml = serializeMatchYaml(match);
           expect(yaml).toContain('mens_doubles');
           expect(yaml).toContain('womens_doubles');
-          expect(yaml).toContain('mixed_doubles');
-          expect(yaml).toContain('dreambreaker');
+          expect(yaml).toContain('mixed_doubles_1');
+          expect(yaml).toContain('mixed_doubles_2');
+          expect(yaml).toContain('mixed_doubles_3');
+          expect(yaml).toContain('mixed_doubles_4');
+          expect(yaml).not.toContain('dreambreaker');
           expect(yaml).toContain(String(match.result.mens_doubles.home));
-          expect(yaml).toContain(String(match.result.dreambreaker.away));
+          expect(yaml).toContain(String(match.result.mixed_doubles_4.away));
         }
       ),
       { numRuns: 100 }

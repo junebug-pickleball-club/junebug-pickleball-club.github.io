@@ -300,14 +300,29 @@ permalink: /submit-match/
         <input type="number" id="womens-away" name="womens_away" min="0" placeholder="0" required>
       </div>
       <div class="score-row">
-        <label>Mixed Doubles</label>
-        <input type="number" id="mixed-home" name="mixed_home" min="0" placeholder="0" required>
-        <input type="number" id="mixed-away" name="mixed_away" min="0" placeholder="0" required>
+        <label>Mixed Doubles 1</label>
+        <input type="number" id="mixed-1-home" name="mixed_1_home" min="0" placeholder="0" required>
+        <input type="number" id="mixed-1-away" name="mixed_1_away" min="0" placeholder="0" required>
       </div>
       <div class="score-row">
-        <label>Dreambreaker</label>
-        <input type="number" id="dream-home" name="dream_home" min="0" placeholder="0" required>
-        <input type="number" id="dream-away" name="dream_away" min="0" placeholder="0" required>
+        <label>Mixed Doubles 2</label>
+        <input type="number" id="mixed-2-home" name="mixed_2_home" min="0" placeholder="0" required>
+        <input type="number" id="mixed-2-away" name="mixed_2_away" min="0" placeholder="0" required>
+      </div>
+      <div class="score-row">
+        <label>Mixed Doubles 3</label>
+        <input type="number" id="mixed-3-home" name="mixed_3_home" min="0" placeholder="0" required>
+        <input type="number" id="mixed-3-away" name="mixed_3_away" min="0" placeholder="0" required>
+      </div>
+      <div class="score-row">
+        <label>Mixed Doubles 4</label>
+        <input type="number" id="mixed-4-home" name="mixed_4_home" min="0" placeholder="0" required>
+        <input type="number" id="mixed-4-away" name="mixed_4_away" min="0" placeholder="0" required>
+      </div>
+      <div class="score-row">
+        <label>Dreambreaker <span style="color:#a0a0b8;font-size:0.8em;">(optional)</span></label>
+        <input type="number" id="dream-home" name="dream_home" min="0" placeholder="0">
+        <input type="number" id="dream-away" name="dream_away" min="0" placeholder="0">
       </div>
 
       <div id="score-errors" style="color:#f44336;font-size:0.8rem;margin-top:8px;display:none;">
@@ -362,7 +377,11 @@ permalink: /submit-match/
     const required = [
       'home_team', 'away_team', 'season', 'week', 'match_date', 'location',
       'mens_home', 'mens_away', 'womens_home', 'womens_away',
-      'mixed_home', 'mixed_away', 'dream_home', 'dream_away'
+      'mixed_1_home', 'mixed_1_away',
+      'mixed_2_home', 'mixed_2_away',
+      'mixed_3_home', 'mixed_3_away',
+      'mixed_4_home', 'mixed_4_away',
+      // dream_home and dream_away are intentionally absent
     ];
     const missing = required.filter(function (key) {
       const val = fields[key];
@@ -378,10 +397,10 @@ permalink: /submit-match/
    * @returns {string}
    */
   function serializeMatchYaml(match) {
-    return [
+    const lines = [
       '  - week: ' + match.week,
       '    date: ' + match.date,
-      '    location: ' + match.location,
+      '    location: "' + match.location + '"',
       '    home_team: ' + match.home_team,
       '    away_team: ' + match.away_team,
       '    result:',
@@ -391,13 +410,27 @@ permalink: /submit-match/
       '      womens_doubles:',
       '        home: ' + match.result.womens_doubles.home,
       '        away: ' + match.result.womens_doubles.away,
-      '      mixed_doubles:',
-      '        home: ' + match.result.mixed_doubles.home,
-      '        away: ' + match.result.mixed_doubles.away,
-      '      dreambreaker:',
-      '        home: ' + match.result.dreambreaker.home,
-      '        away: ' + match.result.dreambreaker.away
-    ].join('\n');
+      '      mixed_doubles_1:',
+      '        home: ' + match.result.mixed_doubles_1.home,
+      '        away: ' + match.result.mixed_doubles_1.away,
+      '      mixed_doubles_2:',
+      '        home: ' + match.result.mixed_doubles_2.home,
+      '        away: ' + match.result.mixed_doubles_2.away,
+      '      mixed_doubles_3:',
+      '        home: ' + match.result.mixed_doubles_3.home,
+      '        away: ' + match.result.mixed_doubles_3.away,
+      '      mixed_doubles_4:',
+      '        home: ' + match.result.mixed_doubles_4.home,
+      '        away: ' + match.result.mixed_doubles_4.away,
+    ];
+    if (match.result.dreambreaker != null) {
+      lines.push(
+        '      dreambreaker:',
+        '        home: ' + match.result.dreambreaker.home,
+        '        away: ' + match.result.dreambreaker.away
+      );
+    }
+    return lines.join('\n');
   }
 
   // ── GitHub API helpers ───────────────────────────────────────────────────────
@@ -489,6 +522,8 @@ permalink: /submit-match/
     const fileSha = fileInfo.sha;
 
     // Build match YAML snippet and append to schedule
+    const dreamHome = formData.dream_home !== '' ? Number(formData.dream_home) : null;
+    const dreamAway = formData.dream_away !== '' ? Number(formData.dream_away) : null;
     const matchObj = {
       week:      formData.week,
       date:      formData.match_date,
@@ -496,10 +531,13 @@ permalink: /submit-match/
       home_team: formData.home_team,
       away_team: formData.away_team,
       result: {
-        mens_doubles:    { home: Number(formData.mens_home),   away: Number(formData.mens_away) },
-        womens_doubles:  { home: Number(formData.womens_home), away: Number(formData.womens_away) },
-        mixed_doubles:   { home: Number(formData.mixed_home),  away: Number(formData.mixed_away) },
-        dreambreaker:    { home: Number(formData.dream_home),  away: Number(formData.dream_away) }
+        mens_doubles:    { home: Number(formData.mens_home),    away: Number(formData.mens_away) },
+        womens_doubles:  { home: Number(formData.womens_home),  away: Number(formData.womens_away) },
+        mixed_doubles_1: { home: Number(formData.mixed_1_home), away: Number(formData.mixed_1_away) },
+        mixed_doubles_2: { home: Number(formData.mixed_2_home), away: Number(formData.mixed_2_away) },
+        mixed_doubles_3: { home: Number(formData.mixed_3_home), away: Number(formData.mixed_3_away) },
+        mixed_doubles_4: { home: Number(formData.mixed_4_home), away: Number(formData.mixed_4_away) },
+        dreambreaker:    (dreamHome !== null && dreamAway !== null) ? { home: dreamHome, away: dreamAway } : null
       }
     };
     const matchYaml = serializeMatchYaml(matchObj);
@@ -593,26 +631,34 @@ permalink: /submit-match/
 
     // Collect field values
     const fields = {
-      home_team:   document.getElementById('home-team').value,
-      away_team:   document.getElementById('away-team').value,
-      season:      document.getElementById('season-select').value,
-      week:        document.getElementById('week-number').value,
-      match_date:  document.getElementById('match-date').value,
-      location:    document.getElementById('location').value,
-      mens_home:   document.getElementById('mens-home').value,
-      mens_away:   document.getElementById('mens-away').value,
-      womens_home: document.getElementById('womens-home').value,
-      womens_away: document.getElementById('womens-away').value,
-      mixed_home:  document.getElementById('mixed-home').value,
-      mixed_away:  document.getElementById('mixed-away').value,
-      dream_home:  document.getElementById('dream-home').value,
-      dream_away:  document.getElementById('dream-away').value
+      home_team:    document.getElementById('home-team').value,
+      away_team:    document.getElementById('away-team').value,
+      season:       document.getElementById('season-select').value,
+      week:         document.getElementById('week-number').value,
+      match_date:   document.getElementById('match-date').value,
+      location:     document.getElementById('location').value,
+      mens_home:    document.getElementById('mens-home').value,
+      mens_away:    document.getElementById('mens-away').value,
+      womens_home:  document.getElementById('womens-home').value,
+      womens_away:  document.getElementById('womens-away').value,
+      mixed_1_home: document.getElementById('mixed-1-home').value,
+      mixed_1_away: document.getElementById('mixed-1-away').value,
+      mixed_2_home: document.getElementById('mixed-2-home').value,
+      mixed_2_away: document.getElementById('mixed-2-away').value,
+      mixed_3_home: document.getElementById('mixed-3-home').value,
+      mixed_3_away: document.getElementById('mixed-3-away').value,
+      mixed_4_home: document.getElementById('mixed-4-home').value,
+      mixed_4_away: document.getElementById('mixed-4-away').value,
+      dream_home:   document.getElementById('dream-home').value,
+      dream_away:   document.getElementById('dream-away').value
     };
 
     // Validate
     const validation = validateForm(fields);
     if (!validation.valid) {
-      const scoreFields = ['mens_home','mens_away','womens_home','womens_away','mixed_home','mixed_away','dream_home','dream_away'];
+      const scoreFields = ['mens_home','mens_away','womens_home','womens_away',
+        'mixed_1_home','mixed_1_away','mixed_2_home','mixed_2_away',
+        'mixed_3_home','mixed_3_away','mixed_4_home','mixed_4_away'];
       let hasScoreError = false;
       validation.missing.forEach(function (f) {
         if (scoreFields.includes(f)) {

@@ -18,7 +18,16 @@ schedule:
       womens_doubles:
         home: 9
         away: 11
-      mixed_doubles:
+      mixed_doubles_1:
+        home: 11
+        away: 6
+      mixed_doubles_2:
+        home: 11
+        away: 6
+      mixed_doubles_3:
+        home: 11
+        away: 6
+      mixed_doubles_4:
         home: 11
         away: 6
       dreambreaker:
