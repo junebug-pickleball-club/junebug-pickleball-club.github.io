@@ -157,7 +157,7 @@ textarea {
     transition:      color 0.2s;
     white-space:     nowrap;
 
-    &:hover { color: $text-primary; }
+    &:hover { color: $accent; }
 
     &.active {
       color:                 $accent;
@@ -191,7 +191,7 @@ textarea {
   gap:           4px;
   white-space:   nowrap;
 
-  &:hover { color: $text-primary; }
+  &:hover { color: $accent; }
 
   .dropdown-arrow { font-size: 0.65rem; }
 }
@@ -218,7 +218,7 @@ textarea {
     color:           $text-secondary;
     text-decoration: none;
 
-    &:hover { color: $text-primary; background: $bg-tertiary; }
+    &:hover { color: $accent; background: $bg-tertiary; }
     &.active { color: $accent; }
   }
 }
