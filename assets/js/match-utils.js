@@ -15,6 +15,12 @@ export function validateForm(fields) {
     'mixed_3_home', 'mixed_3_away',
     'mixed_4_home', 'mixed_4_away',
     // dream_home and dream_away are intentionally absent
+    'mens_home_p1', 'mens_home_p2', 'mens_away_p1', 'mens_away_p2',
+    'womens_home_p1', 'womens_home_p2', 'womens_away_p1', 'womens_away_p2',
+    'mixed_1_home_p1', 'mixed_1_home_p2', 'mixed_1_away_p1', 'mixed_1_away_p2',
+    'mixed_2_home_p1', 'mixed_2_home_p2', 'mixed_2_away_p1', 'mixed_2_away_p2',
+    'mixed_3_home_p1', 'mixed_3_home_p2', 'mixed_3_away_p1', 'mixed_3_away_p2',
+    'mixed_4_home_p1', 'mixed_4_home_p2', 'mixed_4_away_p1', 'mixed_4_away_p2',
   ];
   const missing = required.filter(function (key) {
     const val = fields[key];
@@ -29,6 +35,17 @@ export function validateForm(fields) {
  * @returns {string}
  */
 export function serializeMatchYaml(match) {
+  function playerLines(game) {
+    const out = [];
+    if (game.home_players && game.home_players.length > 0) {
+      out.push('        home_players: [' + game.home_players.map(n => '"' + n + '"').join(', ') + ']');
+    }
+    if (game.away_players && game.away_players.length > 0) {
+      out.push('        away_players: [' + game.away_players.map(n => '"' + n + '"').join(', ') + ']');
+    }
+    return out;
+  }
+
   const lines = [
     '  - week: ' + match.week,
     '    date: ' + match.date,
@@ -39,21 +56,27 @@ export function serializeMatchYaml(match) {
     '      mens_doubles:',
     '        home: ' + match.result.mens_doubles.home,
     '        away: ' + match.result.mens_doubles.away,
+    ...playerLines(match.result.mens_doubles),
     '      womens_doubles:',
     '        home: ' + match.result.womens_doubles.home,
     '        away: ' + match.result.womens_doubles.away,
+    ...playerLines(match.result.womens_doubles),
     '      mixed_doubles_1:',
     '        home: ' + match.result.mixed_doubles_1.home,
     '        away: ' + match.result.mixed_doubles_1.away,
+    ...playerLines(match.result.mixed_doubles_1),
     '      mixed_doubles_2:',
     '        home: ' + match.result.mixed_doubles_2.home,
     '        away: ' + match.result.mixed_doubles_2.away,
+    ...playerLines(match.result.mixed_doubles_2),
     '      mixed_doubles_3:',
     '        home: ' + match.result.mixed_doubles_3.home,
     '        away: ' + match.result.mixed_doubles_3.away,
+    ...playerLines(match.result.mixed_doubles_3),
     '      mixed_doubles_4:',
     '        home: ' + match.result.mixed_doubles_4.home,
     '        away: ' + match.result.mixed_doubles_4.away,
+    ...playerLines(match.result.mixed_doubles_4),
   ];
   if (match.result.dreambreaker != null) {
     lines.push(

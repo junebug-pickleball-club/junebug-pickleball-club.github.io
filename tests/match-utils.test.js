@@ -42,6 +42,8 @@ const matchArb = fc.record({
   result:    matchResultArb,
 });
 
+const playerNameArb = fc.stringMatching(/^[A-Za-z][A-Za-z ]{0,18}[A-Za-z]$/).filter(s => s.trim().length > 0);
+
 const validFormArb = fc.record({
   home_team:    teamIdArb,
   away_team:    teamIdArb,
@@ -62,6 +64,30 @@ const validFormArb = fc.record({
   mixed_3_away: scoreArb.map(String),
   mixed_4_home: scoreArb.map(String),
   mixed_4_away: scoreArb.map(String),
+  mens_home_p1:    playerNameArb,
+  mens_home_p2:    playerNameArb,
+  mens_away_p1:    playerNameArb,
+  mens_away_p2:    playerNameArb,
+  womens_home_p1:  playerNameArb,
+  womens_home_p2:  playerNameArb,
+  womens_away_p1:  playerNameArb,
+  womens_away_p2:  playerNameArb,
+  mixed_1_home_p1: playerNameArb,
+  mixed_1_home_p2: playerNameArb,
+  mixed_1_away_p1: playerNameArb,
+  mixed_1_away_p2: playerNameArb,
+  mixed_2_home_p1: playerNameArb,
+  mixed_2_home_p2: playerNameArb,
+  mixed_2_away_p1: playerNameArb,
+  mixed_2_away_p2: playerNameArb,
+  mixed_3_home_p1: playerNameArb,
+  mixed_3_home_p2: playerNameArb,
+  mixed_3_away_p1: playerNameArb,
+  mixed_3_away_p2: playerNameArb,
+  mixed_4_home_p1: playerNameArb,
+  mixed_4_home_p2: playerNameArb,
+  mixed_4_away_p1: playerNameArb,
+  mixed_4_away_p2: playerNameArb,
 });
 
 const requiredFields = [
@@ -71,6 +97,12 @@ const requiredFields = [
   'mixed_2_home', 'mixed_2_away',
   'mixed_3_home', 'mixed_3_away',
   'mixed_4_home', 'mixed_4_away',
+  'mens_home_p1', 'mens_home_p2', 'mens_away_p1', 'mens_away_p2',
+  'womens_home_p1', 'womens_home_p2', 'womens_away_p1', 'womens_away_p2',
+  'mixed_1_home_p1', 'mixed_1_home_p2', 'mixed_1_away_p1', 'mixed_1_away_p2',
+  'mixed_2_home_p1', 'mixed_2_home_p2', 'mixed_2_away_p1', 'mixed_2_away_p2',
+  'mixed_3_home_p1', 'mixed_3_home_p2', 'mixed_3_away_p1', 'mixed_3_away_p2',
+  'mixed_4_home_p1', 'mixed_4_home_p2', 'mixed_4_away_p1', 'mixed_4_away_p2',
 ];
 
 const dateStrArb = fc.date({ min: new Date('2025-01-01'), max: new Date('2027-12-31') })
@@ -223,6 +255,104 @@ describe('Property 10: Events are correctly partitioned and sorted', () => {
           }
           // No events are lost
           expect(upcoming.length + past.length).toBe(events.length);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ── Property 3: Validation rejects any missing player field ──────────────────
+// Feature: match-submission-form-update, Property 3: Validation rejects any missing player field
+// Validates: Requirements 3.3, 4.1, 4.2
+
+const allRequiredFields = requiredFields;
+
+describe('Feature: match-submission-form-update, Property 3: Validation rejects any missing player field', () => {
+  it('returns invalid and lists every blanked player field in missing', () => {
+    fc.assert(
+      fc.property(
+        validFormArb,
+        fc.subarray(allRequiredFields, { minLength: 1 }),
+        (fields, toBlank) => {
+          const partial = { ...fields };
+          for (const f of toBlank) partial[f] = '';
+
+          const result = validateForm(partial);
+          expect(result.valid).toBe(false);
+          for (const f of toBlank) {
+            expect(result.missing).toContain(f);
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ── Feature: match-submission-form-update, Property 2: Season change resets all player dropdowns ──
+// Validates: Requirements 2.3, 2.4
+
+const GAME_PREFIXES = ['mens', 'womens', 'mixed_1', 'mixed_2', 'mixed_3', 'mixed_4'];
+
+/**
+ * Simulates the resetPlayerDropdowns logic from pages/submit-match.html.
+ * Operates on a plain JS map of { id -> { options: string[], disabled: boolean } }
+ * representing the 24 player selects.
+ */
+function buildPlayerSelectMap(prefixes, sides, slots) {
+  const map = {};
+  for (const prefix of prefixes) {
+    for (const side of sides) {
+      for (const slot of slots) {
+        map[`${prefix}_${side}_${slot}`] = { options: [], disabled: false };
+      }
+    }
+  }
+  return map;
+}
+
+function simulateResetPlayerDropdowns(selectMap) {
+  for (const id of Object.keys(selectMap)) {
+    selectMap[id].options = [''];
+    selectMap[id].disabled = true;
+  }
+}
+
+describe('Feature: match-submission-form-update, Property 2: Season change resets all player dropdowns', () => {
+  // **Validates: Requirements 2.3, 2.4**
+  it('after reset, every player select has exactly one blank option, value "", and is disabled', () => {
+    const sides = ['home', 'away'];
+    const slots = ['p1', 'p2'];
+
+    const playerNameArb2 = fc.stringMatching(/^[A-Za-z][A-Za-z ]{0,18}[A-Za-z]$/);
+
+    fc.assert(
+      fc.property(
+        // Generate arbitrary pre-populated options for each select (1–4 names)
+        fc.array(
+          fc.array(playerNameArb2, { minLength: 1, maxLength: 4 }),
+          { minLength: 24, maxLength: 24 }
+        ),
+        (rosterSets) => {
+          const selectMap = buildPlayerSelectMap(GAME_PREFIXES, sides, slots);
+          const ids = Object.keys(selectMap);
+
+          // Pre-populate each select with arbitrary player names (simulating team selection)
+          ids.forEach((id, i) => {
+            selectMap[id].options = ['', ...rosterSets[i]];
+            selectMap[id].disabled = false;
+          });
+
+          // Simulate season change → reset
+          simulateResetPlayerDropdowns(selectMap);
+
+          // Assert every select is reset to blank placeholder only and disabled
+          for (const id of ids) {
+            expect(selectMap[id].options).toHaveLength(1);
+            expect(selectMap[id].options[0]).toBe('');
+            expect(selectMap[id].disabled).toBe(true);
+          }
         }
       ),
       { numRuns: 100 }

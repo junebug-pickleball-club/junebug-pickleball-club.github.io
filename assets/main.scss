@@ -355,19 +355,22 @@ textarea {
 }
 .score-row {
   display: grid;
-  grid-template-columns: 1fr 80px 80px;
-  gap: 12px;
+  grid-template-columns: 160px 1fr 1fr 64px 32px 64px 1fr 1fr;
+  gap: 8px;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 .score-row label {
   color: $text-secondary;
   font-size: 0.9rem;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.score-row input {
+.score-row input[type="number"] {
   width: 100%;
-  padding: 8px 10px;
+  padding: 8px 6px;
   background: $bg-tertiary;
   border: 1px solid $border-color;
   border-radius: 4px;
@@ -377,16 +380,41 @@ textarea {
   text-align: center;
   box-sizing: border-box;
 }
-.score-row input:focus {
+.score-row input[type="number"]:focus {
   outline: none;
   border-color: $accent;
   box-shadow: 0 0 0 2px rgba($accent, 0.2);
 }
+.score-row select {
+  width: 100%;
+  padding: 7px 6px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  color: $text-primary;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+.score-row select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.score-row select:focus {
+  outline: none;
+  border-color: $accent;
+  box-shadow: 0 0 0 2px rgba($accent, 0.2);
+}
+.vs-sep {
+  text-align: center;
+  color: $text-secondary;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
 .score-header {
   display: grid;
-  grid-template-columns: 1fr 80px 80px;
-  gap: 12px;
-  margin-bottom: 8px;
+  grid-template-columns: 160px 1fr 1fr 64px 32px 64px 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 .score-header span {
   color: $text-secondary;

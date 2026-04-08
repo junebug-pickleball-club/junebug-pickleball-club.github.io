@@ -84,44 +84,84 @@ permalink: /submit-match/
       <h3>Scores</h3>
       <div class="score-header">
         <span>Game</span>
-        <span>Home</span>
-        <span>Away</span>
+        <span>Player 1</span>
+        <span>Player 2</span>
+        <span>Score</span>
+        <span></span>
+        <span>Score</span>
+        <span>Player 1</span>
+        <span>Player 2</span>
       </div>
 
       <div class="score-row">
         <label>Men's Doubles</label>
+        <select id="mens_home_p1" name="mens_home_p1" disabled><option value=""></option></select>
+        <select id="mens_home_p2" name="mens_home_p2" disabled><option value=""></option></select>
         <input type="number" id="mens-home" name="mens_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
         <input type="number" id="mens-away" name="mens_away" min="0" placeholder="0" required>
+        <select id="mens_away_p1" name="mens_away_p1" disabled><option value=""></option></select>
+        <select id="mens_away_p2" name="mens_away_p2" disabled><option value=""></option></select>
       </div>
       <div class="score-row">
         <label>Women's Doubles</label>
+        <select id="womens_home_p1" name="womens_home_p1" disabled><option value=""></option></select>
+        <select id="womens_home_p2" name="womens_home_p2" disabled><option value=""></option></select>
         <input type="number" id="womens-home" name="womens_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
         <input type="number" id="womens-away" name="womens_away" min="0" placeholder="0" required>
+        <select id="womens_away_p1" name="womens_away_p1" disabled><option value=""></option></select>
+        <select id="womens_away_p2" name="womens_away_p2" disabled><option value=""></option></select>
       </div>
       <div class="score-row">
         <label>Mixed Doubles 1</label>
+        <select id="mixed_1_home_p1" name="mixed_1_home_p1" disabled><option value=""></option></select>
+        <select id="mixed_1_home_p2" name="mixed_1_home_p2" disabled><option value=""></option></select>
         <input type="number" id="mixed-1-home" name="mixed_1_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
         <input type="number" id="mixed-1-away" name="mixed_1_away" min="0" placeholder="0" required>
+        <select id="mixed_1_away_p1" name="mixed_1_away_p1" disabled><option value=""></option></select>
+        <select id="mixed_1_away_p2" name="mixed_1_away_p2" disabled><option value=""></option></select>
       </div>
       <div class="score-row">
         <label>Mixed Doubles 2</label>
+        <select id="mixed_2_home_p1" name="mixed_2_home_p1" disabled><option value=""></option></select>
+        <select id="mixed_2_home_p2" name="mixed_2_home_p2" disabled><option value=""></option></select>
         <input type="number" id="mixed-2-home" name="mixed_2_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
         <input type="number" id="mixed-2-away" name="mixed_2_away" min="0" placeholder="0" required>
+        <select id="mixed_2_away_p1" name="mixed_2_away_p1" disabled><option value=""></option></select>
+        <select id="mixed_2_away_p2" name="mixed_2_away_p2" disabled><option value=""></option></select>
       </div>
       <div class="score-row">
         <label>Mixed Doubles 3</label>
+        <select id="mixed_3_home_p1" name="mixed_3_home_p1" disabled><option value=""></option></select>
+        <select id="mixed_3_home_p2" name="mixed_3_home_p2" disabled><option value=""></option></select>
         <input type="number" id="mixed-3-home" name="mixed_3_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
         <input type="number" id="mixed-3-away" name="mixed_3_away" min="0" placeholder="0" required>
+        <select id="mixed_3_away_p1" name="mixed_3_away_p1" disabled><option value=""></option></select>
+        <select id="mixed_3_away_p2" name="mixed_3_away_p2" disabled><option value=""></option></select>
       </div>
       <div class="score-row">
         <label>Mixed Doubles 4</label>
+        <select id="mixed_4_home_p1" name="mixed_4_home_p1" disabled><option value=""></option></select>
+        <select id="mixed_4_home_p2" name="mixed_4_home_p2" disabled><option value=""></option></select>
         <input type="number" id="mixed-4-home" name="mixed_4_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
         <input type="number" id="mixed-4-away" name="mixed_4_away" min="0" placeholder="0" required>
+        <select id="mixed_4_away_p1" name="mixed_4_away_p1" disabled><option value=""></option></select>
+        <select id="mixed_4_away_p2" name="mixed_4_away_p2" disabled><option value=""></option></select>
       </div>
-      <div class="score-row">
+      <div class="score-row score-row--dreambreaker">
         <label>Dreambreaker <span class="label-optional">(optional)</span></label>
+        <span></span>
+        <span></span>
         <input type="number" id="dream-home" name="dream_home" min="0" placeholder="0">
+        <span class="vs-sep">vs</span>
         <input type="number" id="dream-away" name="dream_away" min="0" placeholder="0">
+        <span></span>
+        <span></span>
       </div>
 
       <div id="score-errors" class="score-errors">
@@ -139,7 +179,7 @@ permalink: /submit-match/
   {% assign season_data = site.data.seasons[s.data_file] %}
   "{{ s.data_file }}": [
     {% for team in season_data.teams %}
-    { "slug": "{{ team.slug }}", "name": "{{ team.name }}" }{% unless forloop.last %},{% endunless %}
+    { "slug": "{{ team.slug }}", "name": "{{ team.name }}", "roster": [{% for p in team.roster %}"{{ p.name }}"{% unless forloop.last %},{% endunless %}{% endfor %}] }{% unless forloop.last %},{% endunless %}
     {% endfor %}
   ]{% unless forloop.last %},{% endunless %}
   {% endfor %}
@@ -212,6 +252,49 @@ const SEASON_TEAMS = JSON.parse(document.getElementById('season-teams-data').tex
   }
   window.populateTeamDropdowns = populateTeamDropdowns;
 
+  // ── Player dropdowns ─────────────────────────────────────────────────────────
+  var GAME_PREFIXES = ['mens', 'womens', 'mixed_1', 'mixed_2', 'mixed_3', 'mixed_4'];
+
+  function resetPlayerDropdowns() {
+    GAME_PREFIXES.forEach(function (prefix) {
+      ['home', 'away'].forEach(function (side) {
+        ['p1', 'p2'].forEach(function (slot) {
+          var sel = document.getElementById(prefix + '_' + side + '_' + slot);
+          if (!sel) return;
+          sel.innerHTML = '<option value=""></option>';
+          sel.disabled = true;
+        });
+      });
+    });
+  }
+  window.resetPlayerDropdowns = resetPlayerDropdowns;
+
+  function populatePlayerDropdowns(side, teamSlug, seasonKey) {
+    var teams = (typeof SEASON_TEAMS !== 'undefined' && SEASON_TEAMS[seasonKey]) ? SEASON_TEAMS[seasonKey] : [];
+    var team = teams.find(function (t) { return t.slug === teamSlug; });
+    var roster = (team && team.roster && team.roster.length > 0) ? team.roster : [];
+
+    GAME_PREFIXES.forEach(function (prefix) {
+      ['p1', 'p2'].forEach(function (slot) {
+        var selectId = prefix + '_' + side + '_' + slot;
+        var sel = document.getElementById(selectId);
+        if (!sel) return;
+
+        // Replace all options with blank placeholder + one per roster name
+        sel.innerHTML = '<option value=""></option>';
+        roster.forEach(function (name) {
+          var opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          sel.appendChild(opt);
+        });
+
+        sel.disabled = roster.length === 0;
+      });
+    });
+  }
+  window.populatePlayerDropdowns = populatePlayerDropdowns;
+
   document.addEventListener('DOMContentLoaded', function () {
     var seasonSelect = document.getElementById('season-select');
 
@@ -225,6 +308,23 @@ const SEASON_TEAMS = JSON.parse(document.getElementById('season-teams-data').tex
       document.getElementById('home-team').value = '';
       document.getElementById('away-team').value = '';
       populateTeamDropdowns(this.value);
+      resetPlayerDropdowns();
+    });
+
+    document.getElementById('match-form').addEventListener('reset', function () {
+      resetPlayerDropdowns();
+    });
+
+    document.getElementById('home-team').addEventListener('change', function () {
+      var homeTeamSlug = this.value;
+      var seasonKey = seasonSelect.value;
+      populatePlayerDropdowns('home', homeTeamSlug, seasonKey);
+    });
+
+    document.getElementById('away-team').addEventListener('change', function () {
+      var awayTeamSlug = this.value;
+      var seasonKey = seasonSelect.value;
+      populatePlayerDropdowns('away', awayTeamSlug, seasonKey);
     });
   });
 
@@ -243,6 +343,12 @@ const SEASON_TEAMS = JSON.parse(document.getElementById('season-teams-data').tex
       'mixed_3_home', 'mixed_3_away',
       'mixed_4_home', 'mixed_4_away',
       // dream_home and dream_away are intentionally absent
+      'mens_home_p1', 'mens_home_p2', 'mens_away_p1', 'mens_away_p2',
+      'womens_home_p1', 'womens_home_p2', 'womens_away_p1', 'womens_away_p2',
+      'mixed_1_home_p1', 'mixed_1_home_p2', 'mixed_1_away_p1', 'mixed_1_away_p2',
+      'mixed_2_home_p1', 'mixed_2_home_p2', 'mixed_2_away_p1', 'mixed_2_away_p2',
+      'mixed_3_home_p1', 'mixed_3_home_p2', 'mixed_3_away_p1', 'mixed_3_away_p2',
+      'mixed_4_home_p1', 'mixed_4_home_p2', 'mixed_4_away_p1', 'mixed_4_away_p2',
     ];
     const missing = required.filter(function (key) {
       const val = fields[key];
@@ -258,6 +364,17 @@ const SEASON_TEAMS = JSON.parse(document.getElementById('season-teams-data').tex
    * @returns {string}
    */
   function serializeMatchYaml(match) {
+    function playerLines(game) {
+      const out = [];
+      if (game.home_players && game.home_players.length > 0) {
+        out.push('        home_players: [' + game.home_players.map(function (n) { return '"' + n + '"'; }).join(', ') + ']');
+      }
+      if (game.away_players && game.away_players.length > 0) {
+        out.push('        away_players: [' + game.away_players.map(function (n) { return '"' + n + '"'; }).join(', ') + ']');
+      }
+      return out;
+    }
+
     const lines = [
       '  - week: ' + match.week,
       '    date: ' + match.date,
@@ -268,21 +385,27 @@ const SEASON_TEAMS = JSON.parse(document.getElementById('season-teams-data').tex
       '      mens_doubles:',
       '        home: ' + match.result.mens_doubles.home,
       '        away: ' + match.result.mens_doubles.away,
+      ...playerLines(match.result.mens_doubles),
       '      womens_doubles:',
       '        home: ' + match.result.womens_doubles.home,
       '        away: ' + match.result.womens_doubles.away,
+      ...playerLines(match.result.womens_doubles),
       '      mixed_doubles_1:',
       '        home: ' + match.result.mixed_doubles_1.home,
       '        away: ' + match.result.mixed_doubles_1.away,
+      ...playerLines(match.result.mixed_doubles_1),
       '      mixed_doubles_2:',
       '        home: ' + match.result.mixed_doubles_2.home,
       '        away: ' + match.result.mixed_doubles_2.away,
+      ...playerLines(match.result.mixed_doubles_2),
       '      mixed_doubles_3:',
       '        home: ' + match.result.mixed_doubles_3.home,
       '        away: ' + match.result.mixed_doubles_3.away,
+      ...playerLines(match.result.mixed_doubles_3),
       '      mixed_doubles_4:',
       '        home: ' + match.result.mixed_doubles_4.home,
       '        away: ' + match.result.mixed_doubles_4.away,
+      ...playerLines(match.result.mixed_doubles_4),
     ];
     if (match.result.dreambreaker != null) {
       lines.push(
@@ -392,12 +515,12 @@ const SEASON_TEAMS = JSON.parse(document.getElementById('season-teams-data').tex
       home_team: formData.home_team,
       away_team: formData.away_team,
       result: {
-        mens_doubles:    { home: Number(formData.mens_home),    away: Number(formData.mens_away) },
-        womens_doubles:  { home: Number(formData.womens_home),  away: Number(formData.womens_away) },
-        mixed_doubles_1: { home: Number(formData.mixed_1_home), away: Number(formData.mixed_1_away) },
-        mixed_doubles_2: { home: Number(formData.mixed_2_home), away: Number(formData.mixed_2_away) },
-        mixed_doubles_3: { home: Number(formData.mixed_3_home), away: Number(formData.mixed_3_away) },
-        mixed_doubles_4: { home: Number(formData.mixed_4_home), away: Number(formData.mixed_4_away) },
+        mens_doubles:    { home: Number(formData.mens_home),    away: Number(formData.mens_away),    home_players: [formData.mens_home_p1,    formData.mens_home_p2],    away_players: [formData.mens_away_p1,    formData.mens_away_p2] },
+        womens_doubles:  { home: Number(formData.womens_home),  away: Number(formData.womens_away),  home_players: [formData.womens_home_p1,  formData.womens_home_p2],  away_players: [formData.womens_away_p1,  formData.womens_away_p2] },
+        mixed_doubles_1: { home: Number(formData.mixed_1_home), away: Number(formData.mixed_1_away), home_players: [formData.mixed_1_home_p1, formData.mixed_1_home_p2], away_players: [formData.mixed_1_away_p1, formData.mixed_1_away_p2] },
+        mixed_doubles_2: { home: Number(formData.mixed_2_home), away: Number(formData.mixed_2_away), home_players: [formData.mixed_2_home_p1, formData.mixed_2_home_p2], away_players: [formData.mixed_2_away_p1, formData.mixed_2_away_p2] },
+        mixed_doubles_3: { home: Number(formData.mixed_3_home), away: Number(formData.mixed_3_away), home_players: [formData.mixed_3_home_p1, formData.mixed_3_home_p2], away_players: [formData.mixed_3_away_p1, formData.mixed_3_away_p2] },
+        mixed_doubles_4: { home: Number(formData.mixed_4_home), away: Number(formData.mixed_4_away), home_players: [formData.mixed_4_home_p1, formData.mixed_4_home_p2], away_players: [formData.mixed_4_away_p1, formData.mixed_4_away_p2] },
         dreambreaker:    (dreamHome !== null && dreamAway !== null) ? { home: dreamHome, away: dreamAway } : null
       }
     };
@@ -511,7 +634,32 @@ const SEASON_TEAMS = JSON.parse(document.getElementById('season-teams-data').tex
       mixed_4_home: document.getElementById('mixed-4-home').value,
       mixed_4_away: document.getElementById('mixed-4-away').value,
       dream_home:   document.getElementById('dream-home').value,
-      dream_away:   document.getElementById('dream-away').value
+      dream_away:   document.getElementById('dream-away').value,
+      // Player selects
+      mens_home_p1:    document.getElementById('mens_home_p1').value,
+      mens_home_p2:    document.getElementById('mens_home_p2').value,
+      mens_away_p1:    document.getElementById('mens_away_p1').value,
+      mens_away_p2:    document.getElementById('mens_away_p2').value,
+      womens_home_p1:  document.getElementById('womens_home_p1').value,
+      womens_home_p2:  document.getElementById('womens_home_p2').value,
+      womens_away_p1:  document.getElementById('womens_away_p1').value,
+      womens_away_p2:  document.getElementById('womens_away_p2').value,
+      mixed_1_home_p1: document.getElementById('mixed_1_home_p1').value,
+      mixed_1_home_p2: document.getElementById('mixed_1_home_p2').value,
+      mixed_1_away_p1: document.getElementById('mixed_1_away_p1').value,
+      mixed_1_away_p2: document.getElementById('mixed_1_away_p2').value,
+      mixed_2_home_p1: document.getElementById('mixed_2_home_p1').value,
+      mixed_2_home_p2: document.getElementById('mixed_2_home_p2').value,
+      mixed_2_away_p1: document.getElementById('mixed_2_away_p1').value,
+      mixed_2_away_p2: document.getElementById('mixed_2_away_p2').value,
+      mixed_3_home_p1: document.getElementById('mixed_3_home_p1').value,
+      mixed_3_home_p2: document.getElementById('mixed_3_home_p2').value,
+      mixed_3_away_p1: document.getElementById('mixed_3_away_p1').value,
+      mixed_3_away_p2: document.getElementById('mixed_3_away_p2').value,
+      mixed_4_home_p1: document.getElementById('mixed_4_home_p1').value,
+      mixed_4_home_p2: document.getElementById('mixed_4_home_p2').value,
+      mixed_4_away_p1: document.getElementById('mixed_4_away_p1').value,
+      mixed_4_away_p2: document.getElementById('mixed_4_away_p2').value,
     };
 
     // Validate
