@@ -1,14 +1,18 @@
 ---
-layout: home
-title: Junebug Pickleball League
+layout: default
+title: Junebug Pickleball Club
 ---
 
-<div class="hero">
-  <h1>Junebug Pickleball League</h1>
-  <p class="hero__description">Your home for MLP-style team pickleball. Track standings, browse schedules, and stay up to date with club events.</p>
-  <div class="hero__links">
-    <a class="btn-primary" href="/teams">View Teams</a>
-    <a class="btn-primary" href="/seasons/{{ site.active_season }}">Current Season</a>
-    <a class="btn-primary" href="/events">Events</a>
-  </div>
-</div>
+<section class="news-section">
+  <h2>News</h2>
+  {% if site.posts.size > 0 %}
+    {% for post in site.posts limit:5 %}
+      {% include news-card.html post=post %}
+    {% endfor %}
+    {% if site.posts.size > 5 %}
+      <a href="/news/">View all news &rarr;</a>
+    {% endif %}
+  {% else %}
+    <p>No news yet.</p>
+  {% endif %}
+</section>

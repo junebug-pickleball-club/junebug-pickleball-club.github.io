@@ -178,14 +178,14 @@ describe('Property 11: Event card renders all event fields', () => {
   });
 });
 
-// ── Property 12: Blog posts rendered with complete data ──────────────────────
+// ── Property 12: News archive page rendered ───────────────────────────────────
 
 describe('Property 12: Blog posts rendered with complete data', () => {
-  it('_site/blog/index.html exists and contains post titles', () => {
-    const html = readSiteFile('blog/index.html');
+  it('_site/news/index.html exists and contains News heading', () => {
+    const html = readSiteFile('news/index.html');
     expect(html).not.toBeNull();
-    // Blog index should have the page title at minimum
-    expect(html).toContain('Blog');
+    // News archive page should have the page title at minimum
+    expect(html).toContain('News');
   });
 });
 
@@ -196,7 +196,7 @@ describe('Property 13: Footer present on all pages', () => {
     'index.html',
     'seasons/index.html',
     'events/index.html',
-    'blog/index.html',
+    'news/index.html',
     'submit-match/index.html',
   ];
 
@@ -492,8 +492,8 @@ describe('SCSS smoke tests: horizontal-nav rules', () => {
     expect(scss).toMatch(/color:\s*(\$text-secondary|#a0a0b8)/);
   });
 
-  it('.nav-link:hover color uses $text-primary (Req 6.4)', () => {
-    expect(scss).toMatch(/&:hover\s*\{\s*color:\s*(\$text-primary|#e8e8f0)/);
+  it('.nav-link:hover color uses $accent (Req 6.4)', () => {
+    expect(scss).toMatch(/&:hover\s*\{\s*color:\s*(\$accent|#c8e64b)/);
   });
 
   it('active state has color: $accent and text-decoration: underline (Req 3.2)', () => {
@@ -547,8 +547,8 @@ describe('Header HTML structure (horizontal-nav)', () => {
     expect(header).toContain('href="/events"');
   });
 
-  it('contains nav link href="/blog" (Req 2.3)', () => {
-    expect(header).toContain('href="/blog"');
+  it('does not contain nav link href="/blog" — Blog page was removed (Req 4.1)', () => {
+    expect(header).not.toContain('href="/blog"');
   });
 
   it('contains nav link href="/submit-match" (Req 2.3)', () => {

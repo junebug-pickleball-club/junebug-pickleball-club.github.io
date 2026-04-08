@@ -1,0 +1,13 @@
+---
+layout: page
+title: News
+permalink: /news/
+---
+
+{% if site.posts.size > 0 %}
+  {% for post in site.posts %}
+    {% include news-card.html post=post %}
+  {% endfor %}
+{% else %}
+  <p>No news yet.</p>
+{% endif %}
