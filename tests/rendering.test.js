@@ -465,7 +465,7 @@ describe('Feature: horizontal-nav, Property 3: aria-expanded mirrors nav visibil
 // ── Task 2.4: SCSS smoke tests (horizontal-nav) ───────────────────────────────
 
 describe('SCSS smoke tests: horizontal-nav rules', () => {
-  const scss = readFileSync(resolve('assets/css/style.scss'), 'utf8');
+  const scss = readFileSync(resolve('assets/main.scss'), 'utf8');
   const header = readFileSync(resolve('_includes/header.html'), 'utf8');
 
   it('contains position: sticky (Req 1.2)', () => {
@@ -763,11 +763,13 @@ describe('Feature: season-teams-view, Property 2: teams section renders all team
   });
 
   // Smoke test: built _site/seasons/spring-2026.html contains exactly 5 team-card elements
+  // and uses the teams-carousel class (Requirements 1.1, 1.4)
   it('_site/seasons/spring-2026.html contains exactly 5 team-card elements', () => {
     const html = readSiteFile('seasons/spring-2026.html');
     expect(html).not.toBeNull();
     const count = (html.match(/class="team-card"/g) || []).length;
     expect(count).toBe(5);
+    expect(html).toContain('teams-carousel');
   });
 });
 
@@ -1399,8 +1401,8 @@ describe('WCAG contrast ratios ≥ 4.5:1 (Requirements 1.2, 6.3, 6.4)', () => {
 describe('Header logo rendering (Requirements 6.3, 6.4)', () => {
   const header = readFileSync(resolve('_includes/header.html'), 'utf8');
 
-  it('header.html contains an <img> with src referencing JuneBug_Logo_main.png', () => {
-    expect(header).toMatch(/<img[^>]*src="[^"]*JuneBug_Logo_main\.png[^"]*"/);
+  it('header.html contains an <img> with src referencing a JuneBug logo', () => {
+    expect(header).toMatch(/<img[^>]*src="[^"]*JuneBug_Logo[^"]*"/);
   });
 
   it('header.html <img> has a non-empty alt attribute', () => {

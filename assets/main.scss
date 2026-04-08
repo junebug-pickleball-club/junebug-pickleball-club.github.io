@@ -1,6 +1,7 @@
 ---
 ---
 // ─── Minima overrides (must precede @import "minima") ────────────────────────
+$content-width:    1100px;
 $background-color: #1E2A3A;
 $brand-color:      #C8E64B;
 $text-color:       #FFFFFF;
@@ -490,4 +491,94 @@ textarea {
     &.open { display: block; }
     li a { padding: 8px 0; }
   }
+}
+
+// ─── Teams carousel ──────────────────────────────────────────────────────────
+.season-section {
+  max-width:  1100px;
+  margin:     0 auto 2rem;
+  width:      100%;
+}
+
+.teams-carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+
+  &::before,
+  &::after {
+    content:        "";
+    position:       absolute;
+    top:            0;
+    height:         100%;
+    width:          60px;
+    pointer-events: none;
+    z-index:        1;
+  }
+
+  &::before {
+    left:       0;
+    background: linear-gradient(to left, transparent, #1E2A3A);
+  }
+
+  &::after {
+    right:      0;
+    background: linear-gradient(to right, transparent, #1E2A3A);
+  }
+}
+
+.teams-carousel {
+  display:                  flex;
+  overflow-x:               auto;
+  gap:                      1rem;
+  scroll-snap-type:         x mandatory;
+  flex-wrap:                nowrap;
+  padding-bottom:           0.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.teams-carousel .team-card {
+  flex-shrink:       0;
+  min-width:         0;
+  width:             calc(20% - 0.8rem);
+  padding:           16px 12px;
+  scroll-snap-align: start;
+}
+
+// ─── Team card logo ───────────────────────────────────────────────────────────
+.team-card__name {
+  text-align: center;
+}
+
+// ─── Standings logo ───────────────────────────────────────────────────────────
+.standings-logo-cell {
+  width:   36px;
+  padding: 4px 6px;
+}
+
+.standings-logo {
+  width:      32px;
+  height:     32px;
+  object-fit: contain;
+  display:    block;
+}
+.team-card__logo-wrap {
+  height:          80px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  margin-bottom:   0.75rem;
+}
+
+.team-card__logo {
+  max-width:   100%;
+  max-height:  100%;
+  object-fit:  contain;
+}
+
+.team-card__logo-placeholder {
+  width:         80px;
+  height:        80px;
+  border:        2px dashed currentColor;
+  opacity:       0.3;
+  border-radius: 4px;
 }

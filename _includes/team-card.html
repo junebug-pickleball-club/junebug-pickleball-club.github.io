@@ -1,13 +1,21 @@
 <div class="team-card">
+  <div class="team-card__logo-wrap">
+    {% if include.team.logo %}
+      <img
+        class="team-card__logo"
+        src="{{ include.team.logo }}"
+        alt="{{ include.team.name }}"
+      >
+    {% else %}
+      <div class="team-card__logo-placeholder" aria-hidden="true"></div>
+    {% endif %}
+  </div>
   <h3 class="team-card__name">{{ include.team.name }}</h3>
-  {% if include.team.home_court %}
-  <p class="team-card__court">{{ include.team.home_court }}</p>
-  {% endif %}
   <div class="team-card__roster">
     {% if include.team.roster and include.team.roster.size > 0 %}
     <ul>
       {% for player in include.team.roster %}
-      <li>{{ player.name }} <span class="team-card__role">({{ player.role }})</span></li>
+      <li>{{ player.name }}</li>
       {% endfor %}
     </ul>
     {% else %}

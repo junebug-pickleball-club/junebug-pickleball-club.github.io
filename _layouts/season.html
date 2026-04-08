@@ -7,25 +7,27 @@ layout: default
   <h1>{{ season.name }}</h1>
   <p class="season-dates">{{ season.start_date | date: "%B %-d, %Y" }} &ndash; {{ season.end_date | date: "%B %-d, %Y" }}</p>
 
-  <section class="season-teams">
+  <section class="season-teams season-section">
     <h2>Teams</h2>
     {% if season.teams and season.teams.size > 0 %}
-      <div class="teams-grid">
-        {% for team in season.teams %}
-          {% include team-card.html team=team %}
-        {% endfor %}
+      <div class="teams-carousel-wrapper">
+        <div class="teams-carousel">
+          {% for team in season.teams %}
+            {% include team-card.html team=team %}
+          {% endfor %}
+        </div>
       </div>
     {% else %}
       <p>No teams have been announced yet.</p>
     {% endif %}
   </section>
 
-  <section class="season-standings">
+  <section class="season-standings season-section">
     <h2>Standings</h2>
     {% include standings-table.html season=season %}
   </section>
 
-  <section class="season-schedule">
+  <section class="season-schedule season-section">
     <h2>Schedule</h2>
     <table class="schedule-table">
       <thead>
