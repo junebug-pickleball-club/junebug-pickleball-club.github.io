@@ -1,0 +1,31 @@
+{% assign match = include.match %}
+{% assign teams = include.teams %}
+
+{% assign home_name = match.home_team %}
+{% assign away_name = match.away_team %}
+{% for t in teams %}
+  {% if t.slug == match.home_team %}{% assign home_name = t.name %}{% endif %}
+  {% if t.slug == match.away_team %}{% assign away_name = t.name %}{% endif %}
+{% endfor %}
+
+<tr>
+  <td>{{ match.week }}</td>
+  <td>{{ home_name }}</td>
+  <td>{{ away_name }}</td>
+  <td>{{ match.location }}</td>
+  {% if match.result %}
+    <td>{{ match.result.mens_doubles.home }}–{{ match.result.mens_doubles.away }}</td>
+    <td>{{ match.result.womens_doubles.home }}–{{ match.result.womens_doubles.away }}</td>
+    <td>{{ match.result.mixed_doubles_1.home }}–{{ match.result.mixed_doubles_1.away }}</td>
+    <td>{{ match.result.mixed_doubles_2.home }}–{{ match.result.mixed_doubles_2.away }}</td>
+    <td>{{ match.result.mixed_doubles_3.home }}–{{ match.result.mixed_doubles_3.away }}</td>
+    <td>{{ match.result.mixed_doubles_4.home }}–{{ match.result.mixed_doubles_4.away }}</td>
+    {% if match.result.dreambreaker %}
+      <td>{{ match.result.dreambreaker.home }}–{{ match.result.dreambreaker.away }}</td>
+    {% else %}
+      <td>—</td>
+    {% endif %}
+  {% else %}
+    <td colspan="7"><span class="badge badge--scheduled">Scheduled</span></td>
+  {% endif %}
+</tr>

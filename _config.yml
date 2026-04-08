@@ -58,6 +58,20 @@ plugins:
 #  *All described config keys below should be nested under the top-level
 #   `minima` key.*
 #
+active_season: spring-2026
+
+collections:
+  seasons:
+    output: true
+    permalink: /seasons/:name
+
+defaults:
+  - scope:
+      path: ""
+      type: seasons
+    values:
+      layout: season
+
 minima:
   skin: solarized-dark
 #
@@ -94,4 +108,4 @@ minima:
 #     RSS / Atom feed link is always rendered as the last item of social-links
 #     list. Set below key to `true` to not have the link to feed rendered as
 #     part of social-links list.
-#   hide_site_feed_link: false
+  hide_site_feed_link: true

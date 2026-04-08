@@ -1,0 +1,122 @@
+<style>
+  .season-podium {
+    margin-bottom: 2rem;
+  }
+  .season-podium__heading {
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+    color: #93a1a1;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .podium-entries {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    width: 100%;
+  }
+  .podium-entry {
+    flex: 1 1 0;
+    min-width: 0;
+    border-radius: 6px;
+    padding: 0.6rem 0.5rem;
+    text-align: center;
+    background-color: #073642;
+    border: 2px solid transparent;
+  }
+  .podium-entry--gold {
+    border-color: #b58900;
+    order: 2;
+    padding-top: 0.9rem;
+  }
+  .podium-entry--silver {
+    border-color: #839496;
+    order: 1;
+  }
+  .podium-entry--bronze {
+    border-color: #cb4b16;
+    order: 3;
+  }
+  .podium-entry__medal {
+    display: block;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+  }
+  .podium-entry--gold   .podium-entry__medal { color: #b58900; }
+  .podium-entry--silver .podium-entry__medal { color: #839496; }
+  .podium-entry--bronze .podium-entry__medal { color: #cb4b16; }
+  .podium-entry__logo-wrap {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 0.5rem;
+  }
+  .podium-entry__logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+  .podium-entry__logo-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    background-color: #586e75;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .podium-entry__name {
+    font-size: 0.95rem;
+    color: #eee8d5;
+    margin: 0;
+    word-break: break-word;
+  }
+</style>
+
+<section class="season-podium season-section">
+  <h2 class="season-podium__heading">🏆 Season Champions</h2>
+  <div class="podium-entries">
+    {% assign rankings = include.season.finale_rankings %}
+    {% for slug in rankings limit:3 %}
+      {% assign medal_class = "" %}
+      {% assign medal_label = "" %}
+      {% if forloop.index == 1 %}
+        {% assign medal_class = "podium-entry--gold" %}
+        {% assign medal_label = "🥇 1st Place" %}
+      {% elsif forloop.index == 2 %}
+        {% assign medal_class = "podium-entry--silver" %}
+        {% assign medal_label = "🥈 2nd Place" %}
+      {% elsif forloop.index == 3 %}
+        {% assign medal_class = "podium-entry--bronze" %}
+        {% assign medal_label = "🥉 3rd Place" %}
+      {% endif %}
+
+      {% assign matched_team = nil %}
+      {% for team in include.season.teams %}
+        {% if team.slug == slug %}
+          {% assign matched_team = team %}
+        {% endif %}
+      {% endfor %}
+
+      <div class="podium-entry {{ medal_class }}">
+        <span class="podium-entry__medal">{{ medal_label }}</span>
+        <div class="podium-entry__logo-wrap">
+          {% if matched_team.logo %}
+            <img
+              class="podium-entry__logo"
+              src="{{ matched_team.logo }}"
+              alt="{{ matched_team.name }}"
+            >
+          {% else %}
+            <div class="podium-entry__logo-placeholder" aria-hidden="true"></div>
+          {% endif %}
+        </div>
+        <p class="podium-entry__name">
+          {% if matched_team %}{{ matched_team.name }}{% else %}{{ slug }}{% endif %}
+        </p>
+      </div>
+    {% endfor %}
+  </div>
+</section>

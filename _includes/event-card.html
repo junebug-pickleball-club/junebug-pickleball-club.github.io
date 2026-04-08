@@ -1,0 +1,10 @@
+<div class="event-card">
+  <h3 class="event-card__name">{{ include.event.name }}</h3>
+  <p class="event-card__date">{{ include.event.date | date: "%B %-d, %Y" }}</p>
+  {% if include.event.location %}
+  <p class="event-card__location">{{ include.event.location }}</p>
+  {% endif %}
+  {% if include.event.description %}
+  <p class="event-card__description">{{ include.event.description }}</p>
+  {% endif %}
+</div>

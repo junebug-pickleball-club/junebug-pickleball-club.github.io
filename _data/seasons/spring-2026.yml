@@ -1,0 +1,731 @@
+name: Spring 2026
+slug: spring-2026
+start_date: 2026-01-01
+end_date: 2026-04-30
+status: completed
+banner: /assets/images/seasons/spring-2026/season_finale_banner.jpeg
+finale_rankings:
+  - day-dinkers
+  - long-shots
+  - salsa-and-saltines
+
+teams:
+  - slug: servers-of-the-court
+    name: Servers of the Court
+    logo: /assets/images/team-logos/servers_of_the_court_logo.jpeg
+    home_court: Pickleball Hideout
+    roster:
+      - name: Amy Tucker
+        role: captain
+      - name: Nathan Cross
+        role: member
+      - name: Stephen Houston
+        slug: stevie
+        role: member
+      - name: Sonia Key
+        role: member
+
+  - slug: pickle-posse
+    name: Pickle Posse
+    logo: /assets/images/team-logos/the_pickle_posse_logo.jpeg
+    home_court: Pickleball Hideout
+    roster:
+      - name: Clay Mage
+        role: captain
+      - name: Erik Hernandez
+        role: member
+      - name: Darrah Mage
+        role: member
+      - name: Stephanie Babin
+        role: member
+
+  - slug: long-shots
+    name: Long Shots
+    logo: /assets/images/team-logos/the_long_shots_logo.png
+    home_court: Pickleball Hideout
+    roster:
+      - name: Brent Patane
+        role: captain
+      - name: Taylor Horton
+        role: member
+      - name: Vanessa
+        role: member
+      - name: Kelly
+        role: member
+
+  - slug: salsa-and-saltines
+    name: Salsa And Saltines
+    logo: /assets/images/team-logos/salt_and_saltines_logo.jpeg
+    home_court: Pickleball Hideout
+    roster:
+      - name: Cameron
+        role: captain
+      - name: Justin
+        role: member
+      - name: Callie
+        role: member
+      - name: Camry
+        role: member
+
+  - slug: day-dinkers
+    name: Day Dinkers
+    logo: /assets/images/team-logos/day_dinkers_logo.png
+    home_court: Pickleball Hideout
+    roster:
+      - name: James Schonian
+        role: captain
+      - name: Trent Justice
+        role: member
+      - name: Allana Montag
+        role: member
+      - name: Colleen Stockert
+        role: member
+
+schedule:
+  # ── Week 1 ──────────────────────────────────────────────────────────────────
+  - week: 1
+    date: 2026-03-08
+    location: Pickleball Hideout
+    home_team: day-dinkers
+    away_team: servers-of-the-court
+    result:
+      mens_doubles:
+        home: 12
+        away: 10
+        home_players: [James, Trent]
+        away_players: [Nathan, Stevie]
+      womens_doubles:
+        home: 6
+        away: 11
+        home_players: [Allana, Colleen]
+        away_players: [Amy, Sonia]
+      mixed_doubles_1:
+        home: 11
+        away: 8
+        home_players: [James, Allana]
+        away_players: [Nathan, Amy]
+      mixed_doubles_2:
+        home: 8
+        away: 11
+        home_players: [James, Colleen]
+        away_players: [Nathan, Sonia]
+      mixed_doubles_3:
+        home: 5
+        away: 11
+        home_players: [Trent, Allana]
+        away_players: [Stevie, Amy]
+      mixed_doubles_4:
+        home: 11
+        away: 8
+        home_players: [Trent, Colleen]
+        away_players: [Stevie, Sonia]
+      dreambreaker:
+        home: 21
+        away: 10
+        home_team: day-dinkers
+        away_team: servers-of-the-court
+
+  - week: 1
+    date: 2026-03-08
+    location: Pickleball Hideout
+    home_team: long-shots
+    away_team: salsa-and-saltines
+    result:
+      mens_doubles:
+        home: 12
+        away: 14
+        home_players: [Brent, Taylor]
+        away_players: [Cameron, Justin]
+      womens_doubles:
+        home: 11
+        away: 6
+        home_players: [Vanessa, Kelly]
+        away_players: [Callie, Camry]
+      mixed_doubles_1:
+        home: 11
+        away: 7
+        home_players: [Brent, Vanessa]
+        away_players: [Cameron, Camry]
+      mixed_doubles_2:
+        home: 5
+        away: 11
+        home_players: [Taylor, Vanessa]
+        away_players: [Justin, Callie]
+      mixed_doubles_3:
+        home: 11
+        away: 5
+        home_players: [Taylor, Kelly]
+        away_players: [Justin, Camry]
+      mixed_doubles_4:
+        home: 1
+        away: 11
+        home_players: [Brent, Kelly]
+        away_players: [Cameron, Callie]
+      dreambreaker:
+        home: 21
+        away: 18
+        home_team: long-shots
+        away_team: salsa-and-saltines
+
+  # ── Week 2 ──────────────────────────────────────────────────────────────────
+  - week: 2
+    date: 2026-03-15
+    location: Pickleball Hideout
+    home_team: pickle-posse
+    away_team: servers-of-the-court
+    result:
+      mens_doubles:
+        home: 13
+        away: 11
+        home_players: [Clay, Erik]
+        away_players: [Nathan, Stevie]
+      womens_doubles:
+        home: 3
+        away: 11
+        home_players: [Darrah, Stephanie]
+        away_players: [Amy, Sonia]
+      mixed_doubles_1:
+        home: 4
+        away: 11
+        home_players: [Erik, Darrah]
+        away_players: [Amy, Nathan]
+      mixed_doubles_2:
+        home: 4
+        away: 11
+        home_players: [Erik, Stephanie]
+        away_players: [Nathan, Sonia]
+      mixed_doubles_3:
+        home: 7
+        away: 11
+        home_players: [Clay, Darrah]
+        away_players: [Amy, Stevie]
+      mixed_doubles_4:
+        home: 8
+        away: 11
+        home_players: [Clay, Stephanie]
+        away_players: [Stevie, Sonia]
+
+  - week: 2
+    date: 2026-03-15
+    location: Pickleball Hideout
+    home_team: day-dinkers
+    away_team: salsa-and-saltines
+    result:
+      mens_doubles:
+        home: 6
+        away: 11
+        home_players: [James, Trent]
+        away_players: [Cameron, Justin]
+      womens_doubles:
+        home: 11
+        away: 5
+        home_players: [Allana, Colleen]
+        away_players: [Callie, Camry]
+      mixed_doubles_1:
+        home: 2
+        away: 11
+        home_players: [James, Allana]
+        away_players: [Cameron, Camry]
+      mixed_doubles_2:
+        home: 5
+        away: 11
+        home_players: [Trent, Colleen]
+        away_players: [Justin, Callie]
+      mixed_doubles_3:
+        home: 11
+        away: 5
+        home_players: [Trent, Allana]
+        away_players: [Justin, Camry]
+      mixed_doubles_4:
+        home: 3
+        away: 11
+        home_players: [James, Colleen]
+        away_players: [Cameron, Callie]
+
+  # ── Week 3 ──────────────────────────────────────────────────────────────────
+  - week: 3
+    date: 2026-03-22
+    location: Pickleball Hideout
+    home_team: servers-of-the-court
+    away_team: salsa-and-saltines
+    result:
+      mens_doubles:
+        home: 5
+        away: 11
+        home_players: [Stevie, Nathan]
+        away_players: [Justin, Cameron]
+      womens_doubles:
+        home: 12
+        away: 10
+        home_players: [Amy, Sonia]
+        away_players: [Camry, Callie]
+      mixed_doubles_1:
+        home: 11
+        away: 9
+        home_players: [Nathan, Amy]
+        away_players: [Cameron, Callie]
+      mixed_doubles_2:
+        home: 11
+        away: 3
+        home_players: [Stevie, Sonia]
+        away_players: [Camry, Justin]
+      mixed_doubles_3:
+        home: 11
+        away: 6
+        home_players: [Stevie, Amy]
+        away_players: [Justin, Callie]
+      mixed_doubles_4:
+        home: 11
+        away: 5
+        home_players: [Sonia, Nathan]
+        away_players: [Cameron, Camry]
+
+  - week: 3
+    date: 2026-03-22
+    location: Pickleball Hideout
+    home_team: pickle-posse
+    away_team: long-shots
+    result:
+      mens_doubles:
+        home: 3
+        away: 11
+        home_players: [Clay, Erick]
+        away_players: [Brent, Taylor]
+      womens_doubles:
+        home: 8
+        away: 11
+        home_players: [Darrah, Lisa]
+        away_players: [Vanessa, Kelly]
+        notes: Lisa (sub)
+      mixed_doubles_1:
+        home: 11
+        away: 7
+        home_players: [Erick, Lisa]
+        away_players: [Brent, Vanessa]
+        notes: Lisa (sub)
+      mixed_doubles_2:
+        home: 7
+        away: 11
+        home_players: [Clay, Darrah]
+        away_players: [Brent, Kelly]
+      mixed_doubles_3:
+        home: 11
+        away: 4
+        home_players: [Erick, Darrah]
+        away_players: [Taylor, Kelly]
+      mixed_doubles_4:
+        home: 5
+        away: 11
+        home_players: [Clay, Lisa]
+        away_players: [Taylor, Vanessa]
+        notes: Lisa (sub)
+
+  # ── Week 4 ──────────────────────────────────────────────────────────────────
+  - week: 4
+    date: 2026-03-29
+    location: Pickleball Hideout
+    home_team: pickle-posse
+    away_team: salsa-and-saltines
+    result:
+      mens_doubles:
+        home: 1
+        away: 11
+        home_players: [Clay, Erik]
+        away_players: [Cameron, Mike]
+        notes: Mike (sub)
+      womens_doubles:
+        home: 5
+        away: 11
+        home_players: [Stephanie, Lisa]
+        away_players: [Callie, Camry]
+        notes: Lisa (sub)
+      mixed_doubles_1:
+        home: 2
+        away: 11
+        home_players: [Erick, Stephanie]
+        away_players: [Cameron, Camry]
+      mixed_doubles_2:
+        home: 6
+        away: 11
+        home_players: [Clay, Lisa]
+        away_players: [Mike, Callie]
+        notes: Mike (sub), Lisa (sub)
+      mixed_doubles_3:
+        home: 11
+        away: 9
+        home_players: [Erick, Lisa]
+        away_players: [Mike, Camry]
+        notes: Mike (sub), Lisa (sub)
+      mixed_doubles_4:
+        home: 2
+        away: 11
+        home_players: [Clay, Stephanie]
+        away_players: [Cameron, Callie]
+
+  - week: 4
+    date: 2026-03-29
+    location: Pickleball Hideout
+    home_team: long-shots
+    away_team: day-dinkers
+    result:
+      mens_doubles:
+        home: 5
+        away: 11
+        home_players: [Brent, Taylor]
+        away_players: [James, Trent]
+      womens_doubles:
+        home: 6
+        away: 11
+        home_players: [Vanessa, Kelly]
+        away_players: [Colleen, Allana]
+      mixed_doubles_1:
+        home: 10
+        away: 12
+        home_players: [Taylor, Kelly]
+        away_players: [Trent, Allana]
+      mixed_doubles_2:
+        home: 11
+        away: 6
+        home_players: [Taylor, Vanessa]
+        away_players: [Trent, Colleen]
+      mixed_doubles_3:
+        home: 11
+        away: 5
+        home_players: [Brent, Kelly]
+        away_players: [James, Allana]
+      mixed_doubles_4:
+        home: 11
+        away: 3
+        home_players: [Brent, Vanessa]
+        away_players: [James, Colleen]
+      dreambreaker:
+        home: 26
+        away: 24
+        home_team: long-shots
+        away_team: day-dinkers
+
+  # ── Week 5 ──────────────────────────────────────────────────────────────────
+  - week: 5
+    date: 2026-04-05
+    location: Pickleball Hideout
+    home_team: servers-of-the-court
+    away_team: long-shots
+    result:
+      mens_doubles:
+        home: 10
+        away: 12
+        home_players: [Nathan, Stevie]
+        away_players: [Brent, Taylor]
+      womens_doubles:
+        home: 11
+        away: 4
+        home_players: [Amy, Sonia]
+        away_players: [Vanessa, Kelly]
+      mixed_doubles_1:
+        home: 9
+        away: 11
+        home_players: [Nathan, Amy]
+        away_players: [Brent, Vanessa]
+      mixed_doubles_2:
+        home: 5
+        away: 11
+        home_players: [Nathan, Sonia]
+        away_players: [Brent, Kelly]
+      mixed_doubles_3:
+        home: 11
+        away: 2
+        home_players: [Stevie, Sonia]
+        away_players: [Taylor, Kelly]
+      mixed_doubles_4:
+        home: 11
+        away: 5
+        home_players: [Stevie, Amy]
+        away_players: [Taylor, Vanessa]
+      dreambreaker:
+        home: 12
+        away: 21
+        home_team: servers-of-the-court
+        away_team: long-shots
+
+  - week: 5
+    date: 2026-04-05
+    location: Pickleball Hideout
+    home_team: pickle-posse
+    away_team: day-dinkers
+    result:
+      mens_doubles:
+        home: 11
+        away: 7
+        home_players: [Clay, Erick]
+        away_players: [James, Trent]
+      womens_doubles:
+        home: 3
+        away: 11
+        home_players: [Stephanie, Darrah]
+        away_players: [Allana, Colleen]
+      mixed_doubles_1:
+        home: 7
+        away: 11
+        home_players: [Erick, Stephanie]
+        away_players: [Trent, Colleen]
+      mixed_doubles_2:
+        home: 7
+        away: 11
+        home_players: [Clay, Darrah]
+        away_players: [Trent, Allana]
+      mixed_doubles_3:
+        home: 9
+        away: 11
+        home_players: [Erick, Darrah]
+        away_players: [James, Allana]
+      mixed_doubles_4:
+        home: 11
+        away: 5
+        home_players: [Mike, Stephanie]
+        away_players: [James, Colleen]
+        notes: Mike (sub)
+
+  # ── Week 6 ──────────────────────────────────────────────────────────────────
+  - week: 6
+    date: 2026-04-12
+    location: Pickleball Hideout
+    home_team: salsa-and-saltines
+    away_team: servers-of-the-court
+    result:
+      mens_doubles:
+        home: 11
+        away: 8
+        home_players: [Cameron, Justin]
+        away_players: [Nathan, Stevie]
+      womens_doubles:
+        home: 8
+        away: 11
+        home_players: [Callie, Camry]
+        away_players: [Sonia, Amy]
+      mixed_doubles_1:
+        home: 3
+        away: 11
+        home_players: [Justin, Camry]
+        away_players: [Nathan, Amy]
+      mixed_doubles_2:
+        home: 11
+        away: 8
+        home_players: [Justin, Callie]
+        away_players: [Stevie, Sonia]
+      mixed_doubles_3:
+        home: 11
+        away: 5
+        home_players: [Cameron, Camry]
+        away_players: [Stevie, Amy]
+      mixed_doubles_4:
+        home: 11
+        away: 4
+        home_players: [Cameron, Callie]
+        away_players: [Nathan, Sonia]
+
+  - week: 6
+    date: 2026-04-12
+    location: Pickleball Hideout
+    home_team: long-shots
+    away_team: pickle-posse
+    result:
+      mens_doubles:
+        home: 11
+        away: 4
+        home_players: [Brent, Taylor]
+        away_players: [Erick, Matt]
+        notes: Matt (sub)
+      womens_doubles:
+        home: 11
+        away: 4
+        home_players: [Vanessa, Kelly]
+        away_players: [Stephanie, Darrah]
+      mixed_doubles_1:
+        home: 11
+        away: 4
+        home_players: [Brent, Vanessa]
+        away_players: [Erick, Stephanie]
+      mixed_doubles_2:
+        home: 11
+        away: 7
+        home_players: [Brent, Kelly]
+        away_players: [Erick, Darrah]
+      mixed_doubles_3:
+        home: 11
+        away: 7
+        home_players: [Taylor, Kelly]
+        away_players: [Matt, Darrah]
+        notes: Matt (sub)
+      mixed_doubles_4:
+        home: 11
+        away: 2
+        home_players: [Taylor, Vanessa]
+        away_players: [Matt, Steph]
+        notes: Matt (sub)
+
+  # ── Week 7A ─────────────────────────────────────────────────────────────────
+  - week: 7
+    date: 2026-04-19
+    location: Pickleball Hideout
+    home_team: servers-of-the-court
+    away_team: day-dinkers
+    result:
+      mens_doubles:
+        home: 0
+        away: 11
+        home_players: [Nathan, Stevie]
+        away_players: [James, Trent]
+      womens_doubles:
+        home: 11
+        away: 13
+        home_players: [Amy, Sonia]
+        away_players: [Allanna, Colleen]
+      mixed_doubles_1:
+        home: 4
+        away: 11
+        home_players: [Nathan, Amy]
+        away_players: [James, Allana]
+      mixed_doubles_2:
+        home: 9
+        away: 11
+        home_players: [Stevie, Sonia]
+        away_players: [Trent, Colleen]
+      mixed_doubles_3:
+        home: 5
+        away: 11
+        home_players: [Nathan, Sonia]
+        away_players: [James, Colleen]
+      mixed_doubles_4:
+        home: 0
+        away: 11
+        home_players: [Stevie, Amy]
+        away_players: [Trent, Allana]
+
+  - week: 7
+    date: 2026-04-19
+    location: Pickleball Hideout
+    home_team: salsa-and-saltines
+    away_team: pickle-posse
+    result:
+      mens_doubles:
+        home: 4
+        away: 11
+        home_players: [Cameron, Justin]
+        away_players: [Erick, Mike]
+        notes: Mike (sub)
+      womens_doubles:
+        home: 11
+        away: 7
+        home_players: [Camry, Callie]
+        away_players: [Darrah, Lisa]
+        notes: Lisa (sub)
+      mixed_doubles_1:
+        home: 11
+        away: 9
+        home_players: [Cameron, Camry]
+        away_players: [Erick, Darrah]
+      mixed_doubles_2:
+        home: 11
+        away: 7
+        home_players: [Justin, Camry]
+        away_players: [Mike, Darrah]
+        notes: Mike (sub)
+      mixed_doubles_3:
+        home: 12
+        away: 10
+        home_players: [Justin, Callie]
+        away_players: [Erick, Lisa]
+        notes: Lisa (sub)
+      mixed_doubles_4:
+        home: 11
+        away: 6
+        home_players: [Cameron, Callie]
+        away_players: [Mike, Lisa]
+        notes: Mike (sub), Lisa (sub)
+
+  # ── Week 7B ─────────────────────────────────────────────────────────────────
+  - week: 7
+    date: 2026-04-19
+    location: Pickleball Hideout
+    home_team: salsa-and-saltines
+    away_team: day-dinkers
+    result:
+      mens_doubles:
+        home: 1
+        away: 11
+        home_players: [Justin, Judd]
+        away_players: [James, Trent]
+        notes: Judd (sub)
+      womens_doubles:
+        home: 11
+        away: 8
+        home_players: [Callie, Camry]
+        away_players: [Allana, Colleen]
+      mixed_doubles_1:
+        home: 11
+        away: 9
+        home_players: [Justin, Callie]
+        away_players: [James, Allana]
+      mixed_doubles_2:
+        home: 11
+        away: 7
+        home_players: [Justin, Camry]
+        away_players: [Trent, Colleen]
+      mixed_doubles_3:
+        home: 0
+        away: 11
+        home_players: [Judd, Camry]
+        away_players: [James, Colleen]
+        notes: Judd (sub)
+      mixed_doubles_4:
+        home: 2
+        away: 11
+        home_players: [Judd, Callie]
+        away_players: [Trent, Allana]
+        notes: Judd (sub)
+      dreambreaker:
+        home: 12
+        away: 21
+        home_team: salsa-and-saltines
+        away_team: day-dinkers
+
+  # ── Week 8B ─────────────────────────────────────────────────────────────────
+  - week: 8
+    date: 2026-04-26
+    location: Pickleball Hideout
+    home_team: day-dinkers
+    away_team: pickle-posse
+    result:
+      mens_doubles:
+        home: 11
+        away: 6
+        home_players: [James, Trent]
+        away_players: [Mike, Erick]
+        notes: Mike (sub)
+      womens_doubles:
+        home: 11
+        away: 5
+        home_players: [Allana, Colleen]
+        away_players: [Stephanie, Darrah]
+      mixed_doubles_1:
+        home: 11
+        away: 8
+        home_players: [Trent, Allana]
+        away_players: [Erick, Darrah]
+      mixed_doubles_2:
+        home: 5
+        away: 11
+        home_players: [James, Colleen]
+        away_players: [Mike, Stephanie]
+        notes: Mike (sub)
+      mixed_doubles_3:
+        home: 11
+        away: 7
+        home_players: [James, Allana]
+        away_players: [Erick, Stephanie]
+      mixed_doubles_4:
+        home: 11
+        away: 5
+        home_players: [Trent, Colleen]
+        away_players: [Mike, Darrah]
+        notes: Mike (sub)

@@ -1,0 +1,59 @@
+---
+layout: default
+---
+{% assign season = site.data.seasons[page.data_file] %}
+
+<div class="season-detail">
+  <h1>{{ season.name }}</h1>
+  <p class="season-dates">{{ season.start_date | date: "%B %-d, %Y" }} &ndash; {{ season.end_date | date: "%B %-d, %Y" }}</p>
+
+  {% if season.status == "completed" and season.finale_rankings and season.finale_rankings.size > 0 %}
+    {% include season-podium.html season=season %}
+  {% endif %}
+
+  <section class="season-standings season-section">
+    <h2>Standings</h2>
+    {% include standings-table.html season=season %}
+  </section>
+
+  <section class="season-schedule season-section">
+    <h2>Schedule</h2>
+    <table class="schedule-table">
+      <thead>
+        <tr>
+          <th>Week</th>
+          <th>Home</th>
+          <th>Away</th>
+          <th>Location</th>
+          <th>Men's Doubles</th>
+          <th>Women's Doubles</th>
+          <th>Mixed Doubles 1</th>
+          <th>Mixed Doubles 2</th>
+          <th>Mixed Doubles 3</th>
+          <th>Mixed Doubles 4</th>
+          <th>Dreambreaker</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for match in season.schedule %}
+          {% include match-row.html match=match teams=season.teams %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="season-teams season-section">
+    <h2>Teams</h2>
+    {% if season.teams and season.teams.size > 0 %}
+      <div class="teams-carousel-wrapper">
+        <div class="teams-carousel">
+          {% for team in season.teams %}
+            {% include team-card.html team=team %}
+          {% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <p>No teams have been announced yet.</p>
+    {% endif %}
+  </section>
+</div>

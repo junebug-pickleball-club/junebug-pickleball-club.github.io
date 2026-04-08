@@ -1,0 +1,722 @@
+---
+layout: page
+title: Submit Match
+permalink: /submit-match/
+---
+
+<div class="submit-form">
+
+  <div id="success-banner" class="banner success" role="alert"></div>
+  <div id="error-banner" class="banner error" role="alert"></div>
+
+  <!-- PAT Section -->
+  <div class="pat-section">
+    <h3>GitHub Token</h3>
+    <p>A Personal Access Token with <code>repo</code> scope is required to submit match results. Your token is stored locally in your browser and never sent to our servers.</p>
+    <div class="pat-row">
+      <div class="form-group">
+        <label for="pat-input">Personal Access Token</label>
+        <input type="password" id="pat-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+      </div>
+    </div>
+    <div style="margin-top: 10px;">
+      <a id="clear-token-link" onclick="clearToken()">Clear token</a>
+    </div>
+  </div>
+
+  <form id="match-form" novalidate data-repo-owner="{{ site.github_username }}">
+
+    <!-- Season -->
+    <div class="form-group" id="group-season">
+      <label for="season-select">Season</label>
+      <select id="season-select" name="season" required>
+        <option value="">— select —</option>
+        {% if site.seasons %}
+        {% assign sorted_seasons = site.seasons | sort: "start_date" | reverse %}
+        {% for s in sorted_seasons %}
+        <option value="{{ s.data_file }}"{% if s.data_file == site.active_season %} selected{% endif %}>{{ s.title }}</option>
+        {% endfor %}
+        {% endif %}
+      </select>
+      <div class="field-error" id="err-season">Please select a season.</div>
+    </div>
+
+    <!-- Teams -->
+    <div class="form-row">
+      <div class="form-group" id="group-home_team">
+        <label for="home-team">Home Team</label>
+        <select id="home-team" name="home_team" required disabled>
+          <option value="">— select —</option>
+        </select>
+        <div class="field-error" id="err-home_team">Please select a home team.</div>
+      </div>
+      <div class="form-group" id="group-away_team">
+        <label for="away-team">Away Team</label>
+        <select id="away-team" name="away_team" required disabled>
+          <option value="">— select —</option>
+        </select>
+        <div class="field-error" id="err-away_team">Please select an away team.</div>
+      </div>
+    </div>
+
+    <!-- Week + Date + Location -->
+    <div class="form-row">
+      <div class="form-group" id="group-week">
+        <label for="week-number">Week Number</label>
+        <input type="number" id="week-number" name="week" min="1" max="52" placeholder="1" required>
+        <div class="field-error" id="err-week">Please enter a week number.</div>
+      </div>
+      <div class="form-group" id="group-match_date">
+        <label for="match-date">Match Date</label>
+        <input type="date" id="match-date" name="match_date" required>
+        <div class="field-error" id="err-match_date">Please select a match date.</div>
+      </div>
+    </div>
+
+    <div class="form-group" id="group-location">
+      <label for="location">Location</label>
+      <input type="text" id="location" name="location" placeholder="e.g. Pickleball Hideout" required>
+      <div class="field-error" id="err-location">Please enter a location.</div>
+    </div>
+
+    <!-- Scores -->
+    <div class="scores-section">
+      <h3>Scores</h3>
+      <div class="score-header">
+        <span>Game</span>
+        <span>Player 1</span>
+        <span>Player 2</span>
+        <span>Score</span>
+        <span></span>
+        <span>Score</span>
+        <span>Player 1</span>
+        <span>Player 2</span>
+      </div>
+
+      <div class="score-row">
+        <label>Men's Doubles</label>
+        <select id="mens_home_p1" name="mens_home_p1" disabled><option value=""></option></select>
+        <select id="mens_home_p2" name="mens_home_p2" disabled><option value=""></option></select>
+        <input type="number" id="mens-home" name="mens_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
+        <input type="number" id="mens-away" name="mens_away" min="0" placeholder="0" required>
+        <select id="mens_away_p1" name="mens_away_p1" disabled><option value=""></option></select>
+        <select id="mens_away_p2" name="mens_away_p2" disabled><option value=""></option></select>
+      </div>
+      <div class="score-row">
+        <label>Women's Doubles</label>
+        <select id="womens_home_p1" name="womens_home_p1" disabled><option value=""></option></select>
+        <select id="womens_home_p2" name="womens_home_p2" disabled><option value=""></option></select>
+        <input type="number" id="womens-home" name="womens_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
+        <input type="number" id="womens-away" name="womens_away" min="0" placeholder="0" required>
+        <select id="womens_away_p1" name="womens_away_p1" disabled><option value=""></option></select>
+        <select id="womens_away_p2" name="womens_away_p2" disabled><option value=""></option></select>
+      </div>
+      <div class="score-row">
+        <label>Mixed Doubles 1</label>
+        <select id="mixed_1_home_p1" name="mixed_1_home_p1" disabled><option value=""></option></select>
+        <select id="mixed_1_home_p2" name="mixed_1_home_p2" disabled><option value=""></option></select>
+        <input type="number" id="mixed-1-home" name="mixed_1_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
+        <input type="number" id="mixed-1-away" name="mixed_1_away" min="0" placeholder="0" required>
+        <select id="mixed_1_away_p1" name="mixed_1_away_p1" disabled><option value=""></option></select>
+        <select id="mixed_1_away_p2" name="mixed_1_away_p2" disabled><option value=""></option></select>
+      </div>
+      <div class="score-row">
+        <label>Mixed Doubles 2</label>
+        <select id="mixed_2_home_p1" name="mixed_2_home_p1" disabled><option value=""></option></select>
+        <select id="mixed_2_home_p2" name="mixed_2_home_p2" disabled><option value=""></option></select>
+        <input type="number" id="mixed-2-home" name="mixed_2_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
+        <input type="number" id="mixed-2-away" name="mixed_2_away" min="0" placeholder="0" required>
+        <select id="mixed_2_away_p1" name="mixed_2_away_p1" disabled><option value=""></option></select>
+        <select id="mixed_2_away_p2" name="mixed_2_away_p2" disabled><option value=""></option></select>
+      </div>
+      <div class="score-row">
+        <label>Mixed Doubles 3</label>
+        <select id="mixed_3_home_p1" name="mixed_3_home_p1" disabled><option value=""></option></select>
+        <select id="mixed_3_home_p2" name="mixed_3_home_p2" disabled><option value=""></option></select>
+        <input type="number" id="mixed-3-home" name="mixed_3_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
+        <input type="number" id="mixed-3-away" name="mixed_3_away" min="0" placeholder="0" required>
+        <select id="mixed_3_away_p1" name="mixed_3_away_p1" disabled><option value=""></option></select>
+        <select id="mixed_3_away_p2" name="mixed_3_away_p2" disabled><option value=""></option></select>
+      </div>
+      <div class="score-row">
+        <label>Mixed Doubles 4</label>
+        <select id="mixed_4_home_p1" name="mixed_4_home_p1" disabled><option value=""></option></select>
+        <select id="mixed_4_home_p2" name="mixed_4_home_p2" disabled><option value=""></option></select>
+        <input type="number" id="mixed-4-home" name="mixed_4_home" min="0" placeholder="0" required>
+        <span class="vs-sep">vs</span>
+        <input type="number" id="mixed-4-away" name="mixed_4_away" min="0" placeholder="0" required>
+        <select id="mixed_4_away_p1" name="mixed_4_away_p1" disabled><option value=""></option></select>
+        <select id="mixed_4_away_p2" name="mixed_4_away_p2" disabled><option value=""></option></select>
+      </div>
+      <div class="score-row score-row--dreambreaker">
+        <label>Dreambreaker <span class="label-optional">(optional)</span></label>
+        <span></span>
+        <span></span>
+        <input type="number" id="dream-home" name="dream_home" min="0" placeholder="0">
+        <span class="vs-sep">vs</span>
+        <input type="number" id="dream-away" name="dream_away" min="0" placeholder="0">
+        <span></span>
+        <span></span>
+      </div>
+
+      <div id="score-errors" class="score-errors">
+        Please fill in all score fields.
+      </div>
+    </div>
+
+    <button type="submit" class="btn-primary" id="submit-btn">Submit Match Result</button>
+  </form>
+</div>
+
+<script type="application/json" id="season-teams-data">
+{
+  {% for s in site.seasons %}
+  {% assign season_data = site.data.seasons[s.data_file] %}
+  "{{ s.data_file }}": [
+    {% for team in season_data.teams %}
+    { "slug": "{{ team.slug }}", "name": "{{ team.name }}", "roster": [{% for p in team.roster %}"{{ p.name }}"{% unless forloop.last %},{% endunless %}{% endfor %}] }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ]{% unless forloop.last %},{% endunless %}
+  {% endfor %}
+}
+</script>
+
+<script>
+const SEASON_TEAMS = JSON.parse(document.getElementById('season-teams-data').textContent);
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Config ──────────────────────────────────────────────────────────────────
+  const REPO_OWNER = document.getElementById('match-form').dataset.repoOwner;
+  const REPO_NAME  = 'pickleball-club-site'; // update if repo name differs
+  const PAT_KEY    = 'jpl_github_pat';
+
+  // ── PAT helpers ─────────────────────────────────────────────────────────────
+  function loadPat() {
+    return localStorage.getItem(PAT_KEY) || '';
+  }
+
+  function savePat(token) {
+    localStorage.setItem(PAT_KEY, token);
+  }
+
+  function clearToken() {
+    localStorage.removeItem(PAT_KEY);
+    document.getElementById('pat-input').value = '';
+    showError('Token cleared.');
+  }
+  window.clearToken = clearToken;
+
+  // Pre-fill PAT field from storage on load
+  document.addEventListener('DOMContentLoaded', function () {
+    const stored = loadPat();
+    if (stored) document.getElementById('pat-input').value = stored;
+  });
+
+  // ── Season-aware team dropdowns ──────────────────────────────────────────────
+  function populateTeamDropdowns(seasonKey) {
+    var homeSelect = document.getElementById('home-team');
+    var awaySelect = document.getElementById('away-team');
+    var teams = (typeof SEASON_TEAMS !== 'undefined' && SEASON_TEAMS[seasonKey]) ? SEASON_TEAMS[seasonKey] : [];
+
+    // Reset both selects to placeholder only
+    homeSelect.innerHTML = '<option value="">— select —</option>';
+    awaySelect.innerHTML = '<option value="">— select —</option>';
+
+    if (teams.length > 0) {
+      teams.forEach(function (team) {
+        var optHome = document.createElement('option');
+        optHome.value = team.slug;
+        optHome.textContent = team.name;
+        homeSelect.appendChild(optHome);
+
+        var optAway = document.createElement('option');
+        optAway.value = team.slug;
+        optAway.textContent = team.name;
+        awaySelect.appendChild(optAway);
+      });
+      homeSelect.disabled = false;
+      awaySelect.disabled = false;
+    } else {
+      homeSelect.disabled = true;
+      awaySelect.disabled = true;
+    }
+  }
+  window.populateTeamDropdowns = populateTeamDropdowns;
+
+  // ── Player dropdowns ─────────────────────────────────────────────────────────
+  var GAME_PREFIXES = ['mens', 'womens', 'mixed_1', 'mixed_2', 'mixed_3', 'mixed_4'];
+
+  function resetPlayerDropdowns() {
+    GAME_PREFIXES.forEach(function (prefix) {
+      ['home', 'away'].forEach(function (side) {
+        ['p1', 'p2'].forEach(function (slot) {
+          var sel = document.getElementById(prefix + '_' + side + '_' + slot);
+          if (!sel) return;
+          sel.innerHTML = '<option value=""></option>';
+          sel.disabled = true;
+        });
+      });
+    });
+  }
+  window.resetPlayerDropdowns = resetPlayerDropdowns;
+
+  function populatePlayerDropdowns(side, teamSlug, seasonKey) {
+    var teams = (typeof SEASON_TEAMS !== 'undefined' && SEASON_TEAMS[seasonKey]) ? SEASON_TEAMS[seasonKey] : [];
+    var team = teams.find(function (t) { return t.slug === teamSlug; });
+    var roster = (team && team.roster && team.roster.length > 0) ? team.roster : [];
+
+    GAME_PREFIXES.forEach(function (prefix) {
+      ['p1', 'p2'].forEach(function (slot) {
+        var selectId = prefix + '_' + side + '_' + slot;
+        var sel = document.getElementById(selectId);
+        if (!sel) return;
+
+        // Replace all options with blank placeholder + one per roster name
+        sel.innerHTML = '<option value=""></option>';
+        roster.forEach(function (name) {
+          var opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          sel.appendChild(opt);
+        });
+
+        sel.disabled = roster.length === 0;
+      });
+    });
+  }
+  window.populatePlayerDropdowns = populatePlayerDropdowns;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var seasonSelect = document.getElementById('season-select');
+
+    // Pre-populate teams if a season is already selected (e.g. active season default)
+    if (seasonSelect.value) {
+      populateTeamDropdowns(seasonSelect.value);
+    }
+
+    seasonSelect.addEventListener('change', function () {
+      // Clear previously selected team values
+      document.getElementById('home-team').value = '';
+      document.getElementById('away-team').value = '';
+      populateTeamDropdowns(this.value);
+      resetPlayerDropdowns();
+    });
+
+    document.getElementById('match-form').addEventListener('reset', function () {
+      resetPlayerDropdowns();
+    });
+
+    document.getElementById('home-team').addEventListener('change', function () {
+      var homeTeamSlug = this.value;
+      var seasonKey = seasonSelect.value;
+      populatePlayerDropdowns('home', homeTeamSlug, seasonKey);
+    });
+
+    document.getElementById('away-team').addEventListener('change', function () {
+      var awayTeamSlug = this.value;
+      var seasonKey = seasonSelect.value;
+      populatePlayerDropdowns('away', awayTeamSlug, seasonKey);
+    });
+  });
+
+  // ── validateForm ─────────────────────────────────────────────────────────────
+  /**
+   * Validates required form fields.
+   * @param {Object} fields - map of fieldName → value
+   * @returns {Object} Object with `valid` boolean and `missing` string array
+   */
+  function validateForm(fields) {
+    const required = [
+      'home_team', 'away_team', 'season', 'week', 'match_date', 'location',
+      'mens_home', 'mens_away', 'womens_home', 'womens_away',
+      'mixed_1_home', 'mixed_1_away',
+      'mixed_2_home', 'mixed_2_away',
+      'mixed_3_home', 'mixed_3_away',
+      'mixed_4_home', 'mixed_4_away',
+      // dream_home and dream_away are intentionally absent
+      'mens_home_p1', 'mens_home_p2', 'mens_away_p1', 'mens_away_p2',
+      'womens_home_p1', 'womens_home_p2', 'womens_away_p1', 'womens_away_p2',
+      'mixed_1_home_p1', 'mixed_1_home_p2', 'mixed_1_away_p1', 'mixed_1_away_p2',
+      'mixed_2_home_p1', 'mixed_2_home_p2', 'mixed_2_away_p1', 'mixed_2_away_p2',
+      'mixed_3_home_p1', 'mixed_3_home_p2', 'mixed_3_away_p1', 'mixed_3_away_p2',
+      'mixed_4_home_p1', 'mixed_4_home_p2', 'mixed_4_away_p1', 'mixed_4_away_p2',
+    ];
+    const missing = required.filter(function (key) {
+      const val = fields[key];
+      return val === undefined || val === null || String(val).trim() === '';
+    });
+    return { valid: missing.length === 0, missing: missing };
+  }
+
+  // ── serializeMatchYaml ───────────────────────────────────────────────────────
+  /**
+   * Serializes a match object to a YAML schedule entry string.
+   * @param {Object} match
+   * @returns {string}
+   */
+  function serializeMatchYaml(match) {
+    function playerLines(game) {
+      const out = [];
+      if (game.home_players && game.home_players.length > 0) {
+        out.push('        home_players: [' + game.home_players.map(function (n) { return '"' + n + '"'; }).join(', ') + ']');
+      }
+      if (game.away_players && game.away_players.length > 0) {
+        out.push('        away_players: [' + game.away_players.map(function (n) { return '"' + n + '"'; }).join(', ') + ']');
+      }
+      return out;
+    }
+
+    const lines = [
+      '  - week: ' + match.week,
+      '    date: ' + match.date,
+      '    location: "' + match.location + '"',
+      '    home_team: ' + match.home_team,
+      '    away_team: ' + match.away_team,
+      '    result:',
+      '      mens_doubles:',
+      '        home: ' + match.result.mens_doubles.home,
+      '        away: ' + match.result.mens_doubles.away,
+      ...playerLines(match.result.mens_doubles),
+      '      womens_doubles:',
+      '        home: ' + match.result.womens_doubles.home,
+      '        away: ' + match.result.womens_doubles.away,
+      ...playerLines(match.result.womens_doubles),
+      '      mixed_doubles_1:',
+      '        home: ' + match.result.mixed_doubles_1.home,
+      '        away: ' + match.result.mixed_doubles_1.away,
+      ...playerLines(match.result.mixed_doubles_1),
+      '      mixed_doubles_2:',
+      '        home: ' + match.result.mixed_doubles_2.home,
+      '        away: ' + match.result.mixed_doubles_2.away,
+      ...playerLines(match.result.mixed_doubles_2),
+      '      mixed_doubles_3:',
+      '        home: ' + match.result.mixed_doubles_3.home,
+      '        away: ' + match.result.mixed_doubles_3.away,
+      ...playerLines(match.result.mixed_doubles_3),
+      '      mixed_doubles_4:',
+      '        home: ' + match.result.mixed_doubles_4.home,
+      '        away: ' + match.result.mixed_doubles_4.away,
+      ...playerLines(match.result.mixed_doubles_4),
+    ];
+    if (match.result.dreambreaker != null) {
+      lines.push(
+        '      dreambreaker:',
+        '        home: ' + match.result.dreambreaker.home,
+        '        away: ' + match.result.dreambreaker.away
+      );
+    }
+    return lines.join('\n');
+  }
+
+  // ── GitHub API helpers ───────────────────────────────────────────────────────
+  function apiHeaders(pat) {
+    return {
+      'Authorization': 'token ' + pat,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    };
+  }
+
+  function apiUrl(path) {
+    return 'https://api.github.com' + path;
+  }
+
+  async function getMainHeadSha(pat, owner, repo) {
+    const res = await fetch(apiUrl('/repos/' + owner + '/' + repo + '/git/ref/heads/main'), {
+      headers: apiHeaders(pat)
+    });
+    if (!res.ok) throw { status: res.status, step: 'getRef' };
+    const data = await res.json();
+    return data.object.sha;
+  }
+
+  async function getFileContents(pat, owner, repo, filePath) {
+    const res = await fetch(apiUrl('/repos/' + owner + '/' + repo + '/contents/' + filePath), {
+      headers: apiHeaders(pat)
+    });
+    if (!res.ok) throw { status: res.status, step: 'getFile' };
+    return res.json(); // { content (base64), sha, ... }
+  }
+
+  async function createBranch(pat, owner, repo, branchName, sha) {
+    const res = await fetch(apiUrl('/repos/' + owner + '/' + repo + '/git/refs'), {
+      method: 'POST',
+      headers: apiHeaders(pat),
+      body: JSON.stringify({ ref: 'refs/heads/' + branchName, sha: sha })
+    });
+    if (!res.ok) throw { status: res.status, step: 'createBranch' };
+    return res.json();
+  }
+
+  async function updateFile(pat, owner, repo, filePath, message, content, fileSha, branchName) {
+    const res = await fetch(apiUrl('/repos/' + owner + '/' + repo + '/contents/' + filePath), {
+      method: 'PUT',
+      headers: apiHeaders(pat),
+      body: JSON.stringify({
+        message: message,
+        content: btoa(unescape(encodeURIComponent(content))),
+        sha: fileSha,
+        branch: branchName
+      })
+    });
+    if (!res.ok) throw { status: res.status, step: 'updateFile' };
+    return res.json();
+  }
+
+  async function createPullRequest(pat, owner, repo, title, body, head, base) {
+    const res = await fetch(apiUrl('/repos/' + owner + '/' + repo + '/pulls'), {
+      method: 'POST',
+      headers: apiHeaders(pat),
+      body: JSON.stringify({ title: title, body: body, head: head, base: base })
+    });
+    if (!res.ok) throw { status: res.status, step: 'createPR' };
+    return res.json(); // { html_url, ... }
+  }
+
+  // ── submitMatchResult ────────────────────────────────────────────────────────
+  /**
+   * Orchestrates the full GitHub API call sequence to submit a match result.
+   * 1. GET season file → base64 content + sha
+   * 2a. POST create branch
+   * 2b. PUT updated file to branch
+   * 3. POST create PR
+   *
+   * @param {Object} formData  - parsed form values
+   * @param {string} pat       - GitHub Personal Access Token
+   * @param {string} repoOwner
+   * @param {string} repoName
+   * @returns {Promise<string>} PR URL on success
+   */
+  async function submitMatchResult(formData, pat, repoOwner, repoName) {
+    const seasonSlug = formData.season;
+    const filePath   = '_data/seasons/' + seasonSlug + '.yml';
+
+    // 1. Fetch current season file
+    const fileInfo = await getFileContents(pat, repoOwner, repoName, filePath);
+    const currentYaml = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g, ''))));
+    const fileSha = fileInfo.sha;
+
+    // Build match YAML snippet and append to schedule
+    const dreamHome = formData.dream_home !== '' ? Number(formData.dream_home) : null;
+    const dreamAway = formData.dream_away !== '' ? Number(formData.dream_away) : null;
+    const matchObj = {
+      week:      formData.week,
+      date:      formData.match_date,
+      location:  formData.location,
+      home_team: formData.home_team,
+      away_team: formData.away_team,
+      result: {
+        mens_doubles:    { home: Number(formData.mens_home),    away: Number(formData.mens_away),    home_players: [formData.mens_home_p1,    formData.mens_home_p2],    away_players: [formData.mens_away_p1,    formData.mens_away_p2] },
+        womens_doubles:  { home: Number(formData.womens_home),  away: Number(formData.womens_away),  home_players: [formData.womens_home_p1,  formData.womens_home_p2],  away_players: [formData.womens_away_p1,  formData.womens_away_p2] },
+        mixed_doubles_1: { home: Number(formData.mixed_1_home), away: Number(formData.mixed_1_away), home_players: [formData.mixed_1_home_p1, formData.mixed_1_home_p2], away_players: [formData.mixed_1_away_p1, formData.mixed_1_away_p2] },
+        mixed_doubles_2: { home: Number(formData.mixed_2_home), away: Number(formData.mixed_2_away), home_players: [formData.mixed_2_home_p1, formData.mixed_2_home_p2], away_players: [formData.mixed_2_away_p1, formData.mixed_2_away_p2] },
+        mixed_doubles_3: { home: Number(formData.mixed_3_home), away: Number(formData.mixed_3_away), home_players: [formData.mixed_3_home_p1, formData.mixed_3_home_p2], away_players: [formData.mixed_3_away_p1, formData.mixed_3_away_p2] },
+        mixed_doubles_4: { home: Number(formData.mixed_4_home), away: Number(formData.mixed_4_away), home_players: [formData.mixed_4_home_p1, formData.mixed_4_home_p2], away_players: [formData.mixed_4_away_p1, formData.mixed_4_away_p2] },
+        dreambreaker:    (dreamHome !== null && dreamAway !== null) ? { home: dreamHome, away: dreamAway } : null
+      }
+    };
+    const matchYaml = serializeMatchYaml(matchObj);
+
+    // Append to schedule section (or end of file)
+    let updatedYaml;
+    if (currentYaml.includes('schedule:')) {
+      // Append before any trailing newlines at end of file
+      updatedYaml = currentYaml.trimEnd() + '\n' + matchYaml + '\n';
+    } else {
+      updatedYaml = currentYaml.trimEnd() + '\nschedule:\n' + matchYaml + '\n';
+    }
+
+    // Build branch name
+    const branchBase = 'match/' + formData.match_date + '-' + formData.home_team + '-vs-' + formData.away_team;
+    let branchName = branchBase;
+
+    // 2a. Get main HEAD sha and create branch
+    const mainSha = await getMainHeadSha(pat, repoOwner, repoName);
+
+    try {
+      await createBranch(pat, repoOwner, repoName, branchName, mainSha);
+    } catch (err) {
+      if (err.status === 422) {
+        // Branch already exists — retry with timestamp suffix
+        branchName = branchBase + '-' + Date.now();
+        await createBranch(pat, repoOwner, repoName, branchName, mainSha);
+      } else {
+        throw err;
+      }
+    }
+
+    // 2b. Commit updated YAML to new branch
+    const commitMsg = 'Add match result: ' + formData.home_team + ' vs ' + formData.away_team + ' (Week ' + formData.week + ')';
+    await updateFile(pat, repoOwner, repoName, filePath, commitMsg, updatedYaml, fileSha, branchName);
+
+    // 3. Open PR
+    const prTitle = 'Match result: ' + formData.home_team + ' vs ' + formData.away_team + ' - Week ' + formData.week;
+    const prBody  = 'Submitted via the Junebug Pickleball League match submission form.\n\nSeason: ' + seasonSlug + '\nDate: ' + formData.match_date;
+    const pr = await createPullRequest(pat, repoOwner, repoName, prTitle, prBody, branchName, 'main');
+
+    return pr.html_url;
+  }
+
+  // ── UI feedback helpers ──────────────────────────────────────────────────────
+  function showSuccess(prUrl) {
+    const banner = document.getElementById('success-banner');
+    banner.innerHTML = '✓ Match submitted! <a href="' + prUrl + '" target="_blank" rel="noopener">View Pull Request →</a>';
+    banner.style.display = 'block';
+    document.getElementById('error-banner').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showError(message) {
+    const banner = document.getElementById('error-banner');
+    banner.textContent = message;
+    banner.style.display = 'block';
+    document.getElementById('success-banner').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function errorMessageForStatus(err) {
+    if (!err.status) return 'Network error. Check connection and try again.';
+    switch (err.status) {
+      case 401: return 'Authentication failed. Check your token.';
+      case 403: return 'Permission denied. Ensure token has `repo` scope.';
+      case 404: return 'Season data file not found. Contact admin.';
+      case 422: return 'Could not create branch. Please try again.';
+      default:  return 'API error (' + err.status + '). Please try again.';
+    }
+  }
+
+  function clearFieldErrors() {
+    document.querySelectorAll('.form-group.has-error').forEach(function (el) {
+      el.classList.remove('has-error');
+    });
+    document.getElementById('score-errors').style.display = 'none';
+  }
+
+  function markFieldError(fieldName) {
+    const group = document.getElementById('group-' + fieldName);
+    if (group) group.classList.add('has-error');
+  }
+
+  // ── Form submission ──────────────────────────────────────────────────────────
+  document.getElementById('match-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    clearFieldErrors();
+    document.getElementById('success-banner').style.display = 'none';
+    document.getElementById('error-banner').style.display = 'none';
+
+    // Collect field values
+    const fields = {
+      home_team:    document.getElementById('home-team').value,
+      away_team:    document.getElementById('away-team').value,
+      season:       document.getElementById('season-select').value,
+      week:         document.getElementById('week-number').value,
+      match_date:   document.getElementById('match-date').value,
+      location:     document.getElementById('location').value,
+      mens_home:    document.getElementById('mens-home').value,
+      mens_away:    document.getElementById('mens-away').value,
+      womens_home:  document.getElementById('womens-home').value,
+      womens_away:  document.getElementById('womens-away').value,
+      mixed_1_home: document.getElementById('mixed-1-home').value,
+      mixed_1_away: document.getElementById('mixed-1-away').value,
+      mixed_2_home: document.getElementById('mixed-2-home').value,
+      mixed_2_away: document.getElementById('mixed-2-away').value,
+      mixed_3_home: document.getElementById('mixed-3-home').value,
+      mixed_3_away: document.getElementById('mixed-3-away').value,
+      mixed_4_home: document.getElementById('mixed-4-home').value,
+      mixed_4_away: document.getElementById('mixed-4-away').value,
+      dream_home:   document.getElementById('dream-home').value,
+      dream_away:   document.getElementById('dream-away').value,
+      // Player selects
+      mens_home_p1:    document.getElementById('mens_home_p1').value,
+      mens_home_p2:    document.getElementById('mens_home_p2').value,
+      mens_away_p1:    document.getElementById('mens_away_p1').value,
+      mens_away_p2:    document.getElementById('mens_away_p2').value,
+      womens_home_p1:  document.getElementById('womens_home_p1').value,
+      womens_home_p2:  document.getElementById('womens_home_p2').value,
+      womens_away_p1:  document.getElementById('womens_away_p1').value,
+      womens_away_p2:  document.getElementById('womens_away_p2').value,
+      mixed_1_home_p1: document.getElementById('mixed_1_home_p1').value,
+      mixed_1_home_p2: document.getElementById('mixed_1_home_p2').value,
+      mixed_1_away_p1: document.getElementById('mixed_1_away_p1').value,
+      mixed_1_away_p2: document.getElementById('mixed_1_away_p2').value,
+      mixed_2_home_p1: document.getElementById('mixed_2_home_p1').value,
+      mixed_2_home_p2: document.getElementById('mixed_2_home_p2').value,
+      mixed_2_away_p1: document.getElementById('mixed_2_away_p1').value,
+      mixed_2_away_p2: document.getElementById('mixed_2_away_p2').value,
+      mixed_3_home_p1: document.getElementById('mixed_3_home_p1').value,
+      mixed_3_home_p2: document.getElementById('mixed_3_home_p2').value,
+      mixed_3_away_p1: document.getElementById('mixed_3_away_p1').value,
+      mixed_3_away_p2: document.getElementById('mixed_3_away_p2').value,
+      mixed_4_home_p1: document.getElementById('mixed_4_home_p1').value,
+      mixed_4_home_p2: document.getElementById('mixed_4_home_p2').value,
+      mixed_4_away_p1: document.getElementById('mixed_4_away_p1').value,
+      mixed_4_away_p2: document.getElementById('mixed_4_away_p2').value,
+    };
+
+    // Validate
+    const validation = validateForm(fields);
+    if (!validation.valid) {
+      const scoreFields = ['mens_home','mens_away','womens_home','womens_away',
+        'mixed_1_home','mixed_1_away','mixed_2_home','mixed_2_away',
+        'mixed_3_home','mixed_3_away','mixed_4_home','mixed_4_away'];
+      let hasScoreError = false;
+      validation.missing.forEach(function (f) {
+        if (scoreFields.includes(f)) {
+          hasScoreError = true;
+        } else {
+          markFieldError(f);
+        }
+      });
+      if (hasScoreError) {
+        document.getElementById('score-errors').style.display = 'block';
+      }
+      showError('Please fill in all required fields.');
+      return;
+    }
+
+    // Get / save PAT
+    const patInput = document.getElementById('pat-input').value.trim();
+    if (!patInput) {
+      showError('Please enter your GitHub Personal Access Token.');
+      return;
+    }
+    savePat(patInput);
+
+    // Disable submit button during request
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    try {
+      const prUrl = await submitMatchResult(fields, patInput, REPO_OWNER, REPO_NAME);
+      showSuccess(prUrl);
+      document.getElementById('match-form').reset();
+    } catch (err) {
+      if (err instanceof TypeError) {
+        // Network / fetch error
+        showError('Network error. Check connection and try again.');
+      } else {
+        showError(errorMessageForStatus(err));
+      }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit Match Result';
+    }
+  });
+
+  // Expose pure functions for testing (task 6.2)
+  window.validateForm      = validateForm;
+  window.serializeMatchYaml = serializeMatchYaml;
+  window.submitMatchResult  = submitMatchResult;
+
+}());
+</script>

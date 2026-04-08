@@ -1,0 +1,660 @@
+---
+---
+// ─── Minima overrides (must precede @import "minima") ────────────────────────
+$content-width:    1100px;
+$background-color: #1E2A3A;
+$brand-color:      #C8E64B;
+$text-color:       #FFFFFF;
+$grey-color:       #A0AAB4;
+$grey-color-dark:  #4D5F72;
+$grey-color-light: #2C3E50;
+
+@import "minima";
+
+// ─── Design tokens ───────────────────────────────────────────────────────────
+$bg-primary:    #1E2A3A;
+$bg-secondary:  #2C3E50;
+$bg-tertiary:   #34495E;
+$accent:        #C8E64B;
+$accent-hover:  #A7C93F;
+$text-primary:  #FFFFFF;
+$text-secondary:#A0AAB4;
+$border-color:  #4D5F72;
+$success:       #2ECC71;
+$danger:        #E74C3C;
+
+// ─── Cards ───────────────────────────────────────────────────────────────────
+.team-card,
+.event-card {
+  background:    $bg-secondary;
+  border:        1px solid $border-color;
+  border-radius: 8px;
+  padding:       24px;
+  margin-bottom: 24px;
+  overflow:      hidden;
+}
+
+.event-card__banner {
+  display:    block;
+  width:      calc(100% + 48px);
+  max-width:  none;
+  height:     200px;
+  object-fit: cover;
+  margin:     -24px -24px 16px;
+}
+
+// ─── Primary button ──────────────────────────────────────────────────────────
+.btn-primary,
+input[type="submit"],
+button[type="submit"] {
+  background:    $accent;
+  color:         #fff;
+  border:        none;
+  border-radius: 4px;
+  padding:       10px 20px;
+  cursor:        pointer;
+  font-size:     1rem;
+
+  &:hover {
+    background: $accent-hover;
+  }
+}
+
+// ─── Tables ──────────────────────────────────────────────────────────────────
+table {
+  width:           100%;
+  border-collapse: collapse;
+
+  th {
+    background: $bg-tertiary;
+    color:      $text-primary;
+    padding:    10px 12px;
+    text-align: left;
+  }
+
+  tr:nth-child(odd)  td { background: $bg-secondary; }
+  tr:nth-child(even) td { background: $bg-tertiary; }
+
+  td {
+    padding: 8px 12px;
+    color:   $text-primary;
+    border-bottom: 1px solid $border-color;
+  }
+}
+
+// ─── Form inputs ─────────────────────────────────────────────────────────────
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+  background:    $bg-tertiary;
+  border:        1px solid $border-color;
+  border-radius: 4px;
+  color:         $text-primary;
+  padding:       8px 12px;
+  font-size:     1rem;
+  width:         100%;
+  box-sizing:    border-box;
+
+  &:focus {
+    outline:      none;
+    border-color: $accent;
+    box-shadow:   0 0 0 2px rgba($accent, 0.3);
+  }
+}
+
+// ─── Nav active link ─────────────────────────────────────────────────────────
+.site-nav a.active {
+  text-decoration: underline;
+  text-decoration-color: $accent;
+  color: $accent;
+}
+
+// ─── Page body offset for sticky header ──────────────────────────────────────
+.page-content {
+  padding-top: 56px;
+}
+
+// ─── Header / Nav ────────────────────────────────────────────────────────────
+.site-header {
+  position:   sticky;
+  top:        0;
+  z-index:    1000;
+  min-height: 56px;
+  background:    $bg-secondary;
+  border-bottom: 1px solid $border-color;
+
+  .wrapper {
+    display:         flex;
+    align-items:     stretch;
+    justify-content: space-between;
+    flex-wrap:       nowrap;
+  }
+}
+
+.site-title {
+  font-size:       1.25rem;
+  font-weight:     700;
+  color:           $text-primary;
+  text-decoration: none;
+  flex-shrink:     0;
+  display:         flex;
+  align-items:     center;
+
+  &:hover { color: $accent; }
+}
+
+.site-logo {
+  max-height: 96px;
+  width: auto;
+  display: block;
+}
+
+.site-nav {
+  display:     flex;
+  align-items: stretch;
+  gap:         8px;
+  flex-wrap:   nowrap;
+
+  .nav-link {
+    color:           $text-secondary;
+    text-decoration: none;
+    padding:         0 10px;
+    border-radius:   0;
+    transition:      color 0.2s, background 0.2s;
+    white-space:     nowrap;
+    display:         flex;
+    align-items:     center;
+
+    &:hover { color: $accent; background: $bg-tertiary; }
+
+    &.active {
+      color:                 $accent;
+      text-decoration:      underline;
+      text-decoration-color: $accent;
+    }
+  }
+}
+
+// ─── Seasons dropdown ────────────────────────────────────────────────────────
+.nav-dropdown {
+  position: relative;
+  display:  flex;
+  align-items: stretch;
+
+  &.active .nav-dropdown-toggle {
+    color:                 $accent;
+    text-decoration:      underline;
+    text-decoration-color: $accent;
+  }
+}
+
+.nav-dropdown-toggle {
+  background:    transparent;
+  border:        none;
+  color:         $text-secondary;
+  cursor:        pointer;
+  font-size:     1rem;
+  padding:       0 10px;
+  border-radius: 0;
+  display:       flex;
+  align-items:   center;
+  gap:           4px;
+  white-space:   nowrap;
+  transition:    color 0.2s, background 0.2s;
+
+  &:hover { color: $accent; background: $bg-tertiary; }
+
+  .dropdown-arrow { font-size: 0.65rem; }
+}
+
+.nav-dropdown:hover > .nav-dropdown-menu {
+  display: block;
+}
+
+.nav-dropdown-menu {
+  display:       none;
+  position:      absolute;
+  top:           100%;
+  left:          0;
+  background:    $bg-secondary;
+  border:        1px solid $border-color;
+  border-radius: 0;
+  list-style:    none;
+  margin:        0;
+  padding:       0;
+  min-width:     160px;
+  z-index:       100;
+
+  &.open { display: block; }
+
+  li a {
+    display:         block;
+    padding:         8px 16px;
+    color:           $text-secondary;
+    text-decoration: none;
+
+    &:hover { color: $accent; background: $bg-tertiary; }
+    &.active { color: $accent; }
+  }
+}
+
+// ─── Hamburger button ────────────────────────────────────────────────────────
+.nav-toggle {
+  display:         none;
+  flex-direction:  column;
+  justify-content: space-between;
+  width:           28px;
+  height:          20px;
+  background:      transparent;
+  border:          none;
+  cursor:          pointer;
+  padding:         0;
+
+  .hamburger-bar {
+    display:       block;
+    width:         100%;
+    height:        2px;
+    background:    $text-primary;
+    border-radius: 2px;
+    transition:    background 0.2s;
+  }
+
+  &:hover .hamburger-bar { background: $accent; }
+}
+
+// ─── Season card ─────────────────────────────────────────────────────────────
+.season-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.season-card__banner {
+  width:      100%;
+  height:     500px;
+  object-fit: cover;
+  display:    block;
+}
+
+.season-card__body {
+  padding: 16px 24px;
+}
+
+// ─── Footer ──────────────────────────────────────────────────────────────────
+.site-footer .wrapper {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
+}
+
+.site-footer-logo {
+  height: 24px;
+  width:  auto;
+}
+
+// ─── Submit Match ────────────────────────────────────────────────────────────
+.submit-form {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: $text-secondary;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  color: $text-primary;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: $accent;
+  box-shadow: 0 0 0 2px rgba($accent, 0.2);
+}
+.form-group select option {
+  background: $bg-tertiary;
+  color: $text-primary;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.scores-section {
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.scores-section h3 {
+  margin: 0 0 16px;
+  color: $text-primary;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.score-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 1fr 64px 32px 64px 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.score-row label {
+  color: $text-secondary;
+  font-size: 0.9rem;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.score-row input[type="number"] {
+  width: 100%;
+  padding: 8px 6px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  color: $text-primary;
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  box-sizing: border-box;
+}
+.score-row input[type="number"]:focus {
+  outline: none;
+  border-color: $accent;
+  box-shadow: 0 0 0 2px rgba($accent, 0.2);
+}
+.score-row select {
+  width: 100%;
+  padding: 7px 6px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  color: $text-primary;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+.score-row select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.score-row select:focus {
+  outline: none;
+  border-color: $accent;
+  box-shadow: 0 0 0 2px rgba($accent, 0.2);
+}
+.vs-sep {
+  text-align: center;
+  color: $text-secondary;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.score-header {
+  display: grid;
+  grid-template-columns: 160px 1fr 1fr 64px 32px 64px 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.score-header span {
+  color: $text-secondary;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+.score-header span:first-child {
+  text-align: left;
+}
+.pat-section {
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.pat-section h3 {
+  margin: 0 0 8px;
+  color: $text-primary;
+  font-size: 1rem;
+}
+.pat-section p {
+  color: $text-secondary;
+  font-size: 0.85rem;
+  margin: 0 0 14px;
+}
+.pat-section a {
+  color: $accent;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.pat-section a:hover {
+  color: $accent-hover;
+}
+.pat-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+.pat-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+.btn-primary {
+  background: $accent;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  margin-top: 8px;
+}
+.btn-primary:hover {
+  background: $accent-hover;
+}
+.btn-primary:disabled {
+  background: $border-color;
+  color: $text-secondary;
+  cursor: not-allowed;
+}
+.banner {
+  padding: 14px 18px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  display: none;
+}
+.banner.success {
+  background: rgba($success, 0.15);
+  border: 1px solid $success;
+  color: $success;
+}
+.banner.error {
+  background: rgba($danger, 0.15);
+  border: 1px solid $danger;
+  color: $danger;
+}
+.banner a {
+  color: inherit;
+  font-weight: 600;
+}
+.field-error {
+  color: $danger;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: none;
+}
+.form-group.has-error input,
+.form-group.has-error select {
+  border-color: $danger;
+}
+.form-group.has-error .field-error {
+  display: block;
+}
+.label-optional {
+  color: $text-secondary;
+  font-size: 0.8em;
+}
+.score-errors-msg {
+  color: $danger;
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+.text-secondary {
+  color: $text-secondary;
+}
+.text-sm {
+  font-size: 0.8em;
+}
+.score-errors {
+  color: $danger;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  display: none;
+}
+
+// ─── Mobile nav (≤ 768px) ────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .nav-toggle { display: flex; }
+
+  .site-nav {
+    display:        none;
+    width:          100%;
+    flex-direction: column;
+    align-items:    flex-start;
+    gap:            0;
+    padding:        8px 0;
+
+    &.nav-open { display: flex; }
+
+    .nav-link { width: 100%; padding: 10px 0; }
+  }
+
+  .nav-dropdown        { width: 100%; }
+  .nav-dropdown-toggle { width: 100%; padding: 10px 0; }
+
+  .nav-dropdown-menu {
+    position:   static;
+    border:     none;
+    padding:    0 0 0 16px;
+    background: transparent;
+
+    &.open { display: block; }
+    li a { padding: 8px 0; }
+  }
+}
+
+// ─── Teams carousel ──────────────────────────────────────────────────────────
+.season-section {
+  max-width:  1100px;
+  margin:     0 auto 2rem;
+  width:      100%;
+}
+
+.teams-carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+
+  &::before,
+  &::after {
+    content:        "";
+    position:       absolute;
+    top:            0;
+    height:         100%;
+    width:          60px;
+    pointer-events: none;
+    z-index:        1;
+  }
+
+  &::before {
+    left:       0;
+    background: linear-gradient(to left, transparent, #1E2A3A);
+  }
+
+  &::after {
+    right:      0;
+    background: linear-gradient(to right, transparent, #1E2A3A);
+  }
+}
+
+.teams-carousel {
+  display:                  flex;
+  overflow-x:               auto;
+  gap:                      1rem;
+  scroll-snap-type:         x mandatory;
+  flex-wrap:                nowrap;
+  padding-bottom:           0.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.teams-carousel .team-card {
+  flex-shrink:       0;
+  min-width:         0;
+  width:             calc(20% - 0.8rem);
+  padding:           16px 12px;
+  scroll-snap-align: start;
+}
+
+// ─── Team card logo ───────────────────────────────────────────────────────────
+.team-card__name {
+  text-align: center;
+}
+
+// ─── Standings logo ───────────────────────────────────────────────────────────
+.standings-logo-cell {
+  width:   68px;
+  padding: 4px 6px;
+}
+
+.standings-logo {
+  width:      64px;
+  height:     64px;
+  object-fit: contain;
+  display:    block;
+}
+.team-card__logo-wrap {
+  height:          80px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  margin-bottom:   0.75rem;
+}
+
+.team-card__logo {
+  max-width:   100%;
+  max-height:  100%;
+  object-fit:  contain;
+}
+
+.team-card__logo-placeholder {
+  width:         80px;
+  height:        80px;
+  border:        2px dashed currentColor;
+  opacity:       0.3;
+  border-radius: 4px;
+}
