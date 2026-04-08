@@ -2,6 +2,11 @@ name: Spring 2026
 slug: spring-2026
 start_date: 2026-01-01
 end_date: 2026-04-31
+status: completed
+finale_rankings:
+  - day-dinkers
+  - long-shots
+  - salsa-and-saltines
 teams:
   - slug: servers-of-the-court
     name: Servers of the Court
@@ -53,6 +58,7 @@ teams:
         role: member
   - slug: day-dinkers
     name: Day Dinkers
+    logo: /assets/images/team-logos/day_dinkers_logo.png
     home_court: Pickleball Hideout
     roster:
       - name: James Schonian

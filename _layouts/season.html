@@ -7,20 +7,9 @@ layout: default
   <h1>{{ season.name }}</h1>
   <p class="season-dates">{{ season.start_date | date: "%B %-d, %Y" }} &ndash; {{ season.end_date | date: "%B %-d, %Y" }}</p>
 
-  <section class="season-teams season-section">
-    <h2>Teams</h2>
-    {% if season.teams and season.teams.size > 0 %}
-      <div class="teams-carousel-wrapper">
-        <div class="teams-carousel">
-          {% for team in season.teams %}
-            {% include team-card.html team=team %}
-          {% endfor %}
-        </div>
-      </div>
-    {% else %}
-      <p>No teams have been announced yet.</p>
-    {% endif %}
-  </section>
+  {% if season.status == "completed" and season.finale_rankings and season.finale_rankings.size > 0 %}
+    {% include season-podium.html season=season %}
+  {% endif %}
 
   <section class="season-standings season-section">
     <h2>Standings</h2>
@@ -51,5 +40,20 @@ layout: default
         {% endfor %}
       </tbody>
     </table>
+  </section>
+
+  <section class="season-teams season-section">
+    <h2>Teams</h2>
+    {% if season.teams and season.teams.size > 0 %}
+      <div class="teams-carousel-wrapper">
+        <div class="teams-carousel">
+          {% for team in season.teams %}
+            {% include team-card.html team=team %}
+          {% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <p>No teams have been announced yet.</p>
+    {% endif %}
   </section>
 </div>

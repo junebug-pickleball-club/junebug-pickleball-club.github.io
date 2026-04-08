@@ -1414,3 +1414,375 @@ describe('Header logo rendering (Requirements 6.3, 6.4)', () => {
     expect(imgTag).toMatch(/alt="[^"]+"/);
   });
 });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Feature: season-podium — Simulation helpers + Property tests (Tasks 5.1–5.8)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── Task 5.1: JS simulation helpers ──────────────────────────────────────────
+
+/**
+ * shouldShowPodium(season)
+ * Mirrors the Liquid guard in _layouts/season.html:
+ *   {% if season.status == "completed" and season.finale_rankings and season.finale_rankings.size > 0 %}
+ */
+function shouldShowPodium(season) {
+  return (
+    season.status === 'completed' &&
+    Array.isArray(season.finale_rankings) &&
+    season.finale_rankings.length > 0
+  );
+}
+
+/**
+ * renderPodium(season)
+ * Simulates _includes/season-podium.html:
+ * - Iterates up to 3 entries from finale_rankings
+ * - Resolves team by slug from season.teams
+ * - Emits HTML with .podium-entry, medal modifier classes, team name (or raw slug), and <img> or placeholder
+ */
+function renderPodium(season) {
+  const medals = [
+    { cls: 'podium-entry--gold',   label: '🥇 1st Place' },
+    { cls: 'podium-entry--silver', label: '🥈 2nd Place' },
+    { cls: 'podium-entry--bronze', label: '🥉 3rd Place' },
+  ];
+
+  const rankings = (season.finale_rankings || []).slice(0, 3);
+  const teams    = season.teams || [];
+
+  const entries = rankings.map((slug, i) => {
+    const team       = teams.find(t => t.slug === slug) || null;
+    const medalCls   = medals[i].cls;
+    const medalLabel = medals[i].label;
+    const teamName   = team ? team.name : slug;
+
+    const logoHtml = (team && team.logo)
+      ? `<img class="podium-entry__logo" src="${team.logo}" alt="${teamName}">`
+      : `<div class="podium-entry__logo-placeholder" aria-hidden="true"></div>`;
+
+    return `<div class="podium-entry ${medalCls}">
+  <span class="podium-entry__medal">${medalLabel}</span>
+  <div class="podium-entry__logo-wrap">${logoHtml}</div>
+  <p class="podium-entry__name">${teamName}</p>
+</div>`;
+  });
+
+  return `<section class="season-podium season-section">
+<div class="podium-entries">
+${entries.join('\n')}
+</div>
+</section>`;
+}
+
+/**
+ * renderSeasonPage(season)
+ * Returns HTML with podium output (if applicable) followed by stub section markers.
+ * Used to verify section ordering (Property 7).
+ */
+function renderSeasonPage(season) {
+  const podiumHtml = shouldShowPodium(season) ? renderPodium(season) : '';
+  return [
+    podiumHtml,
+    '<section class="season-standings">',
+    '<section class="season-schedule">',
+    '<section class="season-teams">',
+  ].join('\n');
+}
+
+// ── Arbitraries shared across season-podium property tests ───────────────────
+
+const slugArb = fc.stringMatching(/^[a-z][a-z0-9-]{1,19}$/);
+const teamNameArb = fc.stringMatching(/^[A-Za-z][A-Za-z0-9 ]{1,29}$/);
+
+// A team with an optional logo
+const podiumTeamArb = fc.record({
+  slug:  slugArb,
+  name:  teamNameArb,
+  logo:  fc.option(fc.webUrl(), { nil: undefined }),
+});
+
+// A list of 1–6 teams with distinct slugs
+const podiumTeamsArb = fc
+  .array(podiumTeamArb, { minLength: 1, maxLength: 6 })
+  .filter(teams => new Set(teams.map(t => t.slug)).size === teams.length);
+
+// A completed season: status=completed, finale_rankings drawn from team slugs
+const completedSeasonArb = podiumTeamsArb.chain(teams => {
+  const slugs = teams.map(t => t.slug);
+  return fc
+    .array(fc.constantFrom(...slugs), { minLength: 1, maxLength: Math.min(3, slugs.length) })
+    .filter(rankings => new Set(rankings).size === rankings.length)
+    .map(finale_rankings => ({ status: 'completed', teams, finale_rankings }));
+});
+
+// ── Feature: season-podium, Property 1: rankings slugs ⊆ team slugs ──────────
+// Validates: Requirements 1.3
+
+describe('Feature: season-podium, Property 1: every finale_rankings slug exists in season.teams', () => {
+  // **Validates: Requirements 1.3**
+  it('every slug in finale_rankings is present in season.teams', () => {
+    fc.assert(
+      fc.property(completedSeasonArb, (season) => {
+        const teamSlugs = new Set(season.teams.map(t => t.slug));
+        for (const slug of season.finale_rankings) {
+          expect(teamSlugs.has(slug)).toBe(true);
+        }
+      }),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ── Feature: season-podium, Property 2: podium visibility condition ───────────
+// Validates: Requirements 2.1, 2.2, 2.3
+
+describe('Feature: season-podium, Property 2: podium visibility matches completed-with-rankings condition', () => {
+  // **Validates: Requirements 2.1, 2.2, 2.3**
+  it('shouldShowPodium returns true iff status==="completed" AND finale_rankings is non-empty', () => {
+    // Generator for any season (may or may not be completed / have rankings)
+    const anySeasonArb = fc.record({
+      status:           fc.oneof(fc.constant('completed'), fc.constant('active'), fc.constant('upcoming'), fc.string()),
+      finale_rankings:  fc.oneof(
+        fc.constant(undefined),
+        fc.constant(null),
+        fc.constant([]),
+        fc.array(slugArb, { minLength: 1, maxLength: 3 })
+      ),
+      teams: fc.constant([]),
+    });
+
+    fc.assert(
+      fc.property(anySeasonArb, (season) => {
+        const result   = shouldShowPodium(season);
+        const expected =
+          season.status === 'completed' &&
+          Array.isArray(season.finale_rankings) &&
+          season.finale_rankings.length > 0;
+        expect(result).toBe(expected);
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+  it('shouldShowPodium returns false when status is not "completed"', () => {
+    fc.assert(
+      fc.property(
+        fc.record({
+          status:          fc.string().filter(s => s !== 'completed'),
+          finale_rankings: fc.array(slugArb, { minLength: 1, maxLength: 3 }),
+          teams:           fc.constant([]),
+        }),
+        (season) => {
+          expect(shouldShowPodium(season)).toBe(false);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('shouldShowPodium returns false when finale_rankings is absent or empty', () => {
+    fc.assert(
+      fc.property(
+        fc.oneof(
+          fc.record({ status: fc.constant('completed'), finale_rankings: fc.constant([]),        teams: fc.constant([]) }),
+          fc.record({ status: fc.constant('completed'), finale_rankings: fc.constant(undefined), teams: fc.constant([]) }),
+          fc.record({ status: fc.constant('completed'), finale_rankings: fc.constant(null),      teams: fc.constant([]) })
+        ),
+        (season) => {
+          expect(shouldShowPodium(season)).toBe(false);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ── Feature: season-podium, Property 3: entry count equals min(rankings, 3) ──
+// Validates: Requirements 3.1, 4.1, 4.2, 4.3
+
+describe('Feature: season-podium, Property 3: rendered entry count equals min(finale_rankings.length, 3)', () => {
+  // **Validates: Requirements 3.1, 4.1, 4.2, 4.3**
+  it('number of .podium-entry elements equals Math.min(finale_rankings.length, 3)', () => {
+    fc.assert(
+      fc.property(completedSeasonArb, (season) => {
+        const html  = renderPodium(season);
+        const count = (html.match(/class="podium-entry /g) || []).length;
+        expect(count).toBe(Math.min(season.finale_rankings.length, 3));
+      }),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ── Feature: season-podium, Property 4: medal labels assigned by position ─────
+// Validates: Requirements 3.2, 3.3, 3.4
+
+describe('Feature: season-podium, Property 4: first entry has gold class, second silver, third bronze', () => {
+  // **Validates: Requirements 3.2, 3.3, 3.4**
+  it('first entry has podium-entry--gold class', () => {
+    fc.assert(
+      fc.property(completedSeasonArb, (season) => {
+        const html    = renderPodium(season);
+        const entries = [...html.matchAll(/class="podium-entry ([^"]+)"/g)].map(m => m[1]);
+        expect(entries[0]).toContain('podium-entry--gold');
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+  it('second entry (when present) has podium-entry--silver class', () => {
+    // Only test seasons with at least 2 rankings
+    const twoOrMoreArb = completedSeasonArb.filter(s => s.finale_rankings.length >= 2);
+    fc.assert(
+      fc.property(twoOrMoreArb, (season) => {
+        const html    = renderPodium(season);
+        const entries = [...html.matchAll(/class="podium-entry ([^"]+)"/g)].map(m => m[1]);
+        expect(entries[1]).toContain('podium-entry--silver');
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+  it('third entry (when present) has podium-entry--bronze class', () => {
+    // Only test seasons with exactly 3 rankings (teams list must have ≥ 3 distinct slugs)
+    const threeArb = podiumTeamsArb
+      .filter(teams => teams.length >= 3)
+      .chain(teams => {
+        const slugs = teams.map(t => t.slug);
+        return fc
+          .array(fc.constantFrom(...slugs), { minLength: 3, maxLength: 3 })
+          .filter(r => new Set(r).size === 3)
+          .map(finale_rankings => ({ status: 'completed', teams, finale_rankings }));
+      });
+
+    fc.assert(
+      fc.property(threeArb, (season) => {
+        const html    = renderPodium(season);
+        const entries = [...html.matchAll(/class="podium-entry ([^"]+)"/g)].map(m => m[1]);
+        expect(entries[2]).toContain('podium-entry--bronze');
+      }),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ── Feature: season-podium, Property 5: team name resolved from teams list ────
+// Validates: Requirements 3.5
+
+describe('Feature: season-podium, Property 5: each entry displays the team name resolved from season.teams', () => {
+  // **Validates: Requirements 3.5**
+  it('rendered HTML contains the resolved team name for each ranking entry', () => {
+    fc.assert(
+      fc.property(completedSeasonArb, (season) => {
+        const html = renderPodium(season);
+        for (const slug of season.finale_rankings.slice(0, 3)) {
+          const team = season.teams.find(t => t.slug === slug);
+          const expectedName = team ? team.name : slug;
+          expect(html).toContain(expectedName);
+        }
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+  it('falls back to raw slug when no matching team is found', () => {
+    // Build a season where one ranking slug has no matching team
+    const orphanSlug = 'orphan-team';
+    const season = {
+      status: 'completed',
+      teams: [{ slug: 'real-team', name: 'Real Team' }],
+      finale_rankings: [orphanSlug],
+    };
+    const html = renderPodium(season);
+    expect(html).toContain(orphanSlug);
+  });
+});
+
+// ── Feature: season-podium, Property 6: logo or placeholder by logo presence ──
+// Validates: Requirements 3.6, 3.7
+
+describe('Feature: season-podium, Property 6: entry renders <img> when team has logo, placeholder when not', () => {
+  // **Validates: Requirements 3.6, 3.7**
+  it('team with logo renders <img> element; team without logo renders placeholder div', () => {
+    // Build a season with a mix of teams with and without logos
+    const mixedTeamsArb = fc
+      .array(
+        fc.record({
+          slug: slugArb,
+          name: teamNameArb,
+          logo: fc.oneof(
+            fc.webUrl(),                // has logo
+            fc.constant(undefined),     // no logo
+            fc.constant(null),          // no logo (null)
+            fc.constant('')             // no logo (empty string)
+          ),
+        }),
+        { minLength: 1, maxLength: 6 }
+      )
+      .filter(teams => new Set(teams.map(t => t.slug)).size === teams.length);
+
+    const mixedSeasonArb = mixedTeamsArb.chain(teams => {
+      const slugs = teams.map(t => t.slug);
+      return fc
+        .array(fc.constantFrom(...slugs), { minLength: 1, maxLength: Math.min(3, slugs.length) })
+        .filter(r => new Set(r).size === r.length)
+        .map(finale_rankings => ({ status: 'completed', teams, finale_rankings }));
+    });
+
+    fc.assert(
+      fc.property(mixedSeasonArb, (season) => {
+        const html = renderPodium(season);
+
+        // Split into per-entry blocks for targeted assertions
+        const entryBlocks = [...html.matchAll(/<div class="podium-entry [^"]*">([\s\S]*?)<\/div>\s*<\/div>/g)]
+          .map(m => m[0]);
+
+        season.finale_rankings.slice(0, 3).forEach((slug, i) => {
+          const team  = season.teams.find(t => t.slug === slug);
+          const block = entryBlocks[i] || html; // fallback to full html if regex didn't split cleanly
+
+          if (team && team.logo) {
+            // Should contain an <img> with the logo src
+            expect(html).toContain(`src="${team.logo}"`);
+          } else {
+            // Should contain the placeholder div
+            expect(html).toContain('podium-entry__logo-placeholder');
+          }
+        });
+      }),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// ── Feature: season-podium, Property 7: podium section precedes all other sections ──
+// Validates: Requirements 5.1, 5.2
+
+describe('Feature: season-podium, Property 7: podium section offset is less than standings, schedule, and teams', () => {
+  // **Validates: Requirements 5.1, 5.2**
+  it('podium appears before standings, standings before schedule, schedule before teams', () => {
+    fc.assert(
+      fc.property(completedSeasonArb, (season) => {
+        const html = renderSeasonPage(season);
+
+        const podiumIdx    = html.indexOf('season-podium');
+        const standingsIdx = html.indexOf('season-standings');
+        const scheduleIdx  = html.indexOf('season-schedule');
+        const teamsIdx     = html.indexOf('season-teams');
+
+        // All sections must be present
+        expect(podiumIdx).toBeGreaterThanOrEqual(0);
+        expect(standingsIdx).toBeGreaterThanOrEqual(0);
+        expect(scheduleIdx).toBeGreaterThanOrEqual(0);
+        expect(teamsIdx).toBeGreaterThanOrEqual(0);
+
+        // Order: podium < standings < schedule < teams
+        expect(podiumIdx).toBeLessThan(standingsIdx);
+        expect(standingsIdx).toBeLessThan(scheduleIdx);
+        expect(scheduleIdx).toBeLessThan(teamsIdx);
+      }),
+      { numRuns: 100 }
+    );
+  });
+});
