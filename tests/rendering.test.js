@@ -1786,3 +1786,39 @@ describe('Feature: season-podium, Property 7: podium section offset is less than
     );
   });
 });
+
+// ── Task 2.3: Table scroll wrapper snapshot tests (Requirements 3.1, 3.4) ────
+
+describe('Table scroll wrapper structure (mobile-responsiveness, Req 3.1, 3.4)', () => {
+  // Req 3.1 — schedule-table is wrapped in table-scroll-wrapper in _layouts/season.html
+  it('_layouts/season.html: <table class="schedule-table"> is a descendant of <div class="table-scroll-wrapper">', () => {
+    const source = readFileSync(resolve('_layouts/season.html'), 'utf8');
+    const wrapperPos = source.indexOf('<div class="table-scroll-wrapper">');
+    const tablePos   = source.indexOf('<table class="schedule-table">');
+    // Both elements must be present
+    expect(wrapperPos).toBeGreaterThanOrEqual(0);
+    expect(tablePos).toBeGreaterThanOrEqual(0);
+    // The wrapper must appear before the table
+    expect(wrapperPos).toBeLessThan(tablePos);
+    // The closing </div> for the wrapper must appear after the closing </table>
+    const tableClosePos   = source.indexOf('</table>', tablePos);
+    const wrapperClosePos = source.indexOf('</div>', tableClosePos);
+    expect(wrapperClosePos).toBeGreaterThan(tableClosePos);
+  });
+
+  // Req 3.4 — standings-table is wrapped in table-scroll-wrapper in _includes/standings-table.html
+  it('_includes/standings-table.html: <table class="standings-table"> is a descendant of <div class="table-scroll-wrapper">', () => {
+    const source = readFileSync(resolve('_includes/standings-table.html'), 'utf8');
+    const wrapperPos = source.indexOf('<div class="table-scroll-wrapper">');
+    const tablePos   = source.indexOf('<table class="standings-table">');
+    // Both elements must be present
+    expect(wrapperPos).toBeGreaterThanOrEqual(0);
+    expect(tablePos).toBeGreaterThanOrEqual(0);
+    // The wrapper must appear before the table
+    expect(wrapperPos).toBeLessThan(tablePos);
+    // The closing </div> for the wrapper must appear after the closing </table>
+    const tableClosePos   = source.indexOf('</table>', tablePos);
+    const wrapperClosePos = source.indexOf('</div>', tableClosePos);
+    expect(wrapperClosePos).toBeGreaterThan(tableClosePos);
+  });
+});

@@ -73,6 +73,46 @@
     margin: 0;
     word-break: break-word;
   }
+
+  @media (max-width: 768px) and (min-width: 481px) {
+    .podium-entry__logo-wrap {
+      width: 72px;
+      height: 72px;
+    }
+    .podium-entry__name {
+      font-size: 0.8rem;
+    }
+    .podium-entry__medal {
+      font-size: 0.85rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .podium-entries {
+      flex-direction: column;
+      align-items: stretch;
+      box-sizing: border-box;
+    }
+    .podium-entry {
+      flex: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .podium-entry--gold {
+      order: 1;
+      padding-top: 0.6rem;
+    }
+    .podium-entry--silver {
+      order: 2;
+    }
+    .podium-entry--bronze {
+      order: 3;
+    }
+    .podium-entry__logo-wrap {
+      width: 64px;
+      height: 64px;
+    }
+  }
 </style>
 
 <section class="season-podium season-section">

@@ -60,6 +60,13 @@ button[type="submit"] {
   }
 }
 
+// ─── Table scroll wrapper ────────────────────────────────────────────────────
+.table-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
 // ─── Tables ──────────────────────────────────────────────────────────────────
 table {
   width:           100%;
@@ -540,7 +547,7 @@ textarea {
 
 // ─── Mobile nav (≤ 768px) ────────────────────────────────────────────────────
 @media (max-width: 768px) {
-  .nav-toggle { display: flex; }
+  .nav-toggle { display: flex; align-self: center; }
 
   .site-nav {
     display:        none;
@@ -550,23 +557,63 @@ textarea {
     gap:            0;
     padding:        8px 0;
 
-    &.nav-open { display: flex; }
+    &.nav-open {
+      display:    flex;
+      position:   absolute;
+      top:        100%;
+      left:       0;
+      right:      0;
+      width:      100%;
+      box-sizing: border-box;
+      background: $bg-secondary;
+      border-top: 1px solid $border-color;
+      padding:    8px 16px 16px;
+      z-index:    999;
+    }
 
     .nav-link { width: 100%; padding: 10px 0; }
   }
 
   .nav-dropdown        { width: 100%; }
-  .nav-dropdown-toggle { width: 100%; padding: 10px 0; }
+  .nav-dropdown-toggle { width: 100%; padding: 10px 0; text-align: left; }
 
   .nav-dropdown-menu {
+    display:    none;
     position:   static;
     border:     none;
+    min-width:  0;
+    width:      100%;
+    box-sizing: border-box;
     padding:    0 0 0 16px;
     background: transparent;
+    box-shadow: none;
 
     &.open { display: block; }
-    li a { padding: 8px 0; }
+
+    li { list-style: none; }
+    li a { display: block; padding: 8px 0; white-space: normal; }
   }
+
+  // 3.1 Fix nav overflow — constrain nav width so it can't push past the viewport
+  .site-nav { box-sizing: border-box; width: 100%; max-width: 100%; }
+
+  // 3.2 Fix team carousel card min-width
+  .teams-carousel .team-card { min-width: 200px; }
+
+  // 3.3 Fix form-row to single column
+  .form-row { grid-template-columns: 1fr; }
+
+  // 3.4 Fix score section layout
+  .score-header              { display: none; }
+  .score-row                 { display: grid; grid-template-columns: 1fr 1fr; }
+  .score-row label           { grid-column: 1 / -1; }
+  .score-row .vs-sep         { display: none; }
+
+  // 3.5 Fix season banner height
+  .season-card__banner { height: 220px; }
+
+  // 3.6 Fix image overflow
+  img { max-width: 100%; height: auto; }
 }
 
 // ─── Teams carousel ──────────────────────────────────────────────────────────
@@ -614,7 +661,7 @@ textarea {
 
 .teams-carousel .team-card {
   flex-shrink:       0;
-  min-width:         0;
+  min-width:         200px;
   width:             calc(20% - 0.8rem);
   padding:           16px 12px;
   scroll-snap-align: start;
