@@ -729,3 +729,39 @@ schedule:
         home_players: [Trent, Colleen]
         away_players: [Mike, Darrah]
         notes: Mike (sub)
+  - week: 8
+    date: 2026-03-03
+    location: "Pickleball Hideout"
+    home_team: day-dinkers
+    away_team: long-shots
+    result:
+      mens_doubles:
+        home: 11
+        away: 3
+        home_players: ["James Schonian", "Trent Justice"]
+        away_players: ["Taylor Horton", "Brent Patane"]
+      womens_doubles:
+        home: 4
+        away: 11
+        home_players: ["Colleen Stockert", "Allana Montag"]
+        away_players: ["Vanessa", "Kelly"]
+      mixed_doubles_1:
+        home: 7
+        away: 11
+        home_players: ["Trent Justice", "Allana Montag"]
+        away_players: ["Brent Patane", "Kelly"]
+      mixed_doubles_2:
+        home: 11
+        away: 9
+        home_players: ["Trent Justice", "Colleen Stockert"]
+        away_players: ["Vanessa", "Taylor Horton"]
+      mixed_doubles_3:
+        home: 11
+        away: 0
+        home_players: ["James Schonian", "Allana Montag"]
+        away_players: ["Taylor Horton", "Kelly"]
+      mixed_doubles_4:
+        home: 11
+        away: 8
+        home_players: ["James Schonian", "Colleen Stockert"]
+        away_players: ["Brent Patane", "Vanessa"]
