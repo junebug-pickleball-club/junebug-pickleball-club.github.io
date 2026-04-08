@@ -1,0 +1,634 @@
+---
+layout: page
+title: Round Robin
+permalink: /session-manager/
+---
+
+<style>
+  /* ── Layout ── */
+  .sm-section { max-width: 860px; margin: 0 auto; }
+
+  /* ── Config view ── */
+  .config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 2rem;
+  }
+  .config-grid .field-full { grid-column: 1 / -1; }
+  .field-group { display: flex; flex-direction: column; gap: .25rem; }
+  .field-group label { font-size: .85rem; color: #93a1a1; text-transform: uppercase; letter-spacing: .05em; }
+  .field-group input,
+  .field-group select {
+    background: #073642;
+    border: 1px solid #586e75;
+    color: #fdf6e3;
+    padding: .45rem .6rem;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  .field-group input:focus,
+  .field-group select:focus {
+    outline: none;
+    border-color: #b58900;
+    box-shadow: 0 0 0 2px rgba(181,137,0,.25);
+  }
+  .field-error {
+    color: #dc322f;
+    font-size: .8rem;
+    min-height: 1.1em;
+  }
+
+  /* ── Player name inputs ── */
+  #player-names-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: .6rem;
+    margin-top: .5rem;
+  }
+  #player-names-container input {
+    background: #073642;
+    border: 1px solid #586e75;
+    color: #fdf6e3;
+    padding: .4rem .55rem;
+    border-radius: 4px;
+    font-size: .9rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #player-names-container input:focus {
+    outline: none;
+    border-color: #b58900;
+    box-shadow: 0 0 0 2px rgba(181,137,0,.25);
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-block;
+    padding: .55rem 1.4rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn:hover { opacity: .85; }
+  .btn-primary { background: #b58900; color: #002b36; font-weight: 700; }
+  .btn-danger  { background: #dc322f; color: #fdf6e3; }
+  .btn-secondary { background: #586e75; color: #fdf6e3; }
+
+  /* ── Session view ── */
+  #round-header {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #b58900;
+    margin-bottom: 1rem;
+  }
+
+  #court-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .court-card {
+    background: #073642;
+    border: 1px solid #586e75;
+    border-radius: 6px;
+    padding: .9rem 1rem;
+  }
+  .court-card .court-label {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #93a1a1;
+    margin-bottom: .4rem;
+  }
+  .court-card .matchup {
+    font-size: 1rem;
+    color: #fdf6e3;
+    font-weight: 600;
+  }
+  .court-card .vs { color: #657b83; font-weight: 400; margin: 0 .3rem; }
+
+  #sitting-out-section {
+    background: #073642;
+    border: 1px solid #586e75;
+    border-radius: 6px;
+    padding: .75rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+  #sitting-out-section h3 {
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #93a1a1;
+    margin: 0 0 .4rem;
+  }
+  #sitting-out-list { color: #fdf6e3; margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: .5rem; }
+  #sitting-out-list li {
+    background: #002b36;
+    border: 1px solid #586e75;
+    border-radius: 3px;
+    padding: .2rem .55rem;
+    font-size: .9rem;
+  }
+
+  /* ── Score form ── */
+  #score-form { margin-bottom: 2rem; }
+  #score-form h2 { font-size: 1.1rem; color: #93a1a1; margin-bottom: .75rem; }
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: .6rem;
+    flex-wrap: wrap;
+  }
+  .score-row .match-label { flex: 1 1 160px; color: #fdf6e3; font-size: .95rem; }
+  .score-row input[type="number"] {
+    width: 70px;
+    background: #073642;
+    border: 1px solid #586e75;
+    color: #fdf6e3;
+    padding: .35rem .5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    text-align: center;
+  }
+  .score-row input[type="number"]:focus {
+    outline: none;
+    border-color: #b58900;
+    box-shadow: 0 0 0 2px rgba(181,137,0,.25);
+  }
+  .score-row .field-error { flex-basis: 100%; }
+
+  /* ── Leaderboard ── */
+  .leaderboard-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
+  .leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .95rem;
+  }
+  .leaderboard-table th {
+    background: #073642;
+    color: #93a1a1;
+    text-transform: uppercase;
+    font-size: .75rem;
+    letter-spacing: .07em;
+    padding: .5rem .75rem;
+    text-align: left;
+    border-bottom: 2px solid #586e75;
+  }
+  .leaderboard-table td {
+    padding: .5rem .75rem;
+    border-bottom: 1px solid #073642;
+    color: #fdf6e3;
+  }
+  .leaderboard-table tr:hover td { background: #073642; }
+  .leaderboard-table tr.rank-first td {
+    color: #b58900;
+    font-weight: 700;
+  }
+
+  /* ── Complete view ── */
+  #complete-banner {
+    background: #b58900;
+    color: #002b36;
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 1rem 1.5rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+  }
+  #session-summary {
+    background: #073642;
+    border: 1px solid #586e75;
+    border-radius: 6px;
+    padding: .85rem 1.2rem;
+    color: #93a1a1;
+    font-size: .95rem;
+    margin-bottom: 1.5rem;
+  }
+  #session-summary strong { color: #fdf6e3; }
+
+  /* ── Utility ── */
+  .mt-1 { margin-top: 1rem; }
+  .mt-2 { margin-top: 1.5rem; }
+  .section-divider {
+    border: none;
+    border-top: 1px solid #073642;
+    margin: 1.5rem 0;
+  }
+</style>
+
+<!-- ═══════════════════════════════════════════════
+     VIEW 1 — Configuration
+     ═══════════════════════════════════════════════ -->
+<section id="view-config" class="sm-section" style="display:block;">
+
+  <form id="config-form" novalidate>
+    <div class="config-grid">
+
+      <div class="field-group">
+        <label for="playerCount">Number of Players</label>
+        <input type="number" id="playerCount" name="playerCount" min="2" max="32" value="8">
+        <span class="field-error" id="error-playerCount"></span>
+      </div>
+
+      <div class="field-group">
+        <label for="courtCount">Number of Courts</label>
+        <input type="number" id="courtCount" name="courtCount" min="1" max="16" value="2">
+        <span class="field-error" id="error-courtCount"></span>
+      </div>
+
+      <div class="field-group">
+        <label for="roundCount">Number of Rounds</label>
+        <input type="number" id="roundCount" name="roundCount" min="1" max="64" value="7">
+        <span class="field-error" id="error-roundCount"></span>
+      </div>
+
+      <div class="field-group">
+        <label for="partnerMode">Partner Mode</label>
+        <select id="partnerMode" name="partnerMode">
+          <option value="rotating">Rotating Partners</option>
+          <option value="fixed">Fixed Partners</option>
+        </select>
+        <span class="field-error" id="error-partnerMode"></span>
+      </div>
+
+      <div class="field-group field-full">
+        <label>Player Names <span style="color:#657b83;font-size:.8rem;">(leave blank for default)</span></label>
+        <div id="player-names-container"></div>
+      </div>
+
+    </div>
+
+    <div class="mt-2">
+      <button type="submit" class="btn btn-primary">Start Session</button>
+    </div>
+  </form>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     VIEW 2 — Active Session
+     ═══════════════════════════════════════════════ -->
+<section id="view-session" class="sm-section" style="display:none;">
+
+  <div id="round-header">Round 1 of 1</div>
+
+  <div id="court-cards"></div>
+
+  <div id="sitting-out-section" style="display:none;">
+    <h3>Sitting Out</h3>
+    <ul id="sitting-out-list"></ul>
+  </div>
+
+  <hr class="section-divider">
+
+  <form id="score-form" novalidate>
+    <h2>Submit Scores</h2>
+    <div id="score-inputs"></div>
+    <div class="mt-1">
+      <button type="submit" class="btn btn-primary">Submit Scores</button>
+    </div>
+  </form>
+
+  <hr class="section-divider">
+
+  <h2 style="font-size:1.1rem;color:#93a1a1;margin-bottom:.75rem;">Leaderboard</h2>
+  <div class="leaderboard-wrap">
+    <table id="leaderboard-table" class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Player</th>
+          <th>W</th>
+          <th>L</th>
+          <th>+/-</th>
+          <th>Pts</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="mt-2">
+    <button id="btn-reset" class="btn btn-danger">Reset Session</button>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     VIEW 3 — Session Complete
+     ═══════════════════════════════════════════════ -->
+<section id="view-complete" class="sm-section" style="display:none;">
+
+  <div id="complete-banner">🏆 Session Complete</div>
+
+  <div id="session-summary">
+    <strong id="summary-rounds">0</strong> rounds played &nbsp;·&nbsp;
+    <strong id="summary-matches">0</strong> matches played
+  </div>
+
+  <div class="leaderboard-wrap">
+    <table id="final-leaderboard-table" class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Player</th>
+          <th>W</th>
+          <th>L</th>
+          <th>+/-</th>
+          <th>Pts</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="mt-2">
+    <button id="btn-new-session" class="btn btn-primary">Start New Session</button>
+  </div>
+
+</section>
+
+<script type="module">
+import { validateConfig, resolvePlayerNames, generateSchedule, validateScores, recordRoundScores, computeLeaderboard, serializeState, deserializeState } from '{{ "/assets/js/session-manager.js" | relative_url }}';
+
+const SESSION_KEY = 'jpl_session_manager';
+
+// ── Storage helpers ──────────────────────────────────────────────────────────
+
+let storageAvailable = true;
+function tryReadStorage() {
+  try { return sessionStorage.getItem(SESSION_KEY); }
+  catch (e) { storageAvailable = false; return null; }
+}
+function tryWriteStorage(value) {
+  try { sessionStorage.setItem(SESSION_KEY, value); }
+  catch (e) { storageAvailable = false; }
+}
+function tryClearStorage() {
+  try { sessionStorage.removeItem(SESSION_KEY); }
+  catch (e) { /* ignore */ }
+}
+
+// ── View switching ───────────────────────────────────────────────────────────
+
+function showView(id) {
+  ['view-config', 'view-session', 'view-complete'].forEach(v => {
+    document.getElementById(v).style.display = v === id ? 'block' : 'none';
+  });
+}
+
+// ── Player name inputs ───────────────────────────────────────────────────────
+
+function renderPlayerNameInputs(count) {
+  const container = document.getElementById('player-names-container');
+  container.innerHTML = '';
+  for (let i = 1; i <= count; i++) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = `Player ${i}`;
+    input.dataset.slot = i;
+    container.appendChild(input);
+  }
+}
+
+// ── Config form ──────────────────────────────────────────────────────────────
+
+const playerCountInput = document.getElementById('playerCount');
+
+renderPlayerNameInputs(parseInt(playerCountInput.value, 10) || 8);
+
+playerCountInput.addEventListener('input', () => {
+  const n = parseInt(playerCountInput.value, 10);
+  if (n >= 4 && n <= 32) renderPlayerNameInputs(n);
+});
+
+document.getElementById('config-form').addEventListener('submit', e => {
+  e.preventDefault();
+
+  ['playerCount', 'courtCount', 'roundCount', 'partnerMode'].forEach(f => {
+    document.getElementById(`error-${f}`).textContent = '';
+  });
+
+  const playerCount  = parseInt(document.getElementById('playerCount').value, 10);
+  const courtCount   = parseInt(document.getElementById('courtCount').value, 10);
+  const roundCount   = parseInt(document.getElementById('roundCount').value, 10);
+  const partnerMode  = document.getElementById('partnerMode').value;
+
+  const { valid, errors } = validateConfig({ playerCount, courtCount, roundCount, partnerMode });
+
+  if (!valid) {
+    errors.forEach(({ field, message }) => {
+      const el = document.getElementById(`error-${field}`);
+      if (el) el.textContent = message;
+    });
+    return;
+  }
+
+  const rawNames = Array.from(
+    document.querySelectorAll('#player-names-container input')
+  ).map(inp => inp.value);
+
+  const names = resolvePlayerNames(rawNames);
+  const config = { playerCount, courtCount, roundCount, partnerMode };
+  const schedule = generateSchedule(config, names);
+
+  const state = { config, players: names, schedule, currentRound: 1, status: 'active' };
+
+  tryWriteStorage(serializeState(state));
+  renderSessionView(state);
+  showView('view-session');
+});
+
+// ── Session view rendering ───────────────────────────────────────────────────
+
+function renderSessionView(state) {
+  const round = state.schedule[state.currentRound - 1];
+
+  document.getElementById('round-header').textContent =
+    `Round ${state.currentRound} of ${state.schedule.length}`;
+
+  // Court cards — show "A & B vs C & D"
+  const courtCards = document.getElementById('court-cards');
+  courtCards.innerHTML = '';
+  round.matches.forEach(match => {
+    const card = document.createElement('div');
+    card.className = 'court-card';
+    card.innerHTML = `
+      <div class="court-label">Court ${match.courtNum}</div>
+      <div class="matchup">
+        ${match.team1.join(' &amp; ')}
+        <span class="vs">vs</span>
+        ${match.team2.join(' &amp; ')}
+      </div>
+    `;
+    courtCards.appendChild(card);
+  });
+
+  // Sitting out
+  const sittingSection = document.getElementById('sitting-out-section');
+  const sittingList = document.getElementById('sitting-out-list');
+  if (round.byes && round.byes.length > 0) {
+    sittingSection.style.display = 'block';
+    sittingList.innerHTML = round.byes.map(p => `<li>${p}</li>`).join('');
+  } else {
+    sittingSection.style.display = 'none';
+    sittingList.innerHTML = '';
+  }
+
+  // Score inputs — one row per match, team labels as placeholders
+  const scoreInputs = document.getElementById('score-inputs');
+  scoreInputs.innerHTML = '';
+  round.matches.forEach(match => {
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    row.dataset.matchId = match.matchId;
+    row.innerHTML = `
+      <span class="match-label">${match.team1.join(' &amp; ')} vs ${match.team2.join(' &amp; ')}</span>
+      <input type="number" min="0" placeholder="${match.team1.join(' & ')}" data-field="team1Score" value="">
+      <input type="number" min="0" placeholder="${match.team2.join(' & ')}" data-field="team2Score" value="">
+      <span class="field-error" data-error="${match.matchId}"></span>
+    `;
+    scoreInputs.appendChild(row);
+  });
+
+  renderLeaderboard(state, 'leaderboard-table');
+}
+
+function renderLeaderboard(state, tableId) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  tbody.innerHTML = '';
+  const entries = computeLeaderboard(state);
+  entries.forEach(entry => {
+    const tr = document.createElement('tr');
+    if (entry.rank === 1) tr.classList.add('rank-first');
+    tr.innerHTML = `
+      <td>${entry.rank}</td>
+      <td>${entry.name}</td>
+      <td>${entry.wins}</td>
+      <td>${entry.losses}</td>
+      <td>${entry.pointDiff >= 0 ? '+' : ''}${entry.pointDiff}</td>
+      <td>${entry.pointsScored}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Score form ───────────────────────────────────────────────────────────────
+
+document.getElementById('score-form').addEventListener('submit', e => {
+  e.preventDefault();
+
+  document.querySelectorAll('#score-inputs [data-error]').forEach(el => {
+    el.textContent = '';
+  });
+
+  const scores = Array.from(document.querySelectorAll('#score-inputs .score-row')).map(row => ({
+    matchId:    row.dataset.matchId,
+    team1Score: row.querySelector('[data-field="team1Score"]').value,
+    team2Score: row.querySelector('[data-field="team2Score"]').value,
+  }));
+
+  const { valid, errors } = validateScores(scores);
+
+  if (!valid) {
+    errors.forEach(({ matchId, message }) => {
+      const errorEl = document.querySelector(`[data-error="${matchId}"]`);
+      if (errorEl) errorEl.textContent = (errorEl.textContent ? errorEl.textContent + ' ' : '') + message;
+    });
+    return;
+  }
+
+  let state = loadState();
+  if (!state) return;
+
+  state = recordRoundScores(state, scores);
+  tryWriteStorage(serializeState(state));
+
+  if (state.status === 'complete') {
+    renderCompleteView(state);
+    showView('view-complete');
+  } else {
+    renderSessionView(state);
+  }
+});
+
+// ── Complete view ────────────────────────────────────────────────────────────
+
+function renderCompleteView(state) {
+  document.getElementById('summary-rounds').textContent = state.schedule.length;
+  document.getElementById('summary-matches').textContent =
+    state.schedule.reduce((sum, r) => sum + r.matches.length, 0);
+  renderLeaderboard(state, 'final-leaderboard-table');
+}
+
+// ── Reset / New Session ──────────────────────────────────────────────────────
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if (!window.confirm('Reset session? All round data and scores will be permanently lost.')) return;
+  tryClearStorage();
+  resetConfigForm();
+  showView('view-config');
+});
+
+document.getElementById('btn-new-session').addEventListener('click', () => {
+  tryClearStorage();
+  resetConfigForm();
+  showView('view-config');
+});
+
+function resetConfigForm() {
+  document.getElementById('playerCount').value = '8';
+  document.getElementById('courtCount').value = '2';
+  document.getElementById('roundCount').value = '7';
+  document.getElementById('partnerMode').value = 'rotating';
+  ['playerCount', 'courtCount', 'roundCount', 'partnerMode'].forEach(f => {
+    document.getElementById(`error-${f}`).textContent = '';
+  });
+  renderPlayerNameInputs(8);
+}
+
+// ── State helper ─────────────────────────────────────────────────────────────
+
+function loadState() {
+  const json = tryReadStorage();
+  if (!json) return null;
+  try { return deserializeState(json); }
+  catch (e) { tryClearStorage(); return null; }
+}
+
+// ── Page load restore ────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!storageAvailable) {
+    const warning = document.createElement('p');
+    warning.style.cssText = 'color:#b58900;font-size:.85rem;margin-bottom:.75rem;';
+    warning.textContent = 'Session storage is unavailable. Session will not persist across page refreshes.';
+    document.getElementById('view-config').prepend(warning);
+  }
+
+  const json = tryReadStorage();
+  if (!json) return;
+
+  let state;
+  try {
+    state = deserializeState(json);
+  } catch (e) {
+    tryClearStorage();
+    showView('view-config');
+    return;
+  }
+
+  if (state.status === 'active') {
+    renderSessionView(state);
+    showView('view-session');
+  } else if (state.status === 'complete') {
+    renderCompleteView(state);
+    showView('view-complete');
+  }
+});
+</script>
