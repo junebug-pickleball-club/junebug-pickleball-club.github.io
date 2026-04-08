@@ -3,6 +3,7 @@ slug: spring-2026
 start_date: 2026-01-01
 end_date: 2026-04-31
 status: completed
+banner: /assets/images/seasons/spring-2026/season_finale_banner.jpeg
 finale_rankings:
   - day-dinkers
   - long-shots
@@ -10,6 +11,7 @@ finale_rankings:
 teams:
   - slug: servers-of-the-court
     name: Servers of the Court
+    logo: /assets/images/team-logos/servers_of_the_court_logo.jpeg
     home_court: Pickleball Hideout
     roster:
       - name: Amy Tucker
@@ -22,6 +24,7 @@ teams:
         role: member
   - slug: pickle-posse
     name: Pickle Posse
+    logo: /assets/images/team-logos/the_pickle_posse_logo.jpeg
     home_court: Pickleball Hideout
     roster:
       - name: Clay Mage
@@ -34,6 +37,7 @@ teams:
         role: member
   - slug: long-shots
     name: Long Shots
+    logo: /assets/images/team-logos/the_long_shots_logo.png
     home_court: Pickleball Hideout
     roster:
       - name: Brent Patane
@@ -46,6 +50,7 @@ teams:
         role: member
   - slug: salsa-and-saltines
     name: Salsa And Saltines
+    logo: /assets/images/team-logos/salt_and_saltines_logo.jpeg
     home_court: Pickleball Hideout
     roster:
       - name: Cameron

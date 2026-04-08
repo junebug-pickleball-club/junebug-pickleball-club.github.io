@@ -10,11 +10,16 @@ permalink: /seasons/
   <div class="seasons-list">
     {% for season_page in all_seasons %}
       {% assign season_data = site.data.seasons[season_page.data_file] %}
-      <div class="event-card">
-        <h3><a href="{{ season_page.url }}">{{ season_page.title }}</a></h3>
-        {% if season_data %}
-          <p>{{ season_data.start_date | date: "%B %-d, %Y" }} &ndash; {{ season_data.end_date | date: "%B %-d, %Y" }}</p>
+      <div class="event-card season-card">
+        {% if season_data and season_data.banner %}
+          <img src="{{ season_data.banner | relative_url }}" alt="{{ season_page.title }}" class="season-card__banner">
         {% endif %}
+        <div class="season-card__body">
+          <h3><a href="{{ season_page.url }}">{{ season_page.title }}</a></h3>
+          {% if season_data %}
+            <p>{{ season_data.start_date | date: "%B %-d, %Y" }} &ndash; {{ season_data.end_date | date: "%B %-d, %Y" }}</p>
+          {% endif %}
+        </div>
       </div>
     {% endfor %}
   </div>

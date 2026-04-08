@@ -119,11 +119,9 @@ textarea {
 
   .wrapper {
     display:         flex;
-    align-items:     center;
+    align-items:     stretch;
     justify-content: space-between;
     flex-wrap:       nowrap;
-    padding-top:     4px;
-    padding-bottom:  4px;
   }
 }
 
@@ -133,6 +131,8 @@ textarea {
   color:           $text-primary;
   text-decoration: none;
   flex-shrink:     0;
+  display:         flex;
+  align-items:     center;
 
   &:hover { color: $accent; }
 }
@@ -145,19 +145,21 @@ textarea {
 
 .site-nav {
   display:     flex;
-  align-items: center;
+  align-items: stretch;
   gap:         8px;
   flex-wrap:   nowrap;
 
   .nav-link {
     color:           $text-secondary;
     text-decoration: none;
-    padding:         6px 10px;
-    border-radius:   4px;
-    transition:      color 0.2s;
+    padding:         0 10px;
+    border-radius:   0;
+    transition:      color 0.2s, background 0.2s;
     white-space:     nowrap;
+    display:         flex;
+    align-items:     center;
 
-    &:hover { color: $accent; }
+    &:hover { color: $accent; background: $bg-tertiary; }
 
     &.active {
       color:                 $accent;
@@ -170,6 +172,8 @@ textarea {
 // ─── Seasons dropdown ────────────────────────────────────────────────────────
 .nav-dropdown {
   position: relative;
+  display:  flex;
+  align-items: stretch;
 
   &.active .nav-dropdown-toggle {
     color:                 $accent;
@@ -184,29 +188,34 @@ textarea {
   color:         $text-secondary;
   cursor:        pointer;
   font-size:     1rem;
-  padding:       6px 10px;
-  border-radius: 4px;
+  padding:       0 10px;
+  border-radius: 0;
   display:       flex;
   align-items:   center;
   gap:           4px;
   white-space:   nowrap;
+  transition:    color 0.2s, background 0.2s;
 
-  &:hover { color: $accent; }
+  &:hover { color: $accent; background: $bg-tertiary; }
 
   .dropdown-arrow { font-size: 0.65rem; }
+}
+
+.nav-dropdown:hover > .nav-dropdown-menu {
+  display: block;
 }
 
 .nav-dropdown-menu {
   display:       none;
   position:      absolute;
-  top:           calc(100% + 4px);
+  top:           100%;
   left:          0;
   background:    $bg-secondary;
   border:        1px solid $border-color;
-  border-radius: 4px;
+  border-radius: 0;
   list-style:    none;
   margin:        0;
-  padding:       4px 0;
+  padding:       0;
   min-width:     160px;
   z-index:       100;
 
@@ -245,6 +254,35 @@ textarea {
   }
 
   &:hover .hamburger-bar { background: $accent; }
+}
+
+// ─── Season card ─────────────────────────────────────────────────────────────
+.season-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.season-card__banner {
+  width:      100%;
+  height:     500px;
+  object-fit: cover;
+  display:    block;
+}
+
+.season-card__body {
+  padding: 16px 24px;
+}
+
+// ─── Footer ──────────────────────────────────────────────────────────────────
+.site-footer .wrapper {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
+}
+
+.site-footer-logo {
+  height: 24px;
+  width:  auto;
 }
 
 // ─── Submit Match ────────────────────────────────────────────────────────────
@@ -551,13 +589,13 @@ textarea {
 
 // ─── Standings logo ───────────────────────────────────────────────────────────
 .standings-logo-cell {
-  width:   36px;
+  width:   68px;
   padding: 4px 6px;
 }
 
 .standings-logo {
-  width:      32px;
-  height:     32px;
+  width:      64px;
+  height:     64px;
   object-fit: contain;
   display:    block;
 }

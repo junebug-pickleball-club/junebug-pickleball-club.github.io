@@ -19,7 +19,7 @@
       <a class="nav-link{% if page.url == '/' %} active{% endif %}" href="/">Home</a>
       <div class="nav-dropdown{% if page.url contains '/seasons' %} active{% endif %}">
         <button class="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
-          Seasons <span class="dropdown-arrow">&#9660;</span>
+          Seasons
         </button>
         <ul class="nav-dropdown-menu">
           <li>
@@ -28,8 +28,13 @@
             </a>
           </li>
           <li>
+            <a href="/seasons/spring-2026"{% if page.url == '/seasons/spring-2026/' %} class="active"{% endif %}>
+              Spring 2026
+            </a>
+          </li>
+          <li>
             <a href="/seasons"{% if page.url == '/seasons/' %} class="active"{% endif %}>
-              All Seasons
+              Season Archive
             </a>
           </li>
         </ul>
