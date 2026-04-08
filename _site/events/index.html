@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Events | Junebug Pickleball League</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Events" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Home of the Junebug Pickleball League" />
+<meta property="og:description" content="Home of the Junebug Pickleball League" />
+<link rel="canonical" href="http://localhost:4000/events/" />
+<meta property="og:url" content="http://localhost:4000/events/" />
+<meta property="og:site_name" content="Junebug Pickleball League" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Events" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Home of the Junebug Pickleball League","headline":"Events","url":"http://localhost:4000/events/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Junebug Pickleball League" /></head>
+<body><header class="site-header">
+  <div class="wrapper">
+    <a class="site-title" href="/">
+      <img
+        src="/assets/images/logos/JuneBug_Logo_main_horizontal.png"
+        alt="Junebug Pickleball League"
+        class="site-logo"
+        onerror="this.style.display='none'; this.parentElement.appendChild(document.createTextNode('Junebug Pickleball League'))"
+      >
+    </a>
+
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+    </button>
+
+    <nav class="site-nav" id="site-nav">
+      <a class="nav-link" href="/">Home</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+          Seasons
+        </button>
+        <ul class="nav-dropdown-menu">
+          <li>
+            <a href="/seasons/spring-2026">
+              Active Season
+            </a>
+          </li>
+          <li>
+            <a href="/seasons/spring-2026">
+              Spring 2026
+            </a>
+          </li>
+          <li>
+            <a href="/seasons">
+              Season Archive
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="nav-link active" href="/events">Events</a>
+      <a class="nav-link" href="/submit-match">Submit Match</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  (function () {
+    var toggle = document.querySelector('.nav-toggle');
+    var nav = document.getElementById('site-nav');
+    if (!toggle || !nav) return;
+
+    toggle.addEventListener('click', function () {
+      var isOpen = nav.classList.toggle('nav-open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Seasons dropdown toggle
+    var dropdownToggle = document.querySelector('.nav-dropdown-toggle');
+    var dropdownMenu = document.querySelector('.nav-dropdown-menu');
+    if (dropdownToggle && dropdownMenu) {
+      dropdownToggle.addEventListener('click', function () {
+        var isExpanded = dropdownMenu.classList.toggle('open');
+        dropdownToggle.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function (e) {
+        if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+          dropdownMenu.classList.remove('open');
+          dropdownToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Close dropdown on Escape key
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          dropdownMenu.classList.remove('open');
+          dropdownToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Events</h1>
+  </header>
+
+  <div class="post-content">
+    
+
+
+
+
+
+
+
+
+<section class="events-upcoming">
+  <h2>Upcoming Events</h2>
+  
+    
+      <div class="event-card">
+  <h3 class="event-card__name">Summer Tournament</h3>
+  <p class="event-card__date">July 15, 2026</p>
+  
+  <p class="event-card__location">City Park Courts</p>
+  
+  
+  <p class="event-card__description">Open tournament for all skill levels.</p>
+  
+</div>
+
+    
+  
+</section>
+
+
+<section class="events-past">
+  <h2>Past Events</h2>
+  
+    <div class="event-card">
+  <h3 class="event-card__name">Spring Kickoff Social</h3>
+  <p class="event-card__date">January 20, 2026</p>
+  
+  <p class="event-card__location">Pickleball Hideout</p>
+  
+  
+  <p class="event-card__description">Season opener social event for all club members.</p>
+  
+</div>
+
+  
+</section>
+
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer">
+  <div class="wrapper">
+    <img
+      src="/assets/images/logos/JuneBug_Logo_mini.png"
+      alt="Junebug Pickleball League"
+      class="site-footer-logo"
+    >
+    <span class="site-footer-owner">Junebug Pickleball League</span>
+    <span class="site-footer-separator">&bull;</span>
+    <a class="site-footer-email" href="mailto:junebugpickleballclub@gmail.com">junebugpickleballclub@gmail.com</a>
+  </div>
+</footer>
+</body>
+
+</html>
