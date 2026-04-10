@@ -231,14 +231,8 @@ permalink: /session-manager/
 
       <div class="field-group">
         <label for="playerCount">Number of Players</label>
-        <input type="number" id="playerCount" name="playerCount" min="2" max="32" value="8">
+        <input type="number" id="playerCount" name="playerCount" min="4" max="32" value="8">
         <span class="field-error" id="error-playerCount"></span>
-      </div>
-
-      <div class="field-group">
-        <label for="courtCount">Number of Courts</label>
-        <input type="number" id="courtCount" name="courtCount" min="1" max="16" value="2">
-        <span class="field-error" id="error-courtCount"></span>
       </div>
 
       <div class="field-group">
@@ -410,16 +404,15 @@ playerCountInput.addEventListener('input', () => {
 document.getElementById('config-form').addEventListener('submit', e => {
   e.preventDefault();
 
-  ['playerCount', 'courtCount', 'roundCount', 'partnerMode'].forEach(f => {
+  ['playerCount', 'roundCount', 'partnerMode'].forEach(f => {
     document.getElementById(`error-${f}`).textContent = '';
   });
 
   const playerCount  = parseInt(document.getElementById('playerCount').value, 10);
-  const courtCount   = parseInt(document.getElementById('courtCount').value, 10);
   const roundCount   = parseInt(document.getElementById('roundCount').value, 10);
   const partnerMode  = document.getElementById('partnerMode').value;
 
-  const { valid, errors } = validateConfig({ playerCount, courtCount, roundCount, partnerMode });
+  const { valid, errors } = validateConfig({ playerCount, roundCount, partnerMode });
 
   if (!valid) {
     errors.forEach(({ field, message }) => {
@@ -434,7 +427,7 @@ document.getElementById('config-form').addEventListener('submit', e => {
   ).map(inp => inp.value);
 
   const names = resolvePlayerNames(rawNames);
-  const config = { playerCount, courtCount, roundCount, partnerMode };
+  const config = { playerCount, roundCount, partnerMode };
   const schedule = generateSchedule(config, names);
 
   const state = { config, players: names, schedule, currentRound: 1, status: 'active' };
@@ -583,10 +576,9 @@ document.getElementById('btn-new-session').addEventListener('click', () => {
 
 function resetConfigForm() {
   document.getElementById('playerCount').value = '8';
-  document.getElementById('courtCount').value = '2';
   document.getElementById('roundCount').value = '7';
   document.getElementById('partnerMode').value = 'rotating';
-  ['playerCount', 'courtCount', 'roundCount', 'partnerMode'].forEach(f => {
+  ['playerCount', 'roundCount', 'partnerMode'].forEach(f => {
     document.getElementById(`error-${f}`).textContent = '';
   });
   renderPlayerNameInputs(8);

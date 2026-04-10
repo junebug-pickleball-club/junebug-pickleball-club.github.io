@@ -5,27 +5,25 @@
  * Importable in Node/Vitest without a browser environment.
  *
  * Doubles format: each court has 4 players (2v2).
+ * Courts are derived automatically: floor(playerCount / 4).
+ * Byes occur only when playerCount % 4 !== 0.
+ *
  * partnerMode:
- *   'fixed'    — partners are assigned once at session start and stay together;
- *                the schedule rotates which pair they face each round.
- *   'rotating' — both partners and opponents change each round.
+ *   'fixed'    — partners assigned once at session start; schedule rotates opponents.
+ *   'rotating' — both partners and opponents change each round using optimal matching.
  */
 
 /**
  * Validates a session configuration object.
- * @param {{ playerCount: number, courtCount: number, roundCount: number, partnerMode: string }} config
+ * @param {{ playerCount: number, roundCount: number, partnerMode: string }} config
  * @returns {{ valid: boolean, errors: { field: string, message: string }[] }}
  */
 export function validateConfig(config) {
   const errors = [];
-  const { playerCount, courtCount, roundCount, partnerMode } = config ?? {};
+  const { playerCount, roundCount, partnerMode } = config ?? {};
 
   if (!Number.isInteger(playerCount) || playerCount < 4 || playerCount > 32) {
     errors.push({ field: 'playerCount', message: 'Player count must be an integer between 4 and 32.' });
-  }
-
-  if (!Number.isInteger(courtCount) || courtCount < 1 || courtCount > 16) {
-    errors.push({ field: 'courtCount', message: 'Court count must be an integer between 1 and 16.' });
   }
 
   if (!Number.isInteger(roundCount) || roundCount < 1 || roundCount > 64) {
@@ -41,8 +39,8 @@ export function validateConfig(config) {
 
 /**
  * Resolves player names, substituting "Player N" for any empty/whitespace-only slot.
- * @param {string[]} names - raw name inputs (may be empty strings)
- * @returns {string[]}     - resolved names, same length
+ * @param {string[]} names
+ * @returns {string[]}
  */
 export function resolvePlayerNames(names) {
   return names.map((name, i) =>
@@ -52,28 +50,16 @@ export function resolvePlayerNames(names) {
 
 /**
  * Generates a full doubles round-robin schedule.
+ * Courts = floor(playerCount / 4). Byes when playerCount % 4 !== 0.
  *
- * Each match is 2v2: { team1: [p1, p2], team2: [p3, p4] }.
- * Players who cannot fill a court group get a bye.
- *
- * partnerMode 'fixed':
- *   Players are paired into fixed teams at the start (indices 0+1, 2+3, …).
- *   The schedule rotates which team faces which using the circle method on teams.
- *   Excess players (not forming a complete pair) get byes.
- *
- * partnerMode 'rotating':
- *   Each round, players are grouped into sets of 4 using a circle-method rotation
- *   on individual players. Within each group of 4, the two pairings alternate each
- *   round to ensure everyone partners with everyone over time.
- *   Players who don't fit into a group of 4 get byes.
- *
- * @param {{ playerCount: number, courtCount: number, roundCount: number, partnerMode: string }} config
+ * @param {{ playerCount: number, roundCount: number, partnerMode: string }} config
  * @param {string[]} playerNames
  * @returns {Round[]}
  */
 export function generateSchedule(config, playerNames) {
-  const { courtCount, roundCount, partnerMode } = config;
+  const { roundCount, partnerMode } = config;
   const players = playerNames.slice(0, config.playerCount);
+  const courtCount = Math.floor(players.length / 4);
 
   return partnerMode === 'fixed'
     ? generateFixedSchedule(players, courtCount, roundCount)
@@ -83,8 +69,6 @@ export function generateSchedule(config, playerNames) {
 // ── Fixed partner schedule ────────────────────────────────────────────────────
 
 function generateFixedSchedule(players, courtCount, roundCount) {
-  // Pair players into fixed teams: [0,1], [2,3], [4,5], …
-  // If odd number of players, the last player has no partner and always gets a bye.
   const teams = [];
   const soloByePlayers = [];
   for (let i = 0; i + 1 < players.length; i += 2) {
@@ -94,12 +78,10 @@ function generateFixedSchedule(players, courtCount, roundCount) {
     soloByePlayers.push(players[players.length - 1]);
   }
 
-  // Use circle method on teams to rotate matchups.
-  // For odd team count, add a ghost team — the team paired with ghost gets a bye.
   const slots = teams.slice();
-  if (slots.length % 2 !== 0) slots.push(null); // ghost team
+  if (slots.length % 2 !== 0) slots.push(null);
 
-  const n = slots.length; // always even
+  const n = slots.length;
   const naturalRounds = n - 1;
 
   function generateCycle(slotArr) {
@@ -133,19 +115,15 @@ function generateFixedSchedule(players, courtCount, roundCount) {
         if (byeTeam !== null) byes.push(...byeTeam);
         continue;
       }
-      if (courtNum <= courtCount) {
-        matches.push({
-          matchId: `r${roundNum}-c${courtNum}`,
-          courtNum,
-          team1: t1,
-          team2: t2,
-          team1Score: null,
-          team2Score: null,
-        });
-        courtNum++;
-      } else {
-        byes.push(...t1, ...t2);
-      }
+      matches.push({
+        matchId: `r${roundNum}-c${courtNum}`,
+        courtNum,
+        team1: t1,
+        team2: t2,
+        team1Score: null,
+        team2Score: null,
+      });
+      courtNum++;
     }
 
     schedule.push({ roundNum, matches, byes });
@@ -156,14 +134,15 @@ function generateFixedSchedule(players, courtCount, roundCount) {
 
 // ── Rotating partner schedule ─────────────────────────────────────────────────
 //
-// Uses a round-level optimal matching to maximise partner novelty.
-// Rather than greedily picking pairs sequentially (which can paint itself
-// into a corner), we enumerate all valid court assignments for the round
-// and pick the one with the minimum total repeat-partnership cost.
-// For typical session sizes (≤16 players, ≤4 courts) this is fast enough.
+// Uses a round-level optimal matching (branch-and-bound) to maximise partner
+// novelty. Evaluates all valid court assignments for the round and picks the
+// one with the minimum total repeat-partnership cost.
+//
+// Byes: playerCount % 4 players sit out each round, rotating fairly.
 
 function generateRotatingSchedule(players, courtCount, roundCount) {
   const n = players.length;
+  const byesPerRound = n % 4; // 0, 1, 2, or 3
 
   // partnerCount[i][j] = times players[i] and players[j] have been partners
   const partnerCount = Array.from({ length: n }, () => new Array(n).fill(0));
@@ -175,33 +154,29 @@ function generateRotatingSchedule(players, courtCount, roundCount) {
   for (let round = 0; round < roundCount; round++) {
     const roundNum = round + 1;
 
-    // How many players can play this round (multiples of 4, capped by courts)
-    const maxOnCourt = Math.min(courtCount, Math.floor(n / 4)) * 4;
-
-    // Choose who sits out: fewest byes first; tiebreak by most novel partners remaining
+    // Choose who sits out: most byes first (they've sat out the most, so they
+    // should play now). Tiebreak: most novel partners remaining sits out last.
     const sorted = players
       .map((p, i) => ({ p, i }))
       .sort((a, b) => {
-        const byeDiff = byeCount[a.i] - byeCount[b.i];
+        const byeDiff = byeCount[b.i] - byeCount[a.i];
         if (byeDiff !== 0) return byeDiff;
         const novelA = players.filter((_, k) => k !== a.i && partnerCount[a.i][k] === 0).length;
         const novelB = players.filter((_, k) => k !== b.i && partnerCount[b.i][k] === 0).length;
         return novelB - novelA;
       });
 
-    const playingIdx = sorted.slice(0, maxOnCourt).map(x => x.i);
-    const sittingIdx = sorted.slice(maxOnCourt).map(x => x.i);
+    // Players with the most byes play; the last byesPerRound sit out
+    const playingIdx = sorted.slice(0, n - byesPerRound).map(x => x.i);
+    const sittingIdx = sorted.slice(n - byesPerRound).map(x => x.i);
 
     const byes = sittingIdx.map(i => players[i]);
     for (const i of sittingIdx) byeCount[i]++;
 
-    // Find the optimal assignment of playingIdx into courts (groups of 4),
-    // minimising total partner-repeat cost across all courts in this round.
-    const courts = Math.floor(playingIdx.length / 4);
-    const bestAssignment = findBestAssignment(playingIdx, courts, partnerCount);
+    // Find the optimal assignment of playingIdx into courtCount groups of 4
+    const bestAssignment = findBestAssignment(playingIdx, courtCount, partnerCount);
 
     const matches = bestAssignment.map(([a, b, c, d], courtIdx) => {
-      // Update partner counts
       partnerCount[a][b]++; partnerCount[b][a]++;
       partnerCount[c][d]++; partnerCount[d][c]++;
       return {
@@ -221,13 +196,8 @@ function generateRotatingSchedule(players, courtCount, roundCount) {
 }
 
 /**
- * Finds the assignment of `playerIndices` into `courts` groups of 4 that
- * minimises total partner-repeat cost. Uses branch-and-bound with pruning.
- *
- * Cost of a group [a,b,c,d] = partnerCount[a][b] + partnerCount[c][d]
- * (we only count the two partnerships formed, not the opponent pairing).
- *
- * For ≤16 players / ≤4 courts this search space is manageable.
+ * Finds the assignment of playerIndices into `courts` groups of 4 that
+ * minimises total partner-repeat cost. Branch-and-bound with pruning.
  */
 function findBestAssignment(playerIndices, courts, partnerCount) {
   if (courts === 0) return [];
@@ -235,16 +205,14 @@ function findBestAssignment(playerIndices, courts, partnerCount) {
   let bestCost = Infinity;
   let bestGroups = null;
 
-  function pairCost(a, b) {
-    return partnerCount[a][b];
-  }
+  function pairCost(a, b) { return partnerCount[a][b]; }
 
   function groupCost(a, b, c, d) {
-    // Try both team splits and pick the cheaper one
-    const split1 = pairCost(a, b) + pairCost(c, d);
-    const split2 = pairCost(a, c) + pairCost(b, d);
-    const split3 = pairCost(a, d) + pairCost(b, c);
-    return Math.min(split1, split2, split3);
+    return Math.min(
+      pairCost(a, b) + pairCost(c, d),
+      pairCost(a, c) + pairCost(b, d),
+      pairCost(a, d) + pairCost(b, c)
+    );
   }
 
   function bestTeamSplit(a, b, c, d) {
@@ -265,14 +233,11 @@ function findBestAssignment(playerIndices, courts, partnerCount) {
       }
       return;
     }
+    if (costSoFar >= bestCost) return;
 
-    if (costSoFar >= bestCost) return; // prune
-
-    // Always fix the first remaining player to avoid permutation duplicates
     const first = remaining[0];
     const rest = remaining.slice(1);
 
-    // Choose 3 partners for `first` from rest
     for (let i = 0; i < rest.length; i++) {
       for (let j = i + 1; j < rest.length; j++) {
         for (let k = j + 1; k < rest.length; k++) {
@@ -289,43 +254,29 @@ function findBestAssignment(playerIndices, courts, partnerCount) {
   return bestGroups;
 }
 
-function removeFromArray(arr, val) {
-  const idx = arr.indexOf(val);
-  if (idx !== -1) arr.splice(idx, 1);
-}
-
 /**
- * Validates a set of score inputs for a round.
+ * Validates score inputs for a round.
  * @param {{ matchId: string, team1Score: string, team2Score: string }[]} scores
  * @returns {{ valid: boolean, errors: { matchId: string, field: string, message: string }[] }}
  */
 export function validateScores(scores) {
   const errors = [];
-  const isValidScore = (s) => typeof s === 'string' && /^\d+$/.test(s);
+  const isValid = (s) => typeof s === 'string' && /^\d+$/.test(s);
 
   for (const { matchId, team1Score, team2Score } of scores) {
-    if (!isValidScore(team1Score)) {
-      errors.push({ matchId, field: 'team1Score', message: 'Score must be a non-negative integer.' });
-    }
-    if (!isValidScore(team2Score)) {
-      errors.push({ matchId, field: 'team2Score', message: 'Score must be a non-negative integer.' });
-    }
+    if (!isValid(team1Score)) errors.push({ matchId, field: 'team1Score', message: 'Score must be a non-negative integer.' });
+    if (!isValid(team2Score)) errors.push({ matchId, field: 'team2Score', message: 'Score must be a non-negative integer.' });
   }
 
   return { valid: errors.length === 0, errors };
 }
 
 /**
- * Records scores for the current round and returns updated session state.
- * Does not mutate the input state.
- * @param {object} state
- * @param {{ matchId: string, team1Score: string, team2Score: string }[]} scores
- * @returns {object} updated SessionState
+ * Records scores for the current round. Returns new state (does not mutate).
  */
 export function recordRoundScores(state, scores) {
   const newState = JSON.parse(JSON.stringify(state));
-  const roundIndex = newState.currentRound - 1;
-  const round = newState.schedule[roundIndex];
+  const round = newState.schedule[newState.currentRound - 1];
   const scoreMap = new Map(scores.map(s => [s.matchId, s]));
 
   for (const match of round.matches) {
@@ -346,11 +297,8 @@ export function recordRoundScores(state, scores) {
 }
 
 /**
- * Computes the leaderboard from session state.
- * Wins/losses are tracked per individual player.
- * Sorted by wins desc → pointDiff desc → pointsScored desc.
- * @param {object} state
- * @returns {{ rank: number, name: string, wins: number, losses: number, pointDiff: number, pointsScored: number }[]}
+ * Computes the leaderboard. Wins/losses tracked per individual player.
+ * Sorted: wins desc → pointDiff desc → pointsScored desc.
  */
 export function computeLeaderboard(state) {
   const stats = new Map();
@@ -361,33 +309,28 @@ export function computeLeaderboard(state) {
   for (const round of state.schedule) {
     for (const match of round.matches) {
       if (match.team1Score === null || match.team2Score === null) continue;
-
       const t1Won = match.team1Score > match.team2Score;
       const t2Won = match.team2Score > match.team1Score;
 
       for (const player of match.team1) {
         const s = stats.get(player);
         if (!s) continue;
-        s.pointsScored   += match.team1Score;
+        s.pointsScored += match.team1Score;
         s.pointsConceded += match.team2Score;
-        if (t1Won) s.wins++;
-        else if (t2Won) s.losses++;
+        if (t1Won) s.wins++; else if (t2Won) s.losses++;
       }
       for (const player of match.team2) {
         const s = stats.get(player);
         if (!s) continue;
-        s.pointsScored   += match.team2Score;
+        s.pointsScored += match.team2Score;
         s.pointsConceded += match.team1Score;
-        if (t2Won) s.wins++;
-        else if (t1Won) s.losses++;
+        if (t2Won) s.wins++; else if (t1Won) s.losses++;
       }
     }
   }
 
   const entries = [...stats.entries()].map(([name, s]) => ({
-    name,
-    wins: s.wins,
-    losses: s.losses,
+    name, wins: s.wins, losses: s.losses,
     pointDiff: s.pointsScored - s.pointsConceded,
     pointsScored: s.pointsScored,
   }));
@@ -401,11 +344,8 @@ export function computeLeaderboard(state) {
   let rank = 1;
   for (let i = 0; i < entries.length; i++) {
     if (i > 0) {
-      const prev = entries[i - 1];
-      const curr = entries[i];
-      if (curr.wins !== prev.wins || curr.pointDiff !== prev.pointDiff || curr.pointsScored !== prev.pointsScored) {
-        rank = i + 1;
-      }
+      const p = entries[i - 1], c = entries[i];
+      if (c.wins !== p.wins || c.pointDiff !== p.pointDiff || c.pointsScored !== p.pointsScored) rank = i + 1;
     }
     entries[i].rank = rank;
   }
@@ -413,21 +353,5 @@ export function computeLeaderboard(state) {
   return entries;
 }
 
-/**
- * Serializes session state to a JSON string for sessionStorage.
- * @param {object} state
- * @returns {string}
- */
-export function serializeState(state) {
-  return JSON.stringify(state);
-}
-
-/**
- * Deserializes session state from a JSON string.
- * Throws on malformed input.
- * @param {string} json
- * @returns {object}
- */
-export function deserializeState(json) {
-  return JSON.parse(json);
-}
+export function serializeState(state) { return JSON.stringify(state); }
+export function deserializeState(json) { return JSON.parse(json); }

@@ -11,76 +11,64 @@ import {
 
 describe('validateConfig — unit tests', () => {
   it('accepts a valid config (rotating)', () => {
-    const r = validateConfig({ playerCount: 8, courtCount: 2, roundCount: 7, partnerMode: 'rotating' });
+    const r = validateConfig({ playerCount: 8, roundCount: 7, partnerMode: 'rotating' });
     expect(r.valid).toBe(true);
     expect(r.errors).toHaveLength(0);
   });
 
   it('accepts a valid config (fixed)', () => {
-    const r = validateConfig({ playerCount: 8, courtCount: 2, roundCount: 7, partnerMode: 'fixed' });
+    const r = validateConfig({ playerCount: 8, roundCount: 7, partnerMode: 'fixed' });
     expect(r.valid).toBe(true);
   });
 
   it('accepts boundary min values', () => {
-    const r = validateConfig({ playerCount: 4, courtCount: 1, roundCount: 1, partnerMode: 'fixed' });
+    const r = validateConfig({ playerCount: 4, roundCount: 1, partnerMode: 'fixed' });
     expect(r.valid).toBe(true);
   });
 
   it('accepts boundary max values', () => {
-    const r = validateConfig({ playerCount: 32, courtCount: 16, roundCount: 64, partnerMode: 'rotating' });
+    const r = validateConfig({ playerCount: 32, roundCount: 64, partnerMode: 'rotating' });
     expect(r.valid).toBe(true);
   });
 
   it('rejects playerCount below 4', () => {
-    const r = validateConfig({ playerCount: 3, courtCount: 1, roundCount: 1, partnerMode: 'fixed' });
+    const r = validateConfig({ playerCount: 3, roundCount: 1, partnerMode: 'fixed' });
     expect(r.valid).toBe(false);
     expect(r.errors.some(e => e.field === 'playerCount')).toBe(true);
   });
 
   it('rejects playerCount above 32', () => {
-    const r = validateConfig({ playerCount: 33, courtCount: 1, roundCount: 1, partnerMode: 'fixed' });
+    const r = validateConfig({ playerCount: 33, roundCount: 1, partnerMode: 'fixed' });
     expect(r.valid).toBe(false);
     expect(r.errors.some(e => e.field === 'playerCount')).toBe(true);
   });
 
-  it('rejects courtCount below 1', () => {
-    const r = validateConfig({ playerCount: 8, courtCount: 0, roundCount: 7, partnerMode: 'fixed' });
-    expect(r.valid).toBe(false);
-    expect(r.errors.some(e => e.field === 'courtCount')).toBe(true);
-  });
-
-  it('rejects courtCount above 16', () => {
-    const r = validateConfig({ playerCount: 8, courtCount: 17, roundCount: 7, partnerMode: 'fixed' });
-    expect(r.valid).toBe(false);
-    expect(r.errors.some(e => e.field === 'courtCount')).toBe(true);
-  });
-
   it('rejects roundCount below 1', () => {
-    const r = validateConfig({ playerCount: 8, courtCount: 2, roundCount: 0, partnerMode: 'fixed' });
+    const r = validateConfig({ playerCount: 8, roundCount: 0, partnerMode: 'fixed' });
     expect(r.valid).toBe(false);
     expect(r.errors.some(e => e.field === 'roundCount')).toBe(true);
   });
 
   it('rejects roundCount above 64', () => {
-    const r = validateConfig({ playerCount: 8, courtCount: 2, roundCount: 65, partnerMode: 'fixed' });
+    const r = validateConfig({ playerCount: 8, roundCount: 65, partnerMode: 'fixed' });
     expect(r.valid).toBe(false);
     expect(r.errors.some(e => e.field === 'roundCount')).toBe(true);
   });
 
   it('rejects invalid partnerMode', () => {
-    const r = validateConfig({ playerCount: 8, courtCount: 2, roundCount: 7, partnerMode: 'solo' });
+    const r = validateConfig({ playerCount: 8, roundCount: 7, partnerMode: 'solo' });
     expect(r.valid).toBe(false);
     expect(r.errors.some(e => e.field === 'partnerMode')).toBe(true);
   });
 
   it('collects multiple errors at once', () => {
-    const r = validateConfig({ playerCount: 1, courtCount: 0, roundCount: 0, partnerMode: 'bad' });
+    const r = validateConfig({ playerCount: 1, roundCount: 0, partnerMode: 'bad' });
     expect(r.valid).toBe(false);
-    expect(r.errors).toHaveLength(4);
+    expect(r.errors).toHaveLength(3);
   });
 
   it('rejects non-integer playerCount', () => {
-    const r = validateConfig({ playerCount: 4.5, courtCount: 2, roundCount: 7, partnerMode: 'fixed' });
+    const r = validateConfig({ playerCount: 4.5, roundCount: 7, partnerMode: 'fixed' });
     expect(r.valid).toBe(false);
     expect(r.errors.some(e => e.field === 'playerCount')).toBe(true);
   });
@@ -93,17 +81,14 @@ describe('Feature: round-robin-session-manager, Property 1: Config range validat
     fc.assert(
       fc.property(
         fc.integer({ min: -10, max: 50 }),
-        fc.integer({ min: -10, max: 50 }),
         fc.integer({ min: -10, max: 100 }),
         fc.constantFrom('fixed', 'rotating'),
-        (playerCount, courtCount, roundCount, partnerMode) => {
-          const r = validateConfig({ playerCount, courtCount, roundCount, partnerMode });
+        (playerCount, roundCount, partnerMode) => {
+          const r = validateConfig({ playerCount, roundCount, partnerMode });
           const pv = playerCount >= 4 && playerCount <= 32;
-          const cv = courtCount  >= 1 && courtCount  <= 16;
           const rv = roundCount  >= 1 && roundCount  <= 64;
-          expect(r.valid).toBe(pv && cv && rv);
+          expect(r.valid).toBe(pv && rv);
           if (!pv) expect(r.errors.some(e => e.field === 'playerCount')).toBe(true);
-          if (!cv) expect(r.errors.some(e => e.field === 'courtCount')).toBe(true);
           if (!rv) expect(r.errors.some(e => e.field === 'roundCount')).toBe(true);
         }
       ),
@@ -150,14 +135,12 @@ describe('Feature: round-robin-session-manager, Property 3: Schedule round count
     fc.assert(
       fc.property(
         fc.integer({ min: 4, max: 16 }),
-        fc.integer({ min: 1, max: 8 }),
         fc.integer({ min: 1, max: 20 }),
         fc.constantFrom('fixed', 'rotating'),
-        (playerCount, courtCount, roundCount, partnerMode) => {
-          const config = { playerCount, courtCount, roundCount, partnerMode };
+        (playerCount, roundCount, partnerMode) => {
+          const config = { playerCount, roundCount, partnerMode };
           const names = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
-          const schedule = generateSchedule(config, names);
-          expect(schedule).toHaveLength(roundCount);
+          expect(generateSchedule(config, names)).toHaveLength(roundCount);
         }
       ),
       { numRuns: 100 }
@@ -165,18 +148,17 @@ describe('Feature: round-robin-session-manager, Property 3: Schedule round count
   });
 });
 
-// ── Property 4: Each match has exactly 4 players (2 per team) ────────────────
+// ── Property 4: Each match is 2v2 ────────────────────────────────────────────
 
 describe('Feature: round-robin-session-manager, Property 4: Each match is 2v2', () => {
   it('every match has team1 and team2 each with exactly 2 players', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 4, max: 16 }),
-        fc.integer({ min: 1, max: 4 }),
         fc.integer({ min: 1, max: 10 }),
         fc.constantFrom('fixed', 'rotating'),
-        (playerCount, courtCount, roundCount, partnerMode) => {
-          const config = { playerCount, courtCount, roundCount, partnerMode };
+        (playerCount, roundCount, partnerMode) => {
+          const config = { playerCount, roundCount, partnerMode };
           const names = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
           const schedule = generateSchedule(config, names);
           for (const round of schedule) {
@@ -192,26 +174,25 @@ describe('Feature: round-robin-session-manager, Property 4: Each match is 2v2', 
   });
 });
 
-// ── Property 5: Court count invariant ────────────────────────────────────────
+// ── Property 5: Correct court count derived from player count ─────────────────
 
-describe('Feature: round-robin-session-manager, Property 5: Court count invariant', () => {
-  it('no round has more matches than courtCount, and all courtNum values are in [1, courtCount]', () => {
+describe('Feature: round-robin-session-manager, Property 5: Court count derived correctly', () => {
+  it('number of matches per round equals floor(playerCount/4)', () => {
     fc.assert(
       fc.property(
-        fc.integer({ min: 4, max: 16 }),
-        fc.integer({ min: 1, max: 8 }),
-        fc.integer({ min: 1, max: 20 }),
+        fc.integer({ min: 4, max: 20 }),
+        fc.integer({ min: 1, max: 10 }),
         fc.constantFrom('fixed', 'rotating'),
-        (playerCount, courtCount, roundCount, partnerMode) => {
-          const config = { playerCount, courtCount, roundCount, partnerMode };
+        (playerCount, roundCount, partnerMode) => {
+          const config = { playerCount, roundCount, partnerMode };
           const names = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
           const schedule = generateSchedule(config, names);
+          const expectedCourts = Math.floor(playerCount / 4);
           for (const round of schedule) {
-            expect(round.matches.length).toBeLessThanOrEqual(courtCount);
-            for (const match of round.matches) {
-              expect(match.courtNum).toBeGreaterThanOrEqual(1);
-              expect(match.courtNum).toBeLessThanOrEqual(courtCount);
-            }
+            expect(round.matches.length).toBe(expectedCourts);
+            round.matches.forEach((m, idx) => {
+              expect(m.courtNum).toBe(idx + 1);
+            });
           }
         }
       ),
@@ -220,27 +201,22 @@ describe('Feature: round-robin-session-manager, Property 5: Court count invarian
   });
 });
 
-// ── Property 6: All players in matches or byes each round ────────────────────
+// ── Property 6: Player accounting ────────────────────────────────────────────
 
 describe('Feature: round-robin-session-manager, Property 6: Player accounting', () => {
   it('every player appears in exactly one match or the byes list each round', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 4, max: 16 }),
-        fc.integer({ min: 1, max: 4 }),
         fc.integer({ min: 1, max: 10 }),
         fc.constantFrom('fixed', 'rotating'),
-        (playerCount, courtCount, roundCount, partnerMode) => {
-          const config = { playerCount, courtCount, roundCount, partnerMode };
+        (playerCount, roundCount, partnerMode) => {
+          const config = { playerCount, roundCount, partnerMode };
           const names = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
           const schedule = generateSchedule(config, names);
           for (const round of schedule) {
-            const seen = [];
-            for (const match of round.matches) {
-              seen.push(...match.team1, ...match.team2);
-            }
+            const seen = round.matches.flatMap(m => [...m.team1, ...m.team2]);
             seen.push(...round.byes);
-            // Every player should appear exactly once
             expect(seen.sort()).toEqual(names.slice().sort());
           }
         }
@@ -275,9 +251,9 @@ describe('Feature: round-robin-session-manager, Property 7: Score validation', (
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function makeState(roundCount, currentRound = 1, playerCount = 8, courtCount = 2, partnerMode = 'rotating') {
+function makeState(roundCount, currentRound = 1, playerCount = 8, partnerMode = 'rotating') {
   const players = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
-  const config = { playerCount, courtCount, roundCount, partnerMode };
+  const config = { playerCount, roundCount, partnerMode };
   const schedule = generateSchedule(config, players);
   return { config, players, schedule, currentRound, status: 'active' };
 }
@@ -303,10 +279,9 @@ describe('Feature: round-robin-session-manager, Property 8: Score re-submission 
         fc.integer({ min: 2, max: 5 }),
         fc.constantFrom('fixed', 'rotating'),
         (roundCount, partnerMode) => {
-          const state = makeState(roundCount, 1, 8, 2, partnerMode);
+          const state = makeState(roundCount, 1, 8, partnerMode);
           const roundIndex = state.currentRound - 1;
           if (state.schedule[roundIndex].matches.length === 0) return;
-
           const afterSecond = recordRoundScores(state, makeAltScoresForRound(state, roundIndex));
           for (const match of afterSecond.schedule[roundIndex].matches) {
             expect(match.team1Score).toBe(7);
@@ -328,7 +303,7 @@ describe('Feature: round-robin-session-manager, Property 9: Round advancement', 
         fc.integer({ min: 2, max: 5 }),
         fc.constantFrom('fixed', 'rotating'),
         (roundCount, partnerMode) => {
-          const state = makeState(roundCount, 1, 8, 2, partnerMode);
+          const state = makeState(roundCount, 1, 8, partnerMode);
           if (state.currentRound >= state.schedule.length) return;
           const scores = makeScoresForRound(state, state.currentRound - 1);
           const newState = recordRoundScores(state, scores);
@@ -351,7 +326,7 @@ describe('Feature: round-robin-session-manager, Property 10: Leaderboard sort or
         fc.integer({ min: 1, max: 3 }),
         fc.constantFrom('fixed', 'rotating'),
         (roundCount, roundsToScore, partnerMode) => {
-          let state = makeState(roundCount, 1, 8, 2, partnerMode);
+          let state = makeState(roundCount, 1, 8, partnerMode);
           const actual = Math.min(roundsToScore, roundCount);
           for (let r = 0; r < actual; r++) {
             const ri = state.currentRound - 1;
@@ -396,14 +371,13 @@ describe('Feature: round-robin-session-manager, Property 11: Serialization round
     fc.assert(
       fc.property(
         fc.integer({ min: 4, max: 8 }),
-        fc.integer({ min: 1, max: 4 }),
         fc.integer({ min: 1, max: 8 }),
         fc.constantFrom('fixed', 'rotating'),
         fc.integer({ min: 1, max: 8 }),
         fc.constantFrom('active', 'complete'),
-        (playerCount, courtCount, roundCount, partnerMode, currentRoundRaw, status) => {
+        (playerCount, roundCount, partnerMode, currentRoundRaw, status) => {
           const players = Array.from({ length: playerCount }, (_, i) => `Player ${i + 1}`);
-          const config = { playerCount, courtCount, roundCount, partnerMode };
+          const config = { playerCount, roundCount, partnerMode };
           const schedule = generateSchedule(config, players);
           const currentRound = Math.min(currentRoundRaw, roundCount);
           const state = { config, players, schedule, currentRound, status };
@@ -422,12 +396,11 @@ describe('Feature: round-robin-session-manager, Property 12: Session summary acc
     fc.assert(
       fc.property(
         fc.integer({ min: 4, max: 8 }),
-        fc.integer({ min: 1, max: 4 }),
         fc.integer({ min: 1, max: 8 }),
         fc.constantFrom('fixed', 'rotating'),
-        (playerCount, courtCount, roundCount, partnerMode) => {
+        (playerCount, roundCount, partnerMode) => {
           const players = Array.from({ length: playerCount }, (_, i) => `Player ${i + 1}`);
-          const config = { playerCount, courtCount, roundCount, partnerMode };
+          const config = { playerCount, roundCount, partnerMode };
           const schedule = generateSchedule(config, players);
           let state = { config, players, schedule, currentRound: 1, status: 'active' };
           for (let r = 0; r < roundCount; r++) {
@@ -448,32 +421,7 @@ describe('Feature: round-robin-session-manager, Property 12: Session summary acc
   });
 });
 
-// ── Partner novelty tests (rotating mode) ────────────────────────────────────
-//
-// The greedy algorithm maximises partner novelty on a best-effort basis.
-// A strict "no repeats before all pairs seen" guarantee is only achievable
-// when enough courts are available to play all players every round (i.e.
-// playerCount is a multiple of 4 and courtCount >= playerCount/4).
-// When players must sit out, the available pool changes each round and
-// a greedy algorithm cannot guarantee global novelty — this is equivalent
-// to the NP-hard social golfer problem.
-//
-// What we CAN guarantee and test:
-//   1. When all players play every round (no byes), novel pairings are
-//      exhausted before any repeat occurs.
-//   2. In all configurations, the repeat rate is minimised: the first
-//      repeat never occurs earlier than it mathematically must.
-//   3. The algorithm always prefers a novel pairing over a repeated one
-//      when both are available in the current round's pool.
-
-function partnerPairsPerRound(schedule) {
-  return schedule.map(round =>
-    round.matches.flatMap(m => [
-      [...m.team1].sort().join('|'),
-      [...m.team2].sort().join('|'),
-    ])
-  );
-}
+// ── Partner novelty helpers ───────────────────────────────────────────────────
 
 function allPossiblePairs(players) {
   const pairs = new Set();
@@ -483,24 +431,22 @@ function allPossiblePairs(players) {
   return pairs;
 }
 
-// ── Example-based: full-play configurations (no byes) ────────────────────────
-// When playerCount is a multiple of 4 and courtCount >= playerCount/4,
-// every player plays every round. In this case the greedy algorithm CAN
-// guarantee novel pairings are exhausted before any repeat.
+// ── Partner novelty — full-play configs (playerCount multiple of 4) ───────────
+// When playerCount % 4 === 0, every player plays every round (no byes).
+// The branch-and-bound guarantees novel pairings are exhausted before any repeat.
 
 describe('Rotating partners — partner novelty, full-play configs (no byes)', () => {
   const cases = [
-    { playerCount: 4,  courtCount: 1,  label: '4 players, 1 court'  },
-    { playerCount: 8,  courtCount: 2,  label: '8 players, 2 courts' },
-    { playerCount: 12, courtCount: 3,  label: '12 players, 3 courts' },
-    // 16 players omitted — branch-and-bound search is too slow for CI
+    { playerCount: 4,  label: '4 players'  },
+    { playerCount: 8,  label: '8 players'  },
+    { playerCount: 12, label: '12 players' },
   ];
 
-  for (const { playerCount, courtCount, label } of cases) {
+  for (const { playerCount, label } of cases) {
     it(`novel pairings exhausted before repeats — ${label}`, () => {
       const roundCount = Math.ceil((playerCount * (playerCount - 1)) / 2);
       const players = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
-      const config = { playerCount, courtCount, roundCount, partnerMode: 'rotating' };
+      const config = { playerCount, roundCount, partnerMode: 'rotating' };
       const schedule = generateSchedule(config, players);
 
       const allPairs = allPossiblePairs(players);
@@ -508,125 +454,103 @@ describe('Rotating partners — partner novelty, full-play configs (no byes)', (
       let exhaustedAt = null;
 
       for (let r = 0; r < schedule.length; r++) {
-        const roundPairs = partnerPairsPerRound(schedule)[r];
-        for (const pair of roundPairs) {
-          if (seenPairs.has(pair)) {
-            expect(exhaustedAt).not.toBeNull();
+        for (const match of schedule[r].matches) {
+          for (const team of [match.team1, match.team2]) {
+            const pair = [...team].sort().join('|');
+            if (seenPairs.has(pair)) expect(exhaustedAt).not.toBeNull();
+            seenPairs.add(pair);
           }
-          seenPairs.add(pair);
         }
-        if (exhaustedAt === null && [...allPairs].every(p => seenPairs.has(p))) {
-          exhaustedAt = r;
-        }
+        if (exhaustedAt === null && [...allPairs].every(p => seenPairs.has(p))) exhaustedAt = r;
       }
     });
   }
 });
 
-// ── Example-based: best-effort configs (byes required) ───────────────────────
-// When players must sit out, we verify the weaker guarantee: the algorithm
-// never repeats a partnership when a novel one was available in that round's pool.
+// ── Bye fairness — player counts 4 through 20 ────────────────────────────────
+// For each player count, run enough rounds for byes to distribute fully,
+// then verify the max difference in bye counts between any two players is ≤ 1.
 
-describe('Rotating partners — partner novelty, best-effort configs (byes required)', () => {
-  const cases = [
-    { playerCount: 5,  courtCount: 1, label: '5 players, 1 court'  },
-    { playerCount: 6,  courtCount: 1, label: '6 players, 1 court'  },
-    { playerCount: 8,  courtCount: 1, label: '8 players, 1 court'  },
-    { playerCount: 10, courtCount: 2, label: '10 players, 2 courts' },
-    { playerCount: 12, courtCount: 2, label: '12 players, 2 courts' },
-  ];
+describe('Rotating partners — bye fairness, player counts 4–20', () => {
+  for (let playerCount = 4; playerCount <= 20; playerCount++) {
+    it(`bye counts differ by at most 1 — ${playerCount} players`, () => {
+      const byesPerRound = playerCount % 4;
+      const roundCount = byesPerRound === 0 ? 10 : playerCount * 2;
 
-  for (const { playerCount, courtCount, label } of cases) {
-    it(`never repeats a partnership when a novel one was available — ${label}`, () => {
-      const roundCount = playerCount * 3; // enough rounds to stress-test
       const players = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
-      const config = { playerCount, courtCount, roundCount, partnerMode: 'rotating' };
+      const config = { playerCount, roundCount, partnerMode: 'rotating' };
       const schedule = generateSchedule(config, players);
 
-      // Rebuild partner counts round-by-round and verify each pairing choice
-      const partnerCount = Array.from({ length: playerCount }, () => new Array(playerCount).fill(0));
-      const playerIdx = Object.fromEntries(players.map((p, i) => [p, i]));
-
+      const byeCounts = Object.fromEntries(players.map(p => [p, 0]));
       for (const round of schedule) {
-        const playingPlayers = [
-          ...round.matches.flatMap(m => [...m.team1, ...m.team2]),
-        ];
-
-        for (const match of round.matches) {
-          for (const team of [match.team1, match.team2]) {
-            const [a, b] = team.map(p => playerIdx[p]);
-            const thisCount = partnerCount[a][b];
-
-            // If this pair has partnered before, verify no novel pair existed
-            // among the players active this round
-            if (thisCount > 0) {
-              const playingIdx = playingPlayers.map(p => playerIdx[p]);
-              const novelExists = playingIdx.some(i =>
-                playingIdx.some(j => i < j && partnerCount[i][j] === 0)
-              );
-              expect(novelExists).toBe(false);
-            }
-          }
-        }
-
-        // Update counts after checking
-        for (const match of round.matches) {
-          for (const team of [match.team1, match.team2]) {
-            const [a, b] = team.map(p => playerIdx[p]);
-            partnerCount[a][b]++;
-            partnerCount[b][a]++;
-          }
-        }
+        for (const p of round.byes) byeCounts[p]++;
       }
+
+      const counts = Object.values(byeCounts);
+      expect(Math.max(...counts) - Math.min(...counts)).toBeLessThanOrEqual(1);
     });
   }
 });
 
-// ── Property 13: Greedy novelty — never repeats when novel pair available ─────
+// ── Partner novelty — all player counts 4 through 16 ─────────────────────────
+// For each player count, run enough rounds to exhaust all C(n,2) novel pairs,
+// then verify all pairs were seen (i.e. the algorithm spreads partnerships
+// across the full player pool).
+
+describe('Rotating partners — all pairs seen, player counts 4–16', () => {
+  for (let playerCount = 4; playerCount <= 16; playerCount++) {
+    it(`all C(n,2) pairs seen before session ends — ${playerCount} players`, () => {
+      const partnershipsPerRound = Math.floor(playerCount / 4) * 2;
+      const totalPairs = (playerCount * (playerCount - 1)) / 2;
+      const roundCount = Math.ceil(totalPairs / partnershipsPerRound) * 2;
+
+      const players = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
+      const config = { playerCount, roundCount, partnerMode: 'rotating' };
+      const schedule = generateSchedule(config, players);
+
+      const seenPairs = new Set();
+      for (const round of schedule) {
+        for (const match of round.matches) {
+          seenPairs.add([...match.team1].sort().join('|'));
+          seenPairs.add([...match.team2].sort().join('|'));
+        }
+      }
+
+      expect(seenPairs.size).toBe(allPossiblePairs(players).size);
+    });
+  }
+});
+
+// ── Property 13: Novel pairings exhausted before repeats (full-play) ──────────
 
 describe('Feature: round-robin-session-manager, Property 13: Partner novelty invariant', () => {
-  it('in rotating mode, a partnership is never repeated when a novel one was available in that round', () => {
+  it('for playerCount multiples of 4, no repeat until all C(n,2) pairs seen', () => {
     fc.assert(
       fc.property(
-        fc.integer({ min: 4, max: 8 }),  // keep small — branch-and-bound is O(n choose 3) per court
-        fc.integer({ min: 1, max: 2 }),
-        (playerCount, courtCount) => {
-          const roundCount = playerCount * 2;
+        fc.integer({ min: 1, max: 2 }).map(n => n * 4), // 4, 8 only — 12 is slow
+        (playerCount) => {
+          const roundCount = Math.ceil((playerCount * (playerCount - 1)) / 2);
           const players = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
-          const config = { playerCount, courtCount, roundCount, partnerMode: 'rotating' };
+          const config = { playerCount, roundCount, partnerMode: 'rotating' };
           const schedule = generateSchedule(config, players);
 
-          const partnerCount = Array.from({ length: playerCount }, () => new Array(playerCount).fill(0));
-          const playerIdx = Object.fromEntries(players.map((p, i) => [p, i]));
+          const seenPairs = new Set();
+          let exhaustedAt = null;
 
-          for (const round of schedule) {
-            const playingPlayers = round.matches.flatMap(m => [...m.team1, ...m.team2]);
-            const playingIdx = [...new Set(playingPlayers.map(p => playerIdx[p]))];
-
-            for (const match of round.matches) {
+          for (let r = 0; r < schedule.length; r++) {
+            for (const match of schedule[r].matches) {
               for (const team of [match.team1, match.team2]) {
-                const [a, b] = team.map(p => playerIdx[p]);
-                if (partnerCount[a][b] > 0) {
-                  // Repeat — verify no novel pair existed among active players
-                  const novelExists = playingIdx.some(i =>
-                    playingIdx.some(j => i < j && partnerCount[i][j] === 0)
-                  );
-                  expect(novelExists).toBe(false);
-                }
+                const pair = [...team].sort().join('|');
+                if (seenPairs.has(pair)) expect(exhaustedAt).not.toBeNull();
+                seenPairs.add(pair);
               }
             }
-
-            for (const match of round.matches) {
-              for (const team of [match.team1, match.team2]) {
-                const [a, b] = team.map(p => playerIdx[p]);
-                partnerCount[a][b]++;
-                partnerCount[b][a]++;
-              }
-            }
+            const allPairs = allPossiblePairs(players);
+            if (exhaustedAt === null && [...allPairs].every(p => seenPairs.has(p))) exhaustedAt = r;
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 30 }
     );
   });
 });

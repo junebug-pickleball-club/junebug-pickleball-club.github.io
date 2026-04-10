@@ -1,9 +1,12 @@
 {
   "name": "junebug-pickleball-club",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
-    "test": "vitest --run"
+    "test": "vitest --run",
+    "simulate": "node scripts/simulate-session.mjs",
+    "start": "bundle exec jekyll serve"
   },
   "devDependencies": {
     "fast-check": "^3.19.0",
