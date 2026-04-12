@@ -6,19 +6,23 @@ categories: league news
 banner_image: /assets/images/seasons/spring-2026/season_finale_banner.jpeg
 ---
 
-The Spring 2026 season wrapped up in style at Pickleball Hideout, with five teams battling through a grueling round-robin before the top contenders met in the finale. Here's how it all went down.
+Season 2 of Junebug MLP delivered exactly what the league was built for — competitive matchups, player growth, and a strong sense of community.
 
-## The Road to the Finals
+Five teams entered the season ready to compete: Day Dinkers, Long Shots, Salsa and Saltines, Servers of the Court, and Pickle Posse. From the very first week, it was clear that every match would matter, with tight battles and momentum shifting throughout the standings.
 
-The **Day Dinkers** came out of the regular season as the team to beat. Captain James Schonian and his crew of Trent Justice, Allana Montag, and Colleen Stockert played with relentless consistency, rarely dropping a game across the full schedule. Their mixed doubles lineup in particular proved nearly unbeatable, setting the tone for every match they played.
+The Day Dinkers set the pace early and remained consistent throughout, finishing the regular season at 6–2 and securing the top seed with an impressive 501 total points. Their ability to perform week after week made them the team to beat heading into the playoffs.
 
-The **Long Shots** quietly built momentum as the season progressed. Captain Brent Patane anchored the men's doubles alongside Taylor Horton, while Vanessa and Kelly locked down the women's side. They entered the finale as the second seed, having edged out the **Salsa and Saltines** in a tightly contested late-season matchup that came down to a dreambreaker.
+Right behind them, the Long Shots put together a dominant run of their own, finishing 5–1 and staying within reach of the top spot until the final stretch. Their efficiency and ability to close out matches made them a serious contender all season long.
 
-**Salsa and Saltines**, led by captain Cameron, were the season's biggest surprise. Justin, Callie, and Camry brought energy and athleticism to every court, and their run to third place was earned through a string of close wins that had the crowd on their feet more than once.
+Salsa and Saltines earned the third seed with a solid 4–3 record, proving they could compete with any team and positioning themselves as a dangerous matchup in postseason play.
 
-## The Finale
+Servers of the Court battled through a tough schedule, finishing 2–4 while continuing to improve and remain competitive in key moments throughout the season.
 
-The championship match between the Day Dinkers and the Long Shots lived up to the hype. The Long Shots took the opening men's doubles game, but the Day Dinkers responded immediately in women's doubles to level things up. The mixed doubles rounds swung back and forth, with each team trading wins until the Day Dinkers pulled ahead in the final mixed doubles game to clinch the title.
+Pickle Posse, despite a challenging 0–7 record, showed resilience and commitment each week, bringing energy and effort that reflects the culture of Junebug competition.
+
+As the regular season came to a close, the playoff picture was set with clear contenders, growing rivalries, and everything still left to prove on the court.
+
+Season 2 continued to build on the foundation of Junebug MLP — structured, team-based competition where every game matters and every player plays a role.
 
 ## Final Rankings
 
@@ -27,3 +31,5 @@ The championship match between the Day Dinkers and the Long Shots lived up to th
 3. 🥉 **Salsa and Saltines**
 
 Congratulations to all five teams on a fantastic Spring 2026 season. See you on the courts this summer.
+
+[View the full Spring 2026 standings →](/seasons/spring-2026)
