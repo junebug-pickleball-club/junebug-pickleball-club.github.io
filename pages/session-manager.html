@@ -161,7 +161,41 @@ permalink: /session-manager/
   }
   .score-row .field-error { flex-basis: 100%; }
 
-  /* ── Leaderboard ── */
+  /* ── Round navigation ── */
+  .round-nav {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1rem;
+  }
+  .round-nav #round-header {
+    margin-bottom: 0;
+    flex: 1;
+  }
+  .btn-nav {
+    background: #073642;
+    border: 1px solid #586e75;
+    color: #fdf6e3;
+    border-radius: 4px;
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .15s;
+    flex-shrink: 0;
+  }
+  .btn-nav:hover:not(:disabled) { border-color: #b58900; color: #b58900; }
+  .btn-nav:disabled { opacity: .3; cursor: default; }
+  .round-past-badge {
+    font-size: .75rem;
+    color: #657b83;
+    font-style: italic;
+    margin-left: .25rem;
+  }
+
   .leaderboard-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
   .leaderboard-table {
     width: 100%;
@@ -269,7 +303,11 @@ permalink: /session-manager/
      ═══════════════════════════════════════════════ -->
 <section id="view-session" class="sm-section" style="display:none;">
 
-  <div id="round-header">Round 1 of 1</div>
+  <div class="round-nav">
+    <button id="btn-prev-round" class="btn-nav" aria-label="Previous round" disabled>&#8592;</button>
+    <div id="round-header">Round 1 of 1</div>
+    <button id="btn-next-round" class="btn-nav" aria-label="Next round" disabled>&#8594;</button>
+  </div>
 
   <div id="court-cards"></div>
 
@@ -348,7 +386,7 @@ permalink: /session-manager/
 </section>
 
 <script type="module">
-import { validateConfig, resolvePlayerNames, generateSchedule, validateScores, recordRoundScores, computeLeaderboard, serializeState, deserializeState } from '{{ "/assets/js/session-manager.js" | relative_url }}';
+import { validateConfig, resolvePlayerNames, generateSchedule, validateScores, recordRoundScores, updateRoundScores, computeLeaderboard, serializeState, deserializeState } from '{{ "/assets/js/session-manager.js" | relative_url }}';
 
 const SESSION_KEY = 'jpl_session_manager';
 
@@ -433,19 +471,37 @@ document.getElementById('config-form').addEventListener('submit', e => {
   const state = { config, players: names, schedule, currentRound: 1, status: 'active' };
 
   tryWriteStorage(serializeState(state));
+  viewingRound = 1;
   renderSessionView(state);
   showView('view-session');
 });
 
 // ── Session view rendering ───────────────────────────────────────────────────
 
-function renderSessionView(state) {
-  const round = state.schedule[state.currentRound - 1];
+// viewingRound tracks which round is displayed (1-based). Separate from
+// state.currentRound (the next round to be scored).
+let viewingRound = 1;
 
-  document.getElementById('round-header').textContent =
-    `Round ${state.currentRound} of ${state.schedule.length}`;
+function renderSessionView(state, roundToView) {
+  if (roundToView !== undefined) viewingRound = roundToView;
 
-  // Court cards — show "A & B vs C & D"
+  // Clamp viewingRound to valid range
+  const maxViewable = state.currentRound; // can view up to and including current round
+  viewingRound = Math.max(1, Math.min(viewingRound, maxViewable));
+
+  const round = state.schedule[viewingRound - 1];
+  const isCurrentRound = viewingRound === state.currentRound;
+  const isPastRound = viewingRound < state.currentRound;
+
+  // Round header + nav buttons
+  const headerEl = document.getElementById('round-header');
+  headerEl.innerHTML = `Round ${viewingRound} of ${state.schedule.length}`
+    + (isPastRound ? ' <span class="round-past-badge">(editing past round)</span>' : '');
+
+  document.getElementById('btn-prev-round').disabled = viewingRound <= 1;
+  document.getElementById('btn-next-round').disabled = viewingRound >= maxViewable;
+
+  // Court cards
   const courtCards = document.getElementById('court-cards');
   courtCards.innerHTML = '';
   round.matches.forEach(match => {
@@ -473,21 +529,27 @@ function renderSessionView(state) {
     sittingList.innerHTML = '';
   }
 
-  // Score inputs — one row per match, team labels as placeholders
+  // Score inputs — pre-fill existing scores if editing a past round
   const scoreInputs = document.getElementById('score-inputs');
   scoreInputs.innerHTML = '';
   round.matches.forEach(match => {
     const row = document.createElement('div');
     row.className = 'score-row';
     row.dataset.matchId = match.matchId;
+    const t1Val = match.team1Score !== null ? match.team1Score : '';
+    const t2Val = match.team2Score !== null ? match.team2Score : '';
     row.innerHTML = `
       <span class="match-label">${match.team1.join(' &amp; ')} vs ${match.team2.join(' &amp; ')}</span>
-      <input type="number" min="0" placeholder="${match.team1.join(' & ')}" data-field="team1Score" value="">
-      <input type="number" min="0" placeholder="${match.team2.join(' & ')}" data-field="team2Score" value="">
+      <input type="number" min="0" placeholder="${match.team1.join(' & ')}" data-field="team1Score" value="${t1Val}">
+      <input type="number" min="0" placeholder="${match.team2.join(' & ')}" data-field="team2Score" value="${t2Val}">
       <span class="field-error" data-error="${match.matchId}"></span>
     `;
     scoreInputs.appendChild(row);
   });
+
+  // Update submit button label
+  document.querySelector('#score-form button[type="submit"]').textContent =
+    isPastRound ? 'Update Scores' : 'Submit Scores';
 
   renderLeaderboard(state, 'leaderboard-table');
 }
@@ -510,6 +572,20 @@ function renderLeaderboard(state, tableId) {
     tbody.appendChild(tr);
   });
 }
+
+// ── Round navigation ─────────────────────────────────────────────────────────
+
+document.getElementById('btn-prev-round').addEventListener('click', () => {
+  const state = loadState();
+  if (!state) return;
+  renderSessionView(state, viewingRound - 1);
+});
+
+document.getElementById('btn-next-round').addEventListener('click', () => {
+  const state = loadState();
+  if (!state) return;
+  renderSessionView(state, viewingRound + 1);
+});
 
 // ── Score form ───────────────────────────────────────────────────────────────
 
@@ -539,14 +615,24 @@ document.getElementById('score-form').addEventListener('submit', e => {
   let state = loadState();
   if (!state) return;
 
-  state = recordRoundScores(state, scores);
-  tryWriteStorage(serializeState(state));
+  const isPastRound = viewingRound < state.currentRound;
 
-  if (state.status === 'complete') {
-    renderCompleteView(state);
-    showView('view-complete');
+  if (isPastRound) {
+    // Overwrite scores in the viewed past round without changing currentRound or status
+    const newState = updateRoundScores(state, viewingRound, scores);
+    tryWriteStorage(serializeState(newState));
+    renderSessionView(newState, viewingRound);
   } else {
-    renderSessionView(state);
+    // Normal submission — advance round or complete session
+    state = recordRoundScores(state, scores);
+    tryWriteStorage(serializeState(state));
+    if (state.status === 'complete') {
+      renderCompleteView(state);
+      showView('view-complete');
+    } else {
+      viewingRound = state.currentRound;
+      renderSessionView(state, viewingRound);
+    }
   }
 });
 
@@ -616,6 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (state.status === 'active') {
+    viewingRound = state.currentRound;
     renderSessionView(state);
     showView('view-session');
   } else if (state.status === 'complete') {

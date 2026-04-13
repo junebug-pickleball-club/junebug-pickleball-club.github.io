@@ -297,6 +297,37 @@ export function recordRoundScores(state, scores) {
 }
 
 /**
+ * Overwrites scores for a specific past round without advancing currentRound or
+ * changing session status. The roundNum must be less than state.currentRound.
+ * Returns a new SessionState (does not mutate).
+ * @param {object} state
+ * @param {number} roundNum  1-based round number to update
+ * @param {{ matchId: string, team1Score: string, team2Score: string }[]} scores
+ * @returns {object} updated SessionState
+ */
+export function updateRoundScores(state, roundNum, scores) {
+  if (roundNum < 1 || roundNum > state.schedule.length) {
+    throw new Error(`roundNum ${roundNum} is out of range`);
+  }
+  if (roundNum >= state.currentRound && state.status !== 'complete') {
+    throw new Error(`roundNum ${roundNum} has not been played yet`);
+  }
+
+  const newState = JSON.parse(JSON.stringify(state));
+  const scoreMap = new Map(scores.map(s => [s.matchId, s]));
+
+  for (const match of newState.schedule[roundNum - 1].matches) {
+    const s = scoreMap.get(match.matchId);
+    if (s) {
+      match.team1Score = Number(s.team1Score);
+      match.team2Score = Number(s.team2Score);
+    }
+  }
+
+  return newState;
+}
+
+/**
  * Computes the leaderboard. Wins/losses tracked per individual player.
  * Sorted: wins desc → pointDiff desc → pointsScored desc.
  */

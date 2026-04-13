@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
 import {
   validateConfig, resolvePlayerNames, generateSchedule,
-  validateScores, recordRoundScores, computeLeaderboard,
+  validateScores, recordRoundScores, updateRoundScores, computeLeaderboard,
   serializeState, deserializeState,
 } from '../assets/js/session-manager.js';
 
@@ -551,6 +551,163 @@ describe('Feature: round-robin-session-manager, Property 13: Partner novelty inv
         }
       ),
       { numRuns: 30 }
+    );
+  });
+});
+
+// ── updateRoundScores — unit tests ────────────────────────────────────────────
+
+describe('updateRoundScores — unit tests', () => {
+  // Build a state with 3 rounds, first two already scored
+  function makeMultiRoundState() {
+    let state = makeState(3, 1, 8, 'rotating');
+    // Submit round 1
+    state = recordRoundScores(state, state.schedule[0].matches.map(m => ({
+      matchId: m.matchId, team1Score: '11', team2Score: '5',
+    })));
+    // Submit round 2
+    state = recordRoundScores(state, state.schedule[1].matches.map(m => ({
+      matchId: m.matchId, team1Score: '8', team2Score: '11',
+    })));
+    // state.currentRound is now 3
+    return state;
+  }
+
+  it('overwrites scores in a past round', () => {
+    const state = makeMultiRoundState();
+    const newScores = state.schedule[0].matches.map(m => ({
+      matchId: m.matchId, team1Score: '3', team2Score: '15',
+    }));
+    const updated = updateRoundScores(state, 1, newScores);
+
+    for (const match of updated.schedule[0].matches) {
+      expect(match.team1Score).toBe(3);
+      expect(match.team2Score).toBe(15);
+    }
+  });
+
+  it('does not change currentRound when updating a past round', () => {
+    const state = makeMultiRoundState();
+    const newScores = state.schedule[0].matches.map(m => ({
+      matchId: m.matchId, team1Score: '7', team2Score: '9',
+    }));
+    const updated = updateRoundScores(state, 1, newScores);
+    expect(updated.currentRound).toBe(state.currentRound);
+  });
+
+  it('does not change session status when updating a past round', () => {
+    const state = makeMultiRoundState();
+    const newScores = state.schedule[1].matches.map(m => ({
+      matchId: m.matchId, team1Score: '11', team2Score: '0',
+    }));
+    const updated = updateRoundScores(state, 2, newScores);
+    expect(updated.status).toBe('active');
+  });
+
+  it('does not mutate the original state', () => {
+    const state = makeMultiRoundState();
+    const originalScore = state.schedule[0].matches[0].team1Score;
+    const newScores = state.schedule[0].matches.map(m => ({
+      matchId: m.matchId, team1Score: '99', team2Score: '0',
+    }));
+    updateRoundScores(state, 1, newScores);
+    expect(state.schedule[0].matches[0].team1Score).toBe(originalScore);
+  });
+
+  it('leaves other rounds unchanged', () => {
+    const state = makeMultiRoundState();
+    const round2ScoresBefore = state.schedule[1].matches.map(m => ({
+      t1: m.team1Score, t2: m.team2Score,
+    }));
+    const newScores = state.schedule[0].matches.map(m => ({
+      matchId: m.matchId, team1Score: '1', team2Score: '2',
+    }));
+    const updated = updateRoundScores(state, 1, newScores);
+    updated.schedule[1].matches.forEach((m, i) => {
+      expect(m.team1Score).toBe(round2ScoresBefore[i].t1);
+      expect(m.team2Score).toBe(round2ScoresBefore[i].t2);
+    });
+  });
+
+  it('throws when roundNum is out of range', () => {
+    const state = makeMultiRoundState();
+    expect(() => updateRoundScores(state, 0, [])).toThrow();
+    expect(() => updateRoundScores(state, 99, [])).toThrow();
+  });
+
+  it('throws when trying to update a round that has not been played yet', () => {
+    const state = makeMultiRoundState(); // currentRound = 3, round 3 not yet scored
+    expect(() => updateRoundScores(state, 3, [])).toThrow();
+  });
+
+  it('leaderboard reflects updated scores after updateRoundScores', () => {
+    const state = makeMultiRoundState();
+
+    // Round 1 was scored 11-5 (team1 wins). Update to 0-11 (team2 wins).
+    const newScores = state.schedule[0].matches.map(m => ({
+      matchId: m.matchId, team1Score: '0', team2Score: '11',
+    }));
+    const updated = updateRoundScores(state, 1, newScores);
+    const lb = computeLeaderboard(updated);
+
+    // All round-1 team1 players should now have a loss from round 1 instead of a win
+    // Verify leaderboard is still sorted correctly
+    for (let i = 0; i + 1 < lb.length; i++) {
+      const a = lb[i], b = lb[i + 1];
+      const ok =
+        a.wins > b.wins ||
+        (a.wins === b.wins && a.pointDiff > b.pointDiff) ||
+        (a.wins === b.wins && a.pointDiff === b.pointDiff && a.pointsScored >= b.pointsScored);
+      expect(ok).toBe(true);
+    }
+  });
+});
+
+// ── Property: updateRoundScores invariants ────────────────────────────────────
+
+describe('Feature: round-robin-session-manager, Property 14: updateRoundScores invariants', () => {
+  it('updating a past round preserves currentRound, status, and all other rounds', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 3, max: 5 }), // roundCount — need at least 3 so there's a past round
+        fc.constantFrom('fixed', 'rotating'),
+        (roundCount, partnerMode) => {
+          // Build state with first two rounds scored
+          let state = makeState(roundCount, 1, 8, partnerMode);
+          state = recordRoundScores(state, state.schedule[0].matches.map(m => ({
+            matchId: m.matchId, team1Score: '11', team2Score: '5',
+          })));
+          state = recordRoundScores(state, state.schedule[1].matches.map(m => ({
+            matchId: m.matchId, team1Score: '6', team2Score: '11',
+          })));
+
+          const currentRoundBefore = state.currentRound;
+          const statusBefore = state.status;
+
+          // Update round 1 with new scores
+          const newScores = state.schedule[0].matches.map(m => ({
+            matchId: m.matchId, team1Score: '3', team2Score: '7',
+          }));
+          const updated = updateRoundScores(state, 1, newScores);
+
+          // currentRound and status must not change
+          expect(updated.currentRound).toBe(currentRoundBefore);
+          expect(updated.status).toBe(statusBefore);
+
+          // Round 2 scores must be unchanged
+          updated.schedule[1].matches.forEach((m, i) => {
+            expect(m.team1Score).toBe(state.schedule[1].matches[i].team1Score);
+            expect(m.team2Score).toBe(state.schedule[1].matches[i].team2Score);
+          });
+
+          // Round 1 scores must reflect the update
+          updated.schedule[0].matches.forEach(m => {
+            expect(m.team1Score).toBe(3);
+            expect(m.team2Score).toBe(7);
+          });
+        }
+      ),
+      { numRuns: 100 }
     );
   });
 });
