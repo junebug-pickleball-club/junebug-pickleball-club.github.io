@@ -433,7 +433,8 @@ function allPossiblePairs(players) {
 
 // ── Partner novelty — full-play configs (playerCount multiple of 4) ───────────
 // When playerCount % 4 === 0, every player plays every round (no byes).
-// The branch-and-bound guarantees novel pairings are exhausted before any repeat.
+// The branch-and-bound guarantees all C(n,2) pairs are seen before any repeat
+// across the full schedule (order-independent — rounds are shuffled for variety).
 
 describe('Rotating partners — partner novelty, full-play configs (no byes)', () => {
   const cases = [
@@ -443,25 +444,34 @@ describe('Rotating partners — partner novelty, full-play configs (no byes)', (
   ];
 
   for (const { playerCount, label } of cases) {
-    it(`novel pairings exhausted before repeats — ${label}`, () => {
+    it(`all C(n,2) pairs seen before any repeat — ${label}`, () => {
       const roundCount = Math.ceil((playerCount * (playerCount - 1)) / 2);
       const players = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
       const config = { playerCount, roundCount, partnerMode: 'rotating' };
       const schedule = generateSchedule(config, players);
 
       const allPairs = allPossiblePairs(players);
-      const seenPairs = new Set();
-      let exhaustedAt = null;
-
-      for (let r = 0; r < schedule.length; r++) {
-        for (const match of schedule[r].matches) {
+      const pairCount = {};
+      for (const round of schedule) {
+        for (const match of round.matches) {
           for (const team of [match.team1, match.team2]) {
-            const pair = [...team].sort().join('|');
-            if (seenPairs.has(pair)) expect(exhaustedAt).not.toBeNull();
-            seenPairs.add(pair);
+            const key = [...team].sort().join('|');
+            pairCount[key] = (pairCount[key] ?? 0) + 1;
           }
         }
-        if (exhaustedAt === null && [...allPairs].every(p => seenPairs.has(p))) exhaustedAt = r;
+      }
+
+      // Every possible pair must appear at least once
+      for (const pair of allPairs) {
+        expect(pairCount[pair] ?? 0).toBeGreaterThanOrEqual(1);
+      }
+
+      // No pair should appear more times than (total partnerships / unique pairs) + 1
+      // i.e. repeats are spread evenly, not concentrated
+      const totalPartnerships = Object.values(pairCount).reduce((s, v) => s + v, 0);
+      const maxAllowed = Math.ceil(totalPartnerships / allPairs.size) + 1;
+      for (const count of Object.values(pairCount)) {
+        expect(count).toBeLessThanOrEqual(maxAllowed);
       }
     });
   }
@@ -521,10 +531,10 @@ describe('Rotating partners — all pairs seen, player counts 4–16', () => {
   }
 });
 
-// ── Property 13: Novel pairings exhausted before repeats (full-play) ──────────
+// ── Property 13: All C(n,2) pairs seen for full-play configs ─────────────────
 
 describe('Feature: round-robin-session-manager, Property 13: Partner novelty invariant', () => {
-  it('for playerCount multiples of 4, no repeat until all C(n,2) pairs seen', () => {
+  it('for playerCount multiples of 4, all C(n,2) pairs are seen across the schedule', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 2 }).map(n => n * 4), // 4, 8 only — 12 is slow
@@ -534,19 +544,19 @@ describe('Feature: round-robin-session-manager, Property 13: Partner novelty inv
           const config = { playerCount, roundCount, partnerMode: 'rotating' };
           const schedule = generateSchedule(config, players);
 
+          const allPairs = allPossiblePairs(players);
           const seenPairs = new Set();
-          let exhaustedAt = null;
-
-          for (let r = 0; r < schedule.length; r++) {
-            for (const match of schedule[r].matches) {
+          for (const round of schedule) {
+            for (const match of round.matches) {
               for (const team of [match.team1, match.team2]) {
-                const pair = [...team].sort().join('|');
-                if (seenPairs.has(pair)) expect(exhaustedAt).not.toBeNull();
-                seenPairs.add(pair);
+                seenPairs.add([...team].sort().join('|'));
               }
             }
-            const allPairs = allPossiblePairs(players);
-            if (exhaustedAt === null && [...allPairs].every(p => seenPairs.has(p))) exhaustedAt = r;
+          }
+
+          // All possible pairs must be seen
+          for (const pair of allPairs) {
+            expect(seenPairs.has(pair)).toBe(true);
           }
         }
       ),

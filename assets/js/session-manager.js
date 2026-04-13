@@ -192,6 +192,19 @@ function generateRotatingSchedule(players, courtCount, roundCount) {
     schedule.push({ roundNum, matches, byes });
   }
 
+  // Shuffle round order so the sequence feels random while preserving pairing quality.
+  // Reassign roundNum and matchIds sequentially after shuffling.
+  for (let i = schedule.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [schedule[i], schedule[j]] = [schedule[j], schedule[i]];
+  }
+  schedule.forEach((round, idx) => {
+    round.roundNum = idx + 1;
+    round.matches.forEach(match => {
+      match.matchId = `r${idx + 1}-c${match.courtNum}`;
+    });
+  });
+
   return schedule;
 }
 
