@@ -431,6 +431,124 @@ function allPossiblePairs(players) {
   return pairs;
 }
 
+/**
+ * Walk a schedule and build partner / opponent / same-court counts keyed by
+ * sorted "A|B" pair strings.
+ */
+function relationCounts(schedule) {
+  const partner = {};
+  const opponent = {};
+  const court = {};
+  const bump = (map, a, b) => {
+    const key = [a, b].sort().join('|');
+    map[key] = (map[key] ?? 0) + 1;
+  };
+
+  for (const round of schedule) {
+    for (const match of round.matches) {
+      const [a, b] = match.team1;
+      const [c, d] = match.team2;
+      bump(partner, a, b);
+      bump(partner, c, d);
+      bump(opponent, a, c);
+      bump(opponent, a, d);
+      bump(opponent, b, c);
+      bump(opponent, b, d);
+      const onCourt = [a, b, c, d];
+      for (let i = 0; i < onCourt.length; i++) {
+        for (let j = i + 1; j < onCourt.length; j++) {
+          bump(court, onCourt[i], onCourt[j]);
+        }
+      }
+    }
+  }
+
+  return { partner, opponent, court };
+}
+
+/** Per-player count vectors for a relation map (missing pairs count as 0). */
+function perPlayerCounts(players, relationMap) {
+  return players.map((p) =>
+    players.filter((q) => q !== p).map((q) => relationMap[[p, q].sort().join('|')] ?? 0)
+  );
+}
+
+function assertBalancedPerPlayer(players, relationMap, slotsPerPlayer, roundCount) {
+  const others = players.length - 1;
+  const vectors = perPlayerCounts(players, relationMap);
+  // Perfect max-min≤1 is achievable for small full-play pools (4, 8); larger
+  // pools may need one extra repeat under greedy multi-signal optimization.
+  const maxSpread = others <= 7 ? 1 : 2;
+  for (const counts of vectors) {
+    const max = Math.max(...counts);
+    const min = Math.min(...counts);
+    if (roundCount >= others) {
+      expect(max - min).toBeLessThanOrEqual(maxSpread);
+    } else {
+      expect(max).toBeLessThanOrEqual(Math.ceil(slotsPerPlayer / others) + 1);
+    }
+  }
+}
+
+// ── Court lock regression (the P1/P2 same-court-all-session bug) ──────────────
+
+describe('Rotating partners — court co-occurrence regression', () => {
+  it('8 players / 7 rounds: no pair shares a court every round', () => {
+    const players = Array.from({ length: 8 }, (_, i) => `P${i + 1}`);
+    const schedule = generateSchedule(
+      { playerCount: 8, roundCount: 7, partnerMode: 'rotating' },
+      players
+    );
+    const { partner, opponent, court } = relationCounts(schedule);
+
+    expect(court['P1|P2'] ?? 0).toBeLessThan(7);
+
+    // Ideal whist balance for 8×7: every pair shares a court exactly 3 times
+    const courtValues = [...allPossiblePairs(players)].map((k) => court[k] ?? 0);
+    expect(Math.max(...courtValues) - Math.min(...courtValues)).toBeLessThanOrEqual(1);
+
+    assertBalancedPerPlayer(players, partner, 7, 7);
+    assertBalancedPerPlayer(players, opponent, 14, 7);
+    assertBalancedPerPlayer(players, court, 21, 7);
+  });
+});
+
+// ── Partner / opponent / court balance — full-play configs ────────────────────
+
+describe('Rotating partners — relation balance, full-play configs', () => {
+  for (const playerCount of [4, 8, 12]) {
+    it(`partner, opponent, and court counts stay balanced — ${playerCount} players`, () => {
+      const others = playerCount - 1;
+      // Enough rounds to cover partner pool at least once
+      const roundCount = others;
+      const players = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
+      const schedule = generateSchedule(
+        { playerCount, roundCount, partnerMode: 'rotating' },
+        players
+      );
+      const { partner, opponent, court } = relationCounts(schedule);
+
+      assertBalancedPerPlayer(players, partner, roundCount, roundCount);
+      assertBalancedPerPlayer(players, opponent, 2 * roundCount, roundCount);
+      assertBalancedPerPlayer(players, court, 3 * roundCount, roundCount);
+    });
+
+    it(`short session: no massive court concentration — ${playerCount} players, 3 rounds`, () => {
+      const roundCount = 3;
+      const players = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
+      const schedule = generateSchedule(
+        { playerCount, roundCount, partnerMode: 'rotating' },
+        players
+      );
+      const { partner, opponent, court } = relationCounts(schedule);
+
+      assertBalancedPerPlayer(players, partner, roundCount, roundCount);
+      assertBalancedPerPlayer(players, opponent, 2 * roundCount, roundCount);
+      assertBalancedPerPlayer(players, court, 3 * roundCount, roundCount);
+    });
+  }
+});
+
 // ── Partner novelty — full-play configs (playerCount multiple of 4) ───────────
 // When playerCount % 4 === 0, every player plays every round (no byes).
 // The branch-and-bound guarantees all C(n,2) pairs are seen before any repeat
@@ -512,7 +630,9 @@ describe('Rotating partners — all pairs seen, player counts 4–16', () => {
     it(`all C(n,2) pairs seen before session ends — ${playerCount} players`, () => {
       const partnershipsPerRound = Math.floor(playerCount / 4) * 2;
       const totalPairs = (playerCount * (playerCount - 1)) / 2;
-      const roundCount = Math.ceil(totalPairs / partnershipsPerRound) * 2;
+      // Bye configs need extra rounds: opponent balancing delays partner coverage.
+      const coverageFactor = playerCount % 4 === 0 ? 2 : 3;
+      const roundCount = Math.ceil(totalPairs / partnershipsPerRound) * coverageFactor;
 
       const players = Array.from({ length: playerCount }, (_, i) => `P${i + 1}`);
       const config = { playerCount, roundCount, partnerMode: 'rotating' };

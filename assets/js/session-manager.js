@@ -10,7 +10,8 @@
  *
  * partnerMode:
  *   'fixed'    — partners assigned once at session start; schedule rotates opponents.
- *   'rotating' — both partners and opponents change each round using optimal matching.
+ *   'rotating' — partners and opponents change each round, balancing partner,
+ *                opponent, and same-court novelty via optimal matching.
  */
 
 /**
@@ -134,9 +135,10 @@ function generateFixedSchedule(players, courtCount, roundCount) {
 
 // ── Rotating partner schedule ─────────────────────────────────────────────────
 //
-// Uses a round-level optimal matching (branch-and-bound) to maximise partner
-// novelty. Evaluates all valid court assignments for the round and picks the
-// one with the minimum total repeat-partnership cost.
+// Uses a round-level optimal matching (branch-and-bound) to balance partner,
+// opponent, and same-court novelty. Cost for a 2v2 split is the sum of the two
+// partnership counts plus the four opponentship counts. Ties break on lower
+// same-court secondary cost (partner + opponent for the six pairs on court).
 //
 // Byes: playerCount % 4 players sit out each round, rotating fairly.
 
@@ -146,6 +148,8 @@ function generateRotatingSchedule(players, courtCount, roundCount) {
 
   // partnerCount[i][j] = times players[i] and players[j] have been partners
   const partnerCount = Array.from({ length: n }, () => new Array(n).fill(0));
+  // opponentCount[i][j] = times players[i] and players[j] have been opponents
+  const opponentCount = Array.from({ length: n }, () => new Array(n).fill(0));
   // byeCount[i] = times players[i] has had a bye
   const byeCount = new Array(n).fill(0);
 
@@ -155,14 +159,18 @@ function generateRotatingSchedule(players, courtCount, roundCount) {
     const roundNum = round + 1;
 
     // Choose who sits out: most byes first (they've sat out the most, so they
-    // should play now). Tiebreak: most novel partners remaining sits out last.
+    // should play now). Tiebreak: most novel partners+opponents remaining sits out last.
     const sorted = players
       .map((p, i) => ({ p, i }))
       .sort((a, b) => {
         const byeDiff = byeCount[b.i] - byeCount[a.i];
         if (byeDiff !== 0) return byeDiff;
-        const novelA = players.filter((_, k) => k !== a.i && partnerCount[a.i][k] === 0).length;
-        const novelB = players.filter((_, k) => k !== b.i && partnerCount[b.i][k] === 0).length;
+        const novelA = players.filter((_, k) =>
+          k !== a.i && partnerCount[a.i][k] === 0 && opponentCount[a.i][k] === 0
+        ).length;
+        const novelB = players.filter((_, k) =>
+          k !== b.i && partnerCount[b.i][k] === 0 && opponentCount[b.i][k] === 0
+        ).length;
         return novelB - novelA;
       });
 
@@ -174,11 +182,15 @@ function generateRotatingSchedule(players, courtCount, roundCount) {
     for (const i of sittingIdx) byeCount[i]++;
 
     // Find the optimal assignment of playingIdx into courtCount groups of 4
-    const bestAssignment = findBestAssignment(playingIdx, courtCount, partnerCount);
+    const bestAssignment = findBestAssignment(playingIdx, courtCount, partnerCount, opponentCount);
 
     const matches = bestAssignment.map(([a, b, c, d], courtIdx) => {
       partnerCount[a][b]++; partnerCount[b][a]++;
       partnerCount[c][d]++; partnerCount[d][c]++;
+      opponentCount[a][c]++; opponentCount[c][a]++;
+      opponentCount[a][d]++; opponentCount[d][a]++;
+      opponentCount[b][c]++; opponentCount[c][b]++;
+      opponentCount[b][d]++; opponentCount[d][b]++;
       return {
         matchId: `r${roundNum}-c${courtIdx + 1}`,
         courtNum: courtIdx + 1,
@@ -210,43 +222,66 @@ function generateRotatingSchedule(players, courtCount, roundCount) {
 
 /**
  * Finds the assignment of playerIndices into `courts` groups of 4 that
- * minimises total partner-repeat cost. Branch-and-bound with pruning.
+ * minimises partner+opponent repeat cost, then same-court secondary cost.
+ * Branch-and-bound with pruning on the primary cost.
  */
-function findBestAssignment(playerIndices, courts, partnerCount) {
+function findBestAssignment(playerIndices, courts, partnerCount, opponentCount) {
   if (courts === 0) return [];
 
   let bestCost = Infinity;
+  let bestCourtCost = Infinity;
   let bestGroups = null;
 
-  function pairCost(a, b) { return partnerCount[a][b]; }
-
-  function groupCost(a, b, c, d) {
-    return Math.min(
-      pairCost(a, b) + pairCost(c, d),
-      pairCost(a, c) + pairCost(b, d),
-      pairCost(a, d) + pairCost(b, c)
-    );
+  function splitMetrics(a, b, c, d) {
+    // (a,b) vs (c,d): 2 partners + 4 opponents; court = partner+opponent for all 6 pairs
+    const partner = partnerCount[a][b] + partnerCount[c][d];
+    const opponent =
+      opponentCount[a][c] + opponentCount[a][d] +
+      opponentCount[b][c] + opponentCount[b][d];
+    const court =
+      partnerCount[a][b] + opponentCount[a][b] +
+      partnerCount[c][d] + opponentCount[c][d] +
+      partnerCount[a][c] + opponentCount[a][c] +
+      partnerCount[a][d] + opponentCount[a][d] +
+      partnerCount[b][c] + opponentCount[b][c] +
+      partnerCount[b][d] + opponentCount[b][d];
+    return { primary: partner + opponent, court };
   }
 
-  function bestTeamSplit(a, b, c, d) {
-    const s1 = pairCost(a, b) + pairCost(c, d);
-    const s2 = pairCost(a, c) + pairCost(b, d);
-    const s3 = pairCost(a, d) + pairCost(b, c);
-    const min = Math.min(s1, s2, s3);
-    if (min === s1) return [a, b, c, d];
-    if (min === s2) return [a, c, b, d];
-    return [a, d, b, c];
+  function bestSplitForGroup(a, b, c, d) {
+    const splits = [
+      [a, b, c, d],
+      [a, c, b, d],
+      [a, d, b, c],
+    ];
+    let best = null;
+    for (const split of splits) {
+      const m = splitMetrics(...split);
+      if (
+        !best ||
+        m.primary < best.metrics.primary ||
+        (m.primary === best.metrics.primary && m.court < best.metrics.court)
+      ) {
+        best = { split, metrics: m };
+      }
+    }
+    return best;
   }
 
-  function search(remaining, groups, costSoFar) {
+  function search(remaining, groups, costSoFar, courtSoFar) {
     if (groups.length === courts) {
-      if (costSoFar < bestCost) {
+      if (
+        costSoFar < bestCost ||
+        (costSoFar === bestCost && courtSoFar < bestCourtCost)
+      ) {
         bestCost = costSoFar;
-        bestGroups = groups.map(g => bestTeamSplit(...g));
+        bestCourtCost = courtSoFar;
+        bestGroups = groups.map(g => bestSplitForGroup(...g).split);
       }
       return;
     }
-    if (costSoFar >= bestCost) return;
+    if (costSoFar > bestCost) return;
+    if (costSoFar === bestCost && courtSoFar >= bestCourtCost) return;
 
     const first = remaining[0];
     const rest = remaining.slice(1);
@@ -255,15 +290,20 @@ function findBestAssignment(playerIndices, courts, partnerCount) {
       for (let j = i + 1; j < rest.length; j++) {
         for (let k = j + 1; k < rest.length; k++) {
           const group = [first, rest[i], rest[j], rest[k]];
-          const cost = groupCost(...group);
+          const { metrics } = bestSplitForGroup(...group);
           const newRemaining = rest.filter((_, idx) => idx !== i && idx !== j && idx !== k);
-          search(newRemaining, [...groups, group], costSoFar + cost);
+          search(
+            newRemaining,
+            [...groups, group],
+            costSoFar + metrics.primary,
+            courtSoFar + metrics.court
+          );
         }
       }
     }
   }
 
-  search(playerIndices, [], 0);
+  search(playerIndices, [], 0, 0);
   return bestGroups;
 }
 
